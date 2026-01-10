@@ -6,6 +6,10 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "SkatePlan"
     API_V1_STR: str = "/api/v1"
     
+    # Auth
+    JWT_SECRET: str = "unsafe-secret-key" # Should be overridden by env var
+    JWT_ALGORITHM: str = "HS256"
+    
     # Database
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_USER: str = "postgres"
