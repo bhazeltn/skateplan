@@ -1,3 +1,4 @@
+# ~/development/skateplan/docker-compose.yml
 include:
   - path: infra/docker-compose.yml
     env_file: infra/.env
@@ -5,23 +6,47 @@ include:
 services:
   backend:
     build: ./backend
+    container_name: skateplan-backend
     restart: always
     ports:
       - "8000:8000"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     env_file:
       - infra/.env
     environment:
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-postgres}
+      # Connection to the DB in the 'infra' stack
+      # Public URL for CORS (Browser access)
+      - POSTGRES_SERVER=db
+      - API_EXTERNAL_URL=https://api.skateplan.bradnet.net
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - default
+    volumes:
+      - ./backend:/app
 
   frontend:
     build: ./frontend
+    container_name: skateplan-frontend
     restart: always
     ports:
       - "3000:3000"
+    command: npm run dev
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      # Browser -> Backend (Must be Public URL via Traefik)
+      - NEXT_PUBLIC_API_URL=https://api.skateplan.bradnet.net/api/v1
+      # Next.js Server -> Backend (Internal Docker Network)
+      - API_INTERNAL_URL=http://backend:8000
     depends_on:
       - backend
+    networks:
+      - default
+    volumes:
+      - ./frontend:/app          # Syncs your code to the container
+      - /app/node_modules        # Prevents host node_modules from breaking container
+      - /app/.next               # Keeps build cache inside container
+
+# This ensures all services share the network created by the 'include'
+networks:
+  default:
