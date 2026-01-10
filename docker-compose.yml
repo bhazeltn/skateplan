@@ -23,7 +23,7 @@ services:
         condition: service_healthy
     networks:
       - default
-    user: "${UID}:${GID}"
+    user: "${DOCKER_UID}:${DOCKER_GID}"
     volumes:
       - ./backend:/app
 
@@ -43,7 +43,7 @@ services:
       - backend
     networks:
       - default
-    user: "${UID}:${GID}"
+    user: "${DOCKER_UID}:${DOCKER_GID}"
     volumes:
       - ./frontend:/app          # Syncs your code to the container
       - /app/node_modules        # Prevents host node_modules from breaking container

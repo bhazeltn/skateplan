@@ -7,8 +7,10 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # Auth
-    JWT_SECRET: str = "unsafe-secret-key" # Should be overridden by env var
+    JWT_SECRET: str = "unsafe-secret-key"
     JWT_ALGORITHM: str = "HS256"
+    SUPABASE_URL: str = "https://supabase.skateplan.bradnet.net"
+    SUPABASE_KEY: str = "" # Anon Key
     
     # Database
     POSTGRES_SERVER: str = "localhost"
