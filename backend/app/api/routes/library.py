@@ -1,7 +1,8 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session, select
-from app.api.deps import get_session
+from app.api.deps import get_session, get_current_user
+from app.models.user_models import Profile
 from app.models.library_models import Element
 
 router = APIRouter()
@@ -14,7 +15,7 @@ def read_elements(
     limit: int = 100,
     category: Optional[str] = None,
     search: Optional[str] = None,
-    # REMOVED: current_user dependency to allow public access
+    current_user: Profile = Depends(get_current_user),
 ) -> List[Element]:
     query = select(Element)
     if category:

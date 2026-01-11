@@ -33,21 +33,18 @@ services:
     restart: always
     ports:
       - "3000:3000"
-    command: npm run dev
+    command: sh -c "npm install && npm next dev --webpack"
     environment:
-      # Browser -> Backend (Must be Public URL via Traefik)
       - NEXT_PUBLIC_API_URL=https://api.skateplan.bradnet.net/api/v1
-      # Next.js Server -> Backend (Internal Docker Network)
       - API_INTERNAL_URL=http://backend:8000
+      - NEXT_TURBOPACK=0
     depends_on:
       - backend
     networks:
       - default
     user: "${DOCKER_UID}:${DOCKER_GID}"
     volumes:
-      - ./frontend:/app          # Syncs your code to the container
-      - /app/node_modules        # Prevents host node_modules from breaking container
-      - /app/.next               # Keeps build cache inside container
+      - ./frontend:/app
 
 # This ensures all services share the network created by the 'include'
 networks:
