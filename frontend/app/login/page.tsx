@@ -30,6 +30,7 @@ export default function LoginPage() {
 
       const data = await res.json();
       localStorage.setItem('token', data.access_token);
+      document.cookie = `token=${data.access_token}; path=/; max-age=86400; SameSite=Strict`;
       router.push('/dashboard/roster');
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
