@@ -71,23 +71,23 @@ export default function AddSkaterModal({ isOpen, onClose, onSuccess }: AddSkater
           <div>
             <label className="block text-sm font-medium text-gray-700">Full Name</label>
             <input 
-              type="text" required 
-              className="w-full px-3 py-2 border rounded"
-              value={fullName} onChange={e => setFullName(e.target.value)}
+              className="w-full px-3 py-2 border rounded text-gray-900 bg-white placeholder:text-gray-400"
+              value={fullName} 
+              onChange={e => setFullName(e.target.value)}
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
             <input 
               type="date" required 
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border rounded text-gray-900 bg-white placeholder:text-gray-400"
               value={dob} onChange={e => setDob(e.target.value)}
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Level</label>
             <select 
-                className="w-full px-3 py-2 border rounded"
+                className="w-full px-3 py-2 border rounded text-gray-900 bg-white placeholder:text-gray-400"
                 value={level} onChange={e => setLevel(e.target.value)}
                 required
             >

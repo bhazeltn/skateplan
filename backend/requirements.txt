@@ -11,3 +11,4 @@ httpx
 psycopg2-binary
 alembic
 python-multipart
+argon2-cffi
