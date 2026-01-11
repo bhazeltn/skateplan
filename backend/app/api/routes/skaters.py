@@ -27,9 +27,14 @@ def read_skaters(
     session: Session = Depends(get_session),
     skip: int = 0,
     limit: int = 100,
+    active_only: bool = True,
     current_user: Profile = Depends(get_current_user),
 ) -> List[Skater]:
-    statement = select(Skater).where(Skater.coach_id == current_user.id, Skater.is_active == True).offset(skip).limit(limit)
+    query = select(Skater).where(Skater.coach_id == current_user.id)
+    if active_only:
+        query = query.where(Skater.is_active == True)
+    
+    statement = query.offset(skip).limit(limit)
     skaters = session.exec(statement).all()
     return skaters
 
