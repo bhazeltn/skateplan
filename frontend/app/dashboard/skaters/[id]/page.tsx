@@ -1,4 +1,7 @@
-export default function SkaterProfilePage({ params }: { params: { id: string } }) {
+import AssetsGallery from '../../../components/AssetsGallery';
+
+export default async function SkaterProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm">
@@ -13,9 +16,11 @@ export default function SkaterProfilePage({ params }: { params: { id: string } }
 
       <main className="py-10">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold leading-tight text-gray-900 mb-6">Skater ID: {params.id}</h1>
+          <h1 className="text-3xl font-bold leading-tight text-gray-900 mb-6">Skater ID: {id}</h1>
           
-          <div className="bg-white shadow sm:rounded-lg mb-8">
+          <AssetsGallery skaterId={id} />
+
+          <div className="bg-white shadow sm:rounded-lg mb-8 mt-8">
             <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
               <h3 className="text-lg font-medium leading-6 text-gray-900">Benchmarks & Goals</h3>
             </div>

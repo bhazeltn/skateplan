@@ -111,9 +111,8 @@ export default function RosterPage() {
                 </tr>
             )}
             {data.map((skater) => (
-                <tr key={skater.id}>
-                <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">{skater.full_name}</td>
-                <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{skater.level}</td>
+                                <tr key={skater.id} className="cursor-pointer hover:bg-gray-50" onClick={() => router.push(`/dashboard/skaters/${skater.id}`)}>
+                                    <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">{skater.full_name}</td>                <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{skater.level}</td>
                 <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{skater.dob}</td>
                 <td className="px-6 py-4 text-sm whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${skater.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>

@@ -71,6 +71,7 @@ export default function AddSkaterModal({ isOpen, onClose, onSuccess }: AddSkater
           <div>
             <label className="block text-sm font-medium text-gray-700">Full Name</label>
             <input 
+              type="text" required
               className="w-full px-3 py-2 border rounded text-gray-900 bg-white placeholder:text-gray-400"
               value={fullName} 
               onChange={e => setFullName(e.target.value)}
