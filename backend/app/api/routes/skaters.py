@@ -29,9 +29,49 @@ def read_skaters(
     limit: int = 100,
     current_user: Profile = Depends(get_current_user),
 ) -> List[Skater]:
-    statement = select(Skater).where(Skater.coach_id == current_user.id).offset(skip).limit(limit)
+    statement = select(Skater).where(Skater.coach_id == current_user.id, Skater.is_active == True).offset(skip).limit(limit)
     skaters = session.exec(statement).all()
     return skaters
+
+@router.patch("/{skater_id}/archive", response_model=SkaterRead)
+def archive_skater(
+    *,
+    session: Session = Depends(get_session),
+    skater_id: uuid.UUID,
+    current_user: Profile = Depends(get_current_user),
+) -> Skater:
+    skater = session.get(Skater, skater_id)
+    if not skater:
+        raise HTTPException(status_code=404, detail="Skater not found")
+    
+    if skater.coach_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    skater.is_active = False
+    session.add(skater)
+    session.commit()
+    session.refresh(skater)
+    return skater
+
+@router.patch("/{skater_id}/restore", response_model=SkaterRead)
+def restore_skater(
+    *,
+    session: Session = Depends(get_session),
+    skater_id: uuid.UUID,
+    current_user: Profile = Depends(get_current_user),
+) -> Skater:
+    skater = session.get(Skater, skater_id)
+    if not skater:
+        raise HTTPException(status_code=404, detail="Skater not found")
+    
+    if skater.coach_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    skater.is_active = True
+    session.add(skater)
+    session.commit()
+    session.refresh(skater)
+    return skater
 
 @router.patch("/{skater_id}", response_model=SkaterRead)
 def update_skater(

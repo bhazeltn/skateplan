@@ -50,6 +50,28 @@ export default function RosterPage() {
     }
   };
 
+  const handleArchive = async (id: string) => {
+    const token = localStorage.getItem('token');
+    const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+    
+    try {
+        const res = await fetch(`${api_url}/skaters/${id}/archive`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (res.ok) {
+            fetchSkaters();
+        } else {
+            console.error("Failed to archive");
+        }
+    } catch (e) {
+        console.error(e);
+    }
+  };
+
   useEffect(() => {
     fetchSkaters();
   }, []);
@@ -99,12 +121,13 @@ export default function RosterPage() {
                   <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Level</th>
                   <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">DOB</th>
                   <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Status</th>
+                  <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {skaters.length === 0 && (
                     <tr>
-                        <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                        <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
                             No skaters found. Add one to get started.
                         </td>
                     </tr>
@@ -118,6 +141,16 @@ export default function RosterPage() {
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${skater.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                             {skater.is_active ? 'Active' : 'Archived'}
                         </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm whitespace-nowrap text-left">
+                        {skater.is_active && (
+                            <button 
+                                onClick={() => handleArchive(skater.id)}
+                                className="text-red-600 hover:text-red-900 font-medium"
+                            >
+                                Archive
+                            </button>
+                        )}
                     </td>
                   </tr>
                 ))}
