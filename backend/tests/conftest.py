@@ -45,7 +45,8 @@ def normal_user_token_headers_fixture(client: TestClient, session: Session):
         role="coach",
         full_name="Test Coach",
         email="coach@example.com",
-        id=coach_id
+        id=coach_id,
+        hashed_password="dummy_hash_for_test"
     )
     session.add(coach)
     session.commit()

@@ -11,6 +11,7 @@ enum AssetType {
 interface Asset {
   id: string;
   filename: string;
+  stored_filename: string;
   file_type: AssetType;
   created_at: string;
 }
@@ -67,11 +68,14 @@ export default function AssetsGallery({ skaterId }: { skaterId: string }) {
 
   const filteredAssets = assets.filter(a => a.file_type === activeTab);
   const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : '';
+  
+  // Helper to get direct static URL for media (now public via FastAPI mount)
+  const getStaticUrl = (stored_filename: string) => {
+      const baseUrl = api_url.split('/api/v1')[0];
+      return `${baseUrl}/assets/${stored_filename}`;
+  };
 
-  // Helper to get authenticated URL for media (requires handling auth in backend or cookies)
-  // Since our backend download endpoint requires Auth header/cookie, and audio src= requests usually send cookies but not custom headers.
-  // We rely on the cookie set in login page.
+  // Keep download link pointing to API for proper filename handling
   const getDownloadUrl = (id: string) => `${api_url}/assets/download/${id}`;
 
   return (
@@ -117,12 +121,12 @@ export default function AssetsGallery({ skaterId }: { skaterId: string }) {
                     <p className="text-sm font-medium text-gray-900 truncate mb-2">{asset.filename}</p>
                     {activeTab === AssetType.MUSIC && (
                         <audio controls className="w-full">
-                            <source src={getDownloadUrl(asset.id)} />
+                            <source src={getStaticUrl(asset.stored_filename)} />
                             Your browser does not support the audio element.
                         </audio>
                     )}
                     {activeTab === AssetType.VISUAL && (
-                        <img src={getDownloadUrl(asset.id)} alt={asset.filename} className="w-full h-32 object-cover rounded" />
+                        <img src={getStaticUrl(asset.stored_filename)} alt={asset.filename} className="w-full h-32 object-cover rounded" />
                     )}
                     <a href={getDownloadUrl(asset.id)} download className="text-indigo-600 hover:text-indigo-500 text-sm mt-2 block">Download</a>
                 </div>

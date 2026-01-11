@@ -1,25 +1,53 @@
 import uuid
-from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, date as dt_date
+from typing import List, Optional
+from enum import Enum
 from sqlmodel import Field, SQLModel, Relationship
 
-class BenchmarkProfile(SQLModel, table=True):
-    __tablename__ = "benchmark_profiles"
+class MetricDataType(str, Enum):
+    NUMERIC = "NUMERIC"
+    TEXT = "TEXT"
+    SCALE_1_10 = "SCALE_1_10"
+
+# --- Template Definitions ---
+
+class BenchmarkTemplate(SQLModel, table=True):
+    __tablename__ = "benchmark_templates"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    skater_id: uuid.UUID = Field(index=True) # Foreign key to profiles, but loose coupling for now or explicit FK
     name: str
-    valid_from: Optional[datetime] = None
-    valid_to: Optional[datetime] = None
-    status: str = "draft" # draft, active, archived
+    created_by_id: Optional[uuid.UUID] = Field(default=None, foreign_key="profiles.id")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
-    metrics: List["BenchmarkMetric"] = Relationship(back_populates="profile")
+    metrics: List["MetricDefinition"] = Relationship(back_populates="template")
 
-class BenchmarkMetric(SQLModel, table=True):
-    __tablename__ = "benchmark_metrics"
+class MetricDefinition(SQLModel, table=True):
+    __tablename__ = "metric_definitions"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    profile_id: uuid.UUID = Field(foreign_key="benchmark_profiles.id")
-    category: str # Technical, Physical, Mental
-    name: str
-    target_value: str # Store as string to handle "14 inches" or "Level 4"
+    template_id: uuid.UUID = Field(foreign_key="benchmark_templates.id")
+    label: str
+    unit: Optional[str] = None
+    data_type: MetricDataType
 
-    profile: Optional[BenchmarkProfile] = Relationship(back_populates="metrics")
+    template: BenchmarkTemplate = Relationship(back_populates="metrics")
+
+# --- Results ---
+
+class BenchmarkSession(SQLModel, table=True):
+    __tablename__ = "benchmark_sessions"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    template_id: uuid.UUID = Field(foreign_key="benchmark_templates.id")
+    skater_id: uuid.UUID = Field(foreign_key="skaters.id")
+    recorded_by_id: uuid.UUID = Field(foreign_key="profiles.id")
+    date: dt_date = Field(default_factory=dt_date.today)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+    results: List["BenchmarkResult"] = Relationship(back_populates="session")
+
+class BenchmarkResult(SQLModel, table=True):
+    __tablename__ = "benchmark_results"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    session_id: uuid.UUID = Field(foreign_key="benchmark_sessions.id")
+    metric_definition_id: uuid.UUID = Field(foreign_key="metric_definitions.id")
+    value: str
+
+    session: BenchmarkSession = Relationship(back_populates="results")

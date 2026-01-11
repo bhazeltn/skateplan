@@ -13,7 +13,10 @@ from app.models.asset_models import ProgramAsset, AssetType
 
 router = APIRouter()
 
-UPLOAD_DIR = "/app/app/data/assets" # Inside the container
+# Use relative path if not in container, or configure via env
+# For local dev/test relative to this file: ../../data/assets
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+UPLOAD_DIR = os.path.join(BASE_DIR, "data", "assets")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.post("/{skater_id}", response_model=ProgramAsset)

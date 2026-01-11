@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional, Dict, Any
 from enum import Enum
 from sqlmodel import Field, SQLModel
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.types import JSON
 
 class AssetType(str, Enum):
     MUSIC = "music"
@@ -18,5 +18,5 @@ class ProgramAsset(SQLModel, table=True):
     stored_filename: str # The UUID based filename on disk
     file_type: AssetType
     version: int = Field(default=1)
-    meta_data: Dict[str, Any] = Field(default={}, sa_type=JSONB) # 'metadata' is reserved in SQLModel
+    meta_data: Dict[str, Any] = Field(default={}, sa_type=JSON) # 'metadata' is reserved in SQLModel
     created_at: datetime = Field(default_factory=datetime.utcnow)

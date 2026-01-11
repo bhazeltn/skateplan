@@ -1,10 +1,9 @@
 import sys
 import os
-# Add the backend directory to sys.path so imports work
 sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
 
 from sqlmodel import Session, select
-from app.core.db import engine, init_db
+from app.core.db import engine
 from app.models.user_models import Profile
 from app.core.security import get_password_hash
 import uuid
