@@ -9,6 +9,7 @@ class Profile(SQLModel, table=True):
     full_name: str
     email: str = Field(index=True, unique=True)
     home_club: Optional[str] = None
+    hashed_password: str = Field(nullable=False) # User confirmed this exists in DB
 
 class GuardianLink(SQLModel, table=True):
     __tablename__ = "guardian_links"

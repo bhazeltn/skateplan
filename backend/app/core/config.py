@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     # Auth
     JWT_SECRET: str = "unsafe-secret-key"
     JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8 # 8 days
     SUPABASE_URL: str = "https://supabase.skateplan.bradnet.net"
     SUPABASE_KEY: str = "" # Anon Key
     

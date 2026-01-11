@@ -1,8 +1,10 @@
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from supabase import create_client, Client
-from app.core.config import settings
+from sqlmodel import Session, select
+from app.api.deps import get_session
+from app.core import security
+from app.models.user_models import Profile
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -12,27 +14,29 @@ class Token(BaseModel):
     token_type: str
 
 @router.post("/login/access-token", response_model=Token)
-def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()) -> Any:
+def login_access_token(
+    session: Session = Depends(get_session),
+    form_data: OAuth2PasswordRequestForm = Depends()
+) -> Any:
     """
     OAuth2 compatible token login, get an access token for future requests.
-    Proxies to Supabase Auth.
+    Authenticates against local database.
     """
-    supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+    # 1. Find user by email
+    statement = select(Profile).where(Profile.email == form_data.username)
+    user = session.exec(statement).first()
+
+    # 2. Verify user and password
+    if not user or not security.verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect email or password"
+        )
     
-    try:
-        res = supabase.auth.sign_in_with_password({
-            "email": form_data.username,
-            "password": form_data.password,
-        })
-        
-        if res.session:
-            return {
-                "access_token": res.session.access_token,
-                "token_type": "bearer",
-            }
-        else:
-             raise HTTPException(status_code=400, detail="Incorrect email or password")
-             
-    except Exception as e:
-        # In a real app, parse 'e' to see if it's invalid creds vs system error
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
+    # 3. Generate Token
+    access_token = security.create_access_token(subject=user.id)
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }

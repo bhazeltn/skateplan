@@ -1,4 +1,5 @@
 # ~/development/skateplan/docker-compose.yml
+
 include:
   - path: infra/docker-compose.yml
     env_file: infra/.env
@@ -10,14 +11,18 @@ services:
     restart: always
     ports:
       - "8000:8000"
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    # Added python-multipart installation just in case it's missing from requirements.txt
+    command: sh -c "pip install python-multipart && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     env_file:
       - infra/.env
     environment:
-      # Connection to the DB in the 'infra' stack
-      # Public URL for CORS (Browser access)
       - POSTGRES_SERVER=db
       - API_EXTERNAL_URL=https://api.skateplan.bradnet.net
+      # FIX: Mapped to the actual variable names found in your infra/.env
+      - SUPABASE_URL=${SUPABASE_PUBLIC_URL}
+      - SUPABASE_KEY=${SERVICE_ROLE_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY}
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres
     depends_on:
       db:
         condition: service_healthy
@@ -33,7 +38,8 @@ services:
     restart: always
     ports:
       - "3000:3000"
-    command: sh -c "npm install && npm next dev --webpack"
+    # FIX: Corrected command to 'npx next dev'
+    command: sh -c "npm install && npx next dev --webpack -H 0.0.0.0"
     environment:
       - NEXT_PUBLIC_API_URL=https://api.skateplan.bradnet.net/api/v1
       - API_INTERNAL_URL=http://backend:8000
@@ -46,6 +52,6 @@ services:
     volumes:
       - ./frontend:/app
 
-# This ensures all services share the network created by the 'include'
 networks:
   default:
+    name: skateplan_default
