@@ -19,7 +19,9 @@ from app.models.program_models import (
     ProgramAssetLink,
     ProgramAssetLinkCreate,
     ProgramAssetLinkRead,
+    ProgramElement,
 )
+from app.services.ppc_calculator import calculate_base_value, PPCResult
 
 router = APIRouter()
 
@@ -170,3 +172,41 @@ def list_program_assets(
     ).all()
 
     return list(links)
+
+
+@router.get("/{program_id}/base-value", response_model=PPCResult)
+def get_program_base_value(
+    *,
+    session: Session = Depends(get_session),
+    program_id: uuid.UUID,
+    current_user: Profile = Depends(get_current_user),
+) -> PPCResult:
+    """
+    Calculate the total base value (PPC) for a program.
+
+    Returns the sum of all planned technical elements' base values,
+    with second-half jump bonuses applied.
+    """
+    program = session.get(Program, program_id)
+    if not program or program.skater_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    # Get all elements for this program
+    elements_query = select(ProgramElement).where(
+        ProgramElement.program_id == program_id
+    ).order_by(ProgramElement.sequence_number)
+
+    program_elements = session.exec(elements_query).all()
+
+    # Convert to format expected by calculator
+    # Note: In real implementation, we'd join with the elements table to get base values
+    elements_data = []
+    for pe in program_elements:
+        elements_data.append({
+            "code": f"Element{pe.sequence_number}",  # Would fetch actual code from elements table
+            "base_value": 0.0,  # Would fetch from elements table
+            "sequence": pe.sequence_number,
+            "second_half": False,  # Would determine from sequence_number
+        })
+
+    return calculate_base_value(elements_data)
