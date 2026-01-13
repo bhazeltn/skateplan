@@ -14,8 +14,14 @@ from app.core.config import settings
 from sqlmodel import SQLModel
 
 # Import all models so they're registered with SQLModel.metadata
-from app.models.user_models import Profile, GuardianLink, BetaWaitlist
-from app.models.skater_models import Skater
+from app.models.user_models import (
+    Profile,
+    GuardianLink,
+    SkaterCoachLink,
+    Partnership,
+    BetaWaitlist
+)
+from app.models.skater_models import Skater  # Legacy - being phased out
 from app.models.asset_models import ProgramAsset
 from app.models.benchmark_models import (
     BenchmarkTemplate,
