@@ -1,16 +1,17 @@
 from typing import Any, List, Union
-from pydantic import AnyHttpUrl, PostgresDsn, field_validator
+from pydantic import AnyHttpUrl, PostgresDsn, Field, field_validator
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "SkatePlan"
     API_V1_STR: str = "/api/v1"
-    
+
     # Auth - Supabase
-    SUPABASE_URL: str = "https://supabase.skateplan.bradnet.net"
-    SUPABASE_KEY: str = "" # Anon Key (for client-side)
-    SUPABASE_SERVICE_ROLE_KEY: str = "" # Service Role Key (for backend admin operations)
-    JWT_SECRET: str = "unsafe-secret-key" # Supabase JWT secret for token verification
+    # These values MUST be read from environment variables
+    SUPABASE_URL: str = Field(default="http://kong:8000", description="Supabase API URL")
+    SUPABASE_KEY: str = Field(description="Supabase Anon Key (for client-side)")
+    SUPABASE_SERVICE_ROLE_KEY: str = Field(description="Supabase Service Role Key (for backend admin operations)")
+    JWT_SECRET: str = Field(description="Supabase JWT secret for token verification")
     
     # Database
     POSTGRES_SERVER: str = "localhost"
@@ -34,8 +35,9 @@ class Settings(BaseSettings):
     # CORS
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
 
-    class Config:
-        case_sensitive = True
-        env_file = ".env"
+    model_config = {
+        "case_sensitive": True,
+        "env_file": ".env",
+    }
 
 settings = Settings()

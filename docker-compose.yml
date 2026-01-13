@@ -19,7 +19,7 @@ services:
       - POSTGRES_SERVER=db
       - API_EXTERNAL_URL=https://api.skateplan.bradnet.net
       # FIX: Mapped to the actual variable names found in your infra/.env
-      - SUPABASE_URL=${SUPABASE_PUBLIC_URL}
+      - SUPABASE_URL=http://kong:8000
       - SUPABASE_KEY=${SERVICE_ROLE_KEY}
       - SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY}
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres
