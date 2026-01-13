@@ -33,10 +33,17 @@ class MetricDefinition(SQLModel, table=True):
 # --- Results ---
 
 class BenchmarkSession(SQLModel, table=True):
+    """
+    A benchmark recording session for either an individual skater or a partnership.
+    """
     __tablename__ = "benchmark_sessions"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     template_id: uuid.UUID = Field(foreign_key="benchmark_templates.id")
-    skater_id: uuid.UUID = Field(foreign_key="skaters.id")
+
+    # Can be for individual skater OR partnership (one must be set)
+    skater_id: Optional[uuid.UUID] = Field(default=None, foreign_key="profiles.id")
+    partnership_id: Optional[uuid.UUID] = Field(default=None, foreign_key="partnerships.id")
+
     recorded_by_id: uuid.UUID = Field(foreign_key="profiles.id")
     date: dt_date = Field(default_factory=dt_date.today)
     created_at: datetime = Field(default_factory=datetime.utcnow)
