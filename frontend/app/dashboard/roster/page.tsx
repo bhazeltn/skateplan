@@ -2,14 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getAuthToken } from '../../lib/supabase';
 import AddSkaterModal from './add-skater-modal';
 
 interface Skater {
   id: string;
   full_name: string;
-  dob: string;
-  level: string;
+  email: string;
+  dob: string | null;
+  level: string | null;
   is_active: boolean;
+  home_club: string | null;
 }
 
 export default function RosterPage() {
@@ -19,14 +22,14 @@ export default function RosterPage() {
   const router = useRouter();
 
   const fetchSkaters = async () => {
-    const token = localStorage.getItem('token');
+    const token = await getAuthToken();
     if (!token) {
         router.push('/login');
         return;
     }
 
     const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-    
+
     try {
         // Fetch ALL skaters (active and archived) by setting active_only=false
         const res = await fetch(`${api_url}/skaters/?active_only=false&limit=1000`, {
@@ -34,12 +37,12 @@ export default function RosterPage() {
                 'Authorization': `Bearer ${token}`
             }
         });
-        
+
         if (res.status === 401) {
             router.push('/login');
             return;
         }
-        
+
         if (res.ok) {
             const data = await res.json();
             setSkaters(data);
@@ -52,9 +55,9 @@ export default function RosterPage() {
   };
 
   const handleArchive = async (id: string) => {
-    const token = localStorage.getItem('token');
+    const token = await getAuthToken();
     const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-    
+
     try {
         const res = await fetch(`${api_url}/skaters/${id}/archive`, {
             method: 'PATCH',
@@ -67,9 +70,9 @@ export default function RosterPage() {
   };
 
   const handleRestore = async (id: string) => {
-    const token = localStorage.getItem('token');
+    const token = await getAuthToken();
     const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-    
+
     try {
         const res = await fetch(`${api_url}/skaters/${id}/restore`, {
             method: 'PATCH',
@@ -142,10 +145,10 @@ export default function RosterPage() {
               <span className="text-xl font-bold text-gray-900">SkatePlan Roster</span>
             </div>
             <div className="flex items-center space-x-4">
-                <button 
-                    onClick={() => {
-                        localStorage.removeItem('token');
-                        document.cookie = "token=; path=/; max-age=0";
+                <button
+                    onClick={async () => {
+                        const { signOut } = await import('../../lib/supabase');
+                        await signOut();
                         router.push('/login');
                     }}
                     className="text-sm text-gray-500 hover:text-gray-900"
