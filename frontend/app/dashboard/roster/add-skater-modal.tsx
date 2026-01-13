@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { getAuthToken } from '../../lib/supabase';
 
 interface AddSkaterModalProps {
   isOpen: boolean;
@@ -20,7 +21,7 @@ export default function AddSkaterModal({ isOpen, onClose, onSuccess }: AddSkater
     e.preventDefault();
     setError('');
 
-    const token = localStorage.getItem('token');
+    const token = await getAuthToken();
     const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
     try {
@@ -56,8 +57,9 @@ export default function AddSkaterModal({ isOpen, onClose, onSuccess }: AddSkater
       setDob('');
       setLevel('');
 
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(errorMessage);
     }
   };
 

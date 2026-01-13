@@ -1,0 +1,327 @@
+{
+    "Skate_Canada_STAR_Assessments": {
+        "Pattern_Dance": [
+            {
+                "level": "STAR 1",
+                "tests": [
+                    "Dance Step Elements"
+                ]
+            },
+            {
+                "level": "STAR 2",
+                "tests": [
+                    "2a: Dutch Waltz",
+                    "2b: Canasta Tango"
+                ]
+            },
+            {
+                "level": "STAR 3",
+                "tests": [
+                    "3a: Baby Blues",
+                    "3b: Dance Step Elements"
+                ]
+            },
+            {
+                "level": "STAR 4",
+                "tests": [
+                    "4a: Swing Dance",
+                    "4b: Fiesta Tango"
+                ]
+            },
+            {
+                "level": "STAR 5",
+                "tests": [
+                    "5a: Willow Waltz",
+                    "5b: Dance Step Elements"
+                ]
+            },
+            {
+                "level": "STAR 6",
+                "tests": [
+                    "6A: Ten-Fox",
+                    "6B: European Waltz",
+                    "6C: Fourteenstep"
+                ]
+            },
+            {
+                "level": "STAR 7",
+                "tests": [
+                    "7A: Foxtrot",
+                    "7B: Tango",
+                    "7C: American Waltz"
+                ]
+            },
+            {
+                "level": "STAR 8",
+                "tests": [
+                    "8A: Killian",
+                    "8B: Rocker Foxtrot",
+                    "8C: Starlight Waltz"
+                ]
+            },
+            {
+                "level": "STAR 9",
+                "tests": [
+                    "9A: Paso Doble",
+                    "9B: Blues",
+                    "9C: Silver Samba"
+                ],
+                "completion_rule": "2_of_3"
+            },
+            {
+                "level": "STAR 10",
+                "tests": [
+                    "10A: Cha Cha Congelado",
+                    "10B: Westminster Waltz",
+                    "10C: Quickstep"
+                ],
+                "completion_rule": "2_of_3"
+            },
+            {
+                "level": "Gold",
+                "tests": [
+                    "Gold A: Viennese Waltz",
+                    "Gold B: Argentine Tango",
+                    "Gold C: Gold Rhythm Dance"
+                ],
+                "completion_rule": "2_of_3"
+            },
+            {
+                "level": "Diamond",
+                "tests": [
+                    "Ravensburger Waltz",
+                    "Tango Romantica",
+                    "Yankee Polka",
+                    "Rhumba",
+                    "Austrian Waltz",
+                    "Golden Waltz"
+                ],
+                "completion_rule": "4_of_6"
+            }
+        ],
+        "Freeskate": {
+            "elements": [
+                "STAR 1",
+                "STAR 2",
+                "STAR 3",
+                "STAR 4",
+                "STAR 5",
+                "STAR 6",
+                "STAR 7",
+                "STAR 8",
+                "STAR 9",
+                "STAR 10"
+            ],
+            "programs": [
+                "STAR 2",
+                "STAR 3",
+                "STAR 4",
+                "STAR 5",
+                "STAR 6",
+                "STAR 7",
+                "STAR 8",
+                "STAR 9",
+                "STAR 10",
+                "Gold"
+            ],
+            "completion_rule": "Must pass Elements and Program for Level Credit; STAR 10 Elements + Gold Program required for Gold Level"
+        },
+        "Skills": [
+            "STAR 1",
+            "STAR 2",
+            "STAR 3",
+            "STAR 4",
+            "STAR 5",
+            "STAR 6",
+            "STAR 7",
+            "STAR 8",
+            "STAR 9",
+            "STAR 10",
+            "Gold"
+        ],
+        "Artistic": [
+            "STAR 5",
+            "STAR 7",
+            "STAR 9",
+            "Gold"
+        ],
+        "Synchro": [
+            "STAR 2",
+            "STAR 3",
+            "STAR 4"
+        ]
+    },
+    "USFS_Test_Hierarchies": {
+        "Skating_Skills": [
+            "Pre-Preliminary",
+            "Preliminary",
+            "Pre-Bronze",
+            "Bronze",
+            "Pre-Silver",
+            "Silver",
+            "Pre-Gold",
+            "Gold"
+        ],
+        "Singles_Freeskate": [
+            "Pre-Preliminary",
+            "Preliminary",
+            "Pre-Bronze",
+            "Bronze",
+            "Pre-Silver",
+            "Silver",
+            "Pre-Gold",
+            "Gold"
+        ],
+        "Pattern_Dance_Standard": [
+            {
+                "level": "Preliminary",
+                "tests": [
+                    "Dutch Waltz",
+                    "Canasta Tango",
+                    "Rhythm Blues"
+                ]
+            },
+            {
+                "level": "Pre-Bronze",
+                "tests": [
+                    "Swing Dance",
+                    "Cha Cha",
+                    "Fiesta Tango"
+                ]
+            },
+            {
+                "level": "Bronze",
+                "tests": [
+                    "Hickory Hoedown",
+                    "Willow Waltz",
+                    "Ten-Fox"
+                ]
+            },
+            {
+                "level": "Pre-Silver",
+                "tests": [
+                    "Fourteenstep",
+                    "European Waltz",
+                    "Foxtrot"
+                ]
+            },
+            {
+                "level": "Silver",
+                "tests": [
+                    "American Waltz",
+                    "Tango",
+                    "Rocker Foxtrot"
+                ]
+            },
+            {
+                "level": "Pre-Gold",
+                "tests": [
+                    "Kilian",
+                    "Blues",
+                    "Paso Doble",
+                    "Starlight Waltz"
+                ]
+            },
+            {
+                "level": "Gold",
+                "tests": [
+                    "Viennese Waltz",
+                    "Westminster Waltz",
+                    "Quickstep",
+                    "Argentine Tango"
+                ]
+            },
+            {
+                "level": "International",
+                "tests": [
+                    "Austrian Waltz",
+                    "Cha Cha Congelado",
+                    "Yankee Polka",
+                    "Golden Waltz",
+                    "Midnight Blues",
+                    "Ravensburger Waltz",
+                    "Rhumba",
+                    "Silver Samba",
+                    "Tango Romantica",
+                    "Tea-Time Foxtrot",
+                    "Finnstep"
+                ]
+            }
+        ],
+        "Solo_Free_Dance": [
+            "Juvenile",
+            "Intermediate",
+            "Novice",
+            "Junior",
+            "Senior"
+        ],
+        "Pairs": [
+            "Pre-Juvenile",
+            "Juvenile",
+            "Intermediate",
+            "Novice",
+            "Junior",
+            "Senior"
+        ],
+        "Adult_21_Plus": {
+            "Skills": [
+                "Pre-Bronze",
+                "Bronze",
+                "Silver",
+                "Gold",
+                "Intermediate",
+                "Novice",
+                "Junior",
+                "Senior"
+            ],
+            "Freeskate": [
+                "Pre-Bronze",
+                "Bronze",
+                "Silver",
+                "Gold",
+                "Intermediate",
+                "Novice",
+                "Junior",
+                "Senior"
+            ]
+        },
+        "Adaptive": {
+            "Skills": [
+                "Pre-Bronze",
+                "Bronze",
+                "Silver",
+                "Gold"
+            ],
+            "Singles": [
+                "Pre-Bronze",
+                "Bronze",
+                "Silver",
+                "Gold"
+            ]
+        }
+    },
+    "Philippine Skating Union Tests": {
+        "note": "Custom developmental track for PHSU Pilot",
+        "Freeskate": [
+            "Pre-Juvenile",
+            "Juvenile",
+            "Pre-Novice",
+            "Basic Novice",
+            "Intermediate Novice",
+            "Advanced Novice",
+            "Junior",
+            "Senior"
+        ],
+        "Skating_Skills": [
+            "Pre-Juvenile",
+            "Juvenile",
+            "Pre-Novice",
+            "Basic Novice",
+            "Intermediate Novice",
+            "Advanced Novice",
+            "Junior",
+            "Senior"
+        ],
+        "Dance": null
+    }
+}

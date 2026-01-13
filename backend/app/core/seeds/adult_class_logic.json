@@ -1,0 +1,42 @@
+{
+  "logic_name": "Unified Adult Skating Master",
+  "age_cutoff_date": "July 1st",
+  "min_adult_age": 18,
+  "age_classes": [
+    { "id": "YA", "name": "Young Adult", "min_age": 18, "max_age": 27 },
+    { "id": "CLASS_I", "name": "Class I", "min_age": 28, "max_age": 37 },
+    { "id": "CLASS_II", "name": "Class II", "min_age": 38, "max_age": 47 },
+    { "id": "CLASS_III", "name": "Class III", "min_age": 48, "max_age": 57 },
+    { "id": "CLASS_IV", "name": "Class IV", "min_age": 58, "max_age": 67 },
+    { "id": "CLASS_V", "name": "Class V", "min_age": 68, "max_age": null }
+  ],
+  "disciplines": {
+    "Singles_Freeskate": {
+      "standard": ["Adult Intro Open", "Adult Bronze", "Adult Silver", "Adult Gold"],
+      "masters": ["Adult Masters", "Adult Masters Elite"],
+      "duration_info": { "Bronze": "1:40 +/- 10s", "Silver": "2:10 +/- 10s", "Masters": "2:40 +/- 10s" }
+    },
+    "Pairs_Freeskate": {
+      "standard": ["Adult Pair"],
+      "masters": ["Adult Masters Pair"],
+      "gender_neutral": true,
+      "duration_info": { "Adult Pair": "2:10 +/- 10s", "Masters Pair": "3:10 +/- 10s" }
+    },
+    "Ice_Dance": {
+      "pattern_dance": ["Adult Bronze", "Adult Silver", "Adult Gold", "Adult Elite"],
+      "free_dance": ["Adult Bronze Free Dance", "Adult Silver Free Dance", "Adult Gold Free Dance"],
+      "duration_info": { "Bronze FD": "1:50 +/- 10s", "Silver FD": "2:30 +/- 10s", "Gold FD": "3:10 +/- 10s" },
+      "special_rules": ["Centennial (Combined Age 100+)"]
+    },
+    "Solo_Dance": {
+      "tracks": ["Pattern Dance", "Solo Free Dance"],
+      "levels": ["Bronze", "Silver", "Gold", "Elite"],
+      "duration_info": { "Bronze SFD": "1:40 +/- 10s", "Silver SFD": "2:10 +/- 10s" }
+    }
+  },
+  "synchro_future_proof": {
+    "levels": ["Adult 1", "Adult 2", "Adult 3"],
+    "min_age": 18,
+    "masters_min_age": 25
+  }
+}

@@ -3,6 +3,7 @@ uvicorn
 sqlmodel
 pydantic
 pydantic-settings
+email-validator
 supabase
 python-jose[cryptography]
 passlib[bcrypt]

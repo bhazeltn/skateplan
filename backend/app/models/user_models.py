@@ -1,6 +1,8 @@
 import uuid
-from typing import Optional
+from datetime import date
+from typing import Optional, Dict, Any, List
 from sqlmodel import Field, SQLModel
+from sqlalchemy.types import JSON
 
 class Profile(SQLModel, table=True):
     __tablename__ = "profiles"
@@ -9,7 +11,13 @@ class Profile(SQLModel, table=True):
     full_name: str
     email: str = Field(index=True, unique=True)
     home_club: Optional[str] = None
-    hashed_password: str = Field(nullable=False) # User confirmed this exists in DB
+    # NOTE: No hashed_password - authentication handled by Supabase Auth (auth.users)
+
+    # New fields Sprint 3
+    dob: Optional[date] = None
+    is_adaptive: bool = Field(default=False)
+    training_site: Optional[str] = None
+    active_disciplines: List[str] = Field(default=[], sa_type=JSON)
 
 class GuardianLink(SQLModel, table=True):
     __tablename__ = "guardian_links"

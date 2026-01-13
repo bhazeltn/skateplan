@@ -6,12 +6,11 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "SkatePlan"
     API_V1_STR: str = "/api/v1"
     
-    # Auth
-    JWT_SECRET: str = "unsafe-secret-key"
-    JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8 # 8 days
+    # Auth - Supabase
     SUPABASE_URL: str = "https://supabase.skateplan.bradnet.net"
-    SUPABASE_KEY: str = "" # Anon Key
+    SUPABASE_KEY: str = "" # Anon Key (for client-side)
+    SUPABASE_SERVICE_ROLE_KEY: str = "" # Service Role Key (for backend admin operations)
+    JWT_SECRET: str = "unsafe-secret-key" # Supabase JWT secret for token verification
     
     # Database
     POSTGRES_SERVER: str = "localhost"

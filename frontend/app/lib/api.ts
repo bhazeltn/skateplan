@@ -1,32 +1,82 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+/**
+ * API helper functions for making authenticated requests to the backend
+ */
 
-export async function fetchElements(limit = 10) {
-  console.log("🚀 FETCHING:", API_URL);
-  
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  const headers: HeadersInit = {};
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
+import { getAuthToken } from './supabase';
 
-  try {
-    const res = await fetch(`${API_URL}/elements?limit=${limit}`, {
-      headers
-    });
-    
-    if (res.status === 401) {
-        if (typeof window !== 'undefined') {
-            window.location.href = '/login';
-        }
-        throw new Error('Unauthorized');
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+
+/**
+ * Make an authenticated API request
+ */
+export async function apiFetch(endpoint: string, options: RequestInit = {}) {
+  const token = await getAuthToken();
+
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` }),
+    ...options.headers,
+  };
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      // Redirect to login if unauthorized
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      throw new Error('Unauthorized');
     }
-
-    if (!res.ok) throw new Error(`Failed: ${res.status} ${res.statusText}`);
-    return res.json();
-  } catch (error) {
-    console.error("❌ Fetch Error:", error);
-    // Don't return empty array if it's an auth error, let the redirect happen
-    // but for now, we return empty to prevent crash
-    return [];
+    throw new Error(`API request failed: ${response.statusText}`);
   }
+
+  return response.json();
+}
+
+/**
+ * GET request helper
+ */
+export async function apiGet(endpoint: string) {
+  return apiFetch(endpoint, { method: 'GET' });
+}
+
+/**
+ * POST request helper
+ */
+export async function apiPost(endpoint: string, data: unknown) {
+  return apiFetch(endpoint, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * PUT request helper
+ */
+export async function apiPut(endpoint: string, data: unknown) {
+  return apiFetch(endpoint, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * PATCH request helper
+ */
+export async function apiPatch(endpoint: string, data: unknown) {
+  return apiFetch(endpoint, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * DELETE request helper
+ */
+export async function apiDelete(endpoint: string) {
+  return apiFetch(endpoint, { method: 'DELETE' });
 }
