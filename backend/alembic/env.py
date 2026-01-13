@@ -23,6 +23,7 @@ from app.models.user_models import (
 )
 from app.models.skater_models import Skater  # Legacy - being phased out
 from app.models.asset_models import ProgramAsset
+from app.models.program_models import Program, ProgramAssetLink, ProgramElement
 from app.models.benchmark_models import (
     BenchmarkTemplate,
     MetricDefinition,
