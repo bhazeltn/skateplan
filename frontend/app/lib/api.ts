@@ -80,3 +80,12 @@ export async function apiPatch(endpoint: string, data: unknown) {
 export async function apiDelete(endpoint: string) {
   return apiFetch(endpoint, { method: 'DELETE' });
 }
+
+// Specific API functions
+
+/**
+ * Fetch ISU elements library
+ */
+export async function fetchElements() {
+  return apiGet('/elements');
+}

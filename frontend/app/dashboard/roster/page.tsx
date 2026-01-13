@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAuthToken } from '../../lib/supabase';
+import { getAuthToken, signOut } from '../../lib/supabase';
 import AddSkaterModal from './add-skater-modal';
 
 interface Skater {
@@ -147,7 +147,6 @@ export default function RosterPage() {
             <div className="flex items-center space-x-4">
                 <button
                     onClick={async () => {
-                        const { signOut } = await import('../../lib/supabase');
                         await signOut();
                         router.push('/login');
                     }}

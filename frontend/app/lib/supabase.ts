@@ -31,3 +31,10 @@ export async function isAuthenticated(): Promise<boolean> {
   const { data } = await supabase.auth.getSession()
   return !!data.session
 }
+
+/**
+ * Sign out the current user
+ */
+export async function signOut(): Promise<void> {
+  await supabase.auth.signOut()
+}

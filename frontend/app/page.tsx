@@ -1,13 +1,14 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { fetchElements } from './lib/api';
+import type { Element } from './lib/types/api';
 
 export default function Dashboard() {
-  const [elements, setElements] = useState<any[]>([]);
+  const [elements, setElements] = useState<Element[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchElements().then((data) => {
+    fetchElements().then((data: Element[]) => {
       setElements(data);
       setLoading(false);
     });
@@ -31,7 +32,7 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {elements.map((el: any) => (
+                {elements.map((el) => (
                   <tr key={el.id}>
                     <td className="px-6 py-4 whitespace-nowrap font-mono text-sm text-blue-600">{el.code}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{el.name}</td>
