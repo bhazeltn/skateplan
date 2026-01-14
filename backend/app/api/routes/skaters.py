@@ -14,6 +14,7 @@ class SkaterCreate(BaseModel):
     full_name: str
     dob: date
     level: str
+    federation_code: str = "ISU"  # Default to ISU
     is_active: bool = True
 
 class SkaterRead(BaseModel):
@@ -55,6 +56,7 @@ def create_skater(
         email=skater_email,
         dob=skater_in.dob,
         level=skater_in.level,
+        federation_code=skater_in.federation_code,
         is_active=skater_in.is_active,
     )
     session.add(skater)

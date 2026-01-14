@@ -1,7 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getAuthToken } from '../../lib/supabase';
+import { FederationFlag } from '../../components/FederationFlag';
+
+interface Federation {
+  id: string;
+  name: string;
+  code: string;
+  iso_code: string;
+}
 
 interface AddSkaterModalProps {
   isOpen: boolean;
@@ -13,7 +21,34 @@ export default function AddSkaterModal({ isOpen, onClose, onSuccess }: AddSkater
   const [fullName, setFullName] = useState('');
   const [dob, setDob] = useState('');
   const [level, setLevel] = useState('');
+  const [federationCode, setFederationCode] = useState('ISU');
+  const [federations, setFederations] = useState<Federation[]>([]);
   const [error, setError] = useState('');
+
+  // Fetch federations on mount
+  useEffect(() => {
+    const fetchFederations = async () => {
+      const token = await getAuthToken();
+      const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+
+      try {
+        const res = await fetch(`${api_url}/federations/`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setFederations(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch federations:', err);
+      }
+    };
+
+    if (isOpen) {
+      fetchFederations();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -35,6 +70,7 @@ export default function AddSkaterModal({ isOpen, onClose, onSuccess }: AddSkater
           full_name: fullName,
           dob: dob,
           level: level,
+          federation_code: federationCode,
           is_active: true
         })
       });
@@ -56,6 +92,7 @@ export default function AddSkaterModal({ isOpen, onClose, onSuccess }: AddSkater
       setFullName('');
       setDob('');
       setLevel('');
+      setFederationCode('ISU');
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
@@ -88,8 +125,34 @@ export default function AddSkaterModal({ isOpen, onClose, onSuccess }: AddSkater
             />
           </div>
           <div>
+            <label className="block text-sm font-medium text-gray-700">Federation</label>
+            <select
+              className="w-full px-3 py-2 border rounded text-gray-900 bg-white"
+              value={federationCode}
+              onChange={(e) => setFederationCode(e.target.value)}
+              required
+            >
+              <option value="">Select Federation</option>
+              {federations.map((fed) => (
+                <option key={fed.code} value={fed.code}>
+                  {fed.name}
+                </option>
+              ))}
+            </select>
+            {federationCode && federations.find(f => f.code === federationCode) && (
+              <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+                <FederationFlag
+                  iso_code={federations.find(f => f.code === federationCode)!.iso_code}
+                  size="small"
+                />
+                <span>{federations.find(f => f.code === federationCode)!.name}</span>
+              </div>
+            )}
+          </div>
+
+          <div>
             <label className="block text-sm font-medium text-gray-700">Level</label>
-            <select 
+            <select
                 className="w-full px-3 py-2 border rounded text-gray-900 bg-white placeholder:text-gray-400"
                 value={level} onChange={e => setLevel(e.target.value)}
                 required
