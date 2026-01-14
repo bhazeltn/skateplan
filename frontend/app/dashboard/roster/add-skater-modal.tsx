@@ -30,6 +30,8 @@ export default function AddSkaterModal({ isOpen, onClose, onSuccess }: AddSkater
   const [dob, setDob] = useState('');
   const [level, setLevel] = useState('');
   const [federationCode, setFederationCode] = useState('ISU');
+  const [trainingSite, setTrainingSite] = useState('');
+  const [isuLevelAnchor, setIsuLevelAnchor] = useState('');
   const [federations, setFederations] = useState<Federation[]>([]);
   const [levels, setLevels] = useState<Level[]>([]);
   const [error, setError] = useState('');
@@ -109,6 +111,8 @@ export default function AddSkaterModal({ isOpen, onClose, onSuccess }: AddSkater
           dob: dob,
           level: level,
           federation_code: federationCode,
+          training_site: trainingSite || null,
+          isu_level_anchor: isuLevelAnchor || null,
           is_active: true
         })
       });
@@ -131,6 +135,8 @@ export default function AddSkaterModal({ isOpen, onClose, onSuccess }: AddSkater
       setDob('');
       setLevel('');
       setFederationCode('ISU');
+      setTrainingSite('');
+      setIsuLevelAnchor('');
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
@@ -208,7 +214,35 @@ export default function AddSkaterModal({ isOpen, onClose, onSuccess }: AddSkater
               </p>
             )}
           </div>
-          
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Training Site</label>
+            <input
+              type="text"
+              className="w-full px-3 py-2 border rounded text-gray-900 bg-white placeholder:text-gray-400"
+              value={trainingSite}
+              onChange={e => setTrainingSite(e.target.value)}
+              placeholder="e.g., Toronto Cricket Club"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">ISU Level Anchor</label>
+            <select
+              className="w-full px-3 py-2 border rounded text-gray-900 bg-white"
+              value={isuLevelAnchor}
+              onChange={e => setIsuLevelAnchor(e.target.value)}
+            >
+              <option value="">Select ISU Level (Optional)</option>
+              <option value="NOVICE">Novice</option>
+              <option value="JUNIOR">Junior</option>
+              <option value="SENIOR">Senior</option>
+            </select>
+            <p className="mt-1 text-xs text-gray-500">
+              Maps national level to ISU equivalent for global benchmarking
+            </p>
+          </div>
+
           <div className="flex justify-end space-x-2 pt-4">
             <button 
               type="button" 

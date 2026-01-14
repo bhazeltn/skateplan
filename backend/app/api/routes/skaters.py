@@ -16,6 +16,8 @@ class SkaterCreate(BaseModel):
     dob: date
     level: str
     federation_code: str = "ISU"  # Default to ISU
+    training_site: str | None = None
+    isu_level_anchor: str | None = None
     is_active: bool = True
 
 class SkaterRead(BaseModel):
@@ -24,6 +26,9 @@ class SkaterRead(BaseModel):
     email: str
     dob: date | None
     level: str | None
+    federation: str | None
+    training_site: str | None
+    isu_level_anchor: str | None
     is_active: bool
     home_club: str | None
 
@@ -31,6 +36,8 @@ class SkaterUpdate(BaseModel):
     full_name: str | None = None
     dob: date | None = None
     level: str | None = None
+    training_site: str | None = None
+    isu_level_anchor: str | None = None
     is_active: bool | None = None
     home_club: str | None = None
 
@@ -57,7 +64,9 @@ def create_skater(
         email=skater_email,
         dob=skater_in.dob,
         level=skater_in.level,
-        federation_code=skater_in.federation_code,
+        federation=skater_in.federation_code,  # Map federation_code to federation field
+        training_site=skater_in.training_site,
+        isu_level_anchor=skater_in.isu_level_anchor,
         is_active=skater_in.is_active,
     )
     session.add(skater)
@@ -81,6 +90,9 @@ def create_skater(
         email=skater.email,
         dob=skater.dob,
         level=skater.level,
+        federation=skater.federation,
+        training_site=skater.training_site,
+        isu_level_anchor=skater.isu_level_anchor,
         is_active=skater.is_active,
         home_club=skater.home_club
     )
@@ -122,6 +134,9 @@ def read_skaters(
             email=s.email,
             dob=s.dob,
             level=s.level,
+            federation=s.federation,
+            training_site=s.training_site,
+            isu_level_anchor=s.isu_level_anchor,
             is_active=s.is_active,
             home_club=s.home_club
         )
@@ -163,6 +178,9 @@ def archive_skater(
         email=skater.email,
         dob=skater.dob,
         level=skater.level,
+        federation=skater.federation,
+        training_site=skater.training_site,
+        isu_level_anchor=skater.isu_level_anchor,
         is_active=skater.is_active,
         home_club=skater.home_club
     )
@@ -202,6 +220,9 @@ def restore_skater(
         email=skater.email,
         dob=skater.dob,
         level=skater.level,
+        federation=skater.federation,
+        training_site=skater.training_site,
+        isu_level_anchor=skater.isu_level_anchor,
         is_active=skater.is_active,
         home_club=skater.home_club
     )
@@ -246,6 +267,9 @@ def update_skater(
         email=skater.email,
         dob=skater.dob,
         level=skater.level,
+        federation=skater.federation,
+        training_site=skater.training_site,
+        isu_level_anchor=skater.isu_level_anchor,
         is_active=skater.is_active,
         home_club=skater.home_club
     )
