@@ -11,6 +11,14 @@ interface Federation {
   iso_code: string;
 }
 
+interface Level {
+  id: string;
+  federation_code: string;
+  level_name: string;
+  level_order: number;
+  is_system: boolean;
+}
+
 interface AddSkaterModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -23,6 +31,7 @@ export default function AddSkaterModal({ isOpen, onClose, onSuccess }: AddSkater
   const [level, setLevel] = useState('');
   const [federationCode, setFederationCode] = useState('ISU');
   const [federations, setFederations] = useState<Federation[]>([]);
+  const [levels, setLevels] = useState<Level[]>([]);
   const [error, setError] = useState('');
 
   // Fetch federations on mount
@@ -49,6 +58,35 @@ export default function AddSkaterModal({ isOpen, onClose, onSuccess }: AddSkater
       fetchFederations();
     }
   }, [isOpen]);
+
+  // Fetch levels when federation changes
+  useEffect(() => {
+    const fetchLevels = async () => {
+      if (!federationCode) return;
+
+      const token = await getAuthToken();
+      const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+
+      try {
+        const res = await fetch(`${api_url}/levels/?federation_code=${federationCode}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setLevels(data);
+          // Reset level selection when federation changes
+          setLevel('');
+        }
+      } catch (err) {
+        console.error('Failed to fetch levels:', err);
+      }
+    };
+
+    if (isOpen && federationCode) {
+      fetchLevels();
+    }
+  }, [isOpen, federationCode]);
 
   if (!isOpen) return null;
 
@@ -158,14 +196,17 @@ export default function AddSkaterModal({ isOpen, onClose, onSuccess }: AddSkater
                 required
             >
                 <option value="">Select Level</option>
-                <option value="Star 1">Star 1</option>
-                <option value="Star 5">Star 5</option>
-                <option value="Juvenile">Juvenile</option>
-                <option value="Pre-Novice">Pre-Novice</option>
-                <option value="Novice">Novice</option>
-                <option value="Junior">Junior</option>
-                <option value="Senior">Senior</option>
+                {levels.map((lvl) => (
+                  <option key={lvl.id} value={lvl.level_name}>
+                    {lvl.level_name}
+                  </option>
+                ))}
             </select>
+            {levels.length === 0 && federationCode && (
+              <p className="mt-1 text-xs text-gray-500">
+                No levels found for this federation. Defaulting to ISU levels.
+              </p>
+            )}
           </div>
           
           <div className="flex justify-end space-x-2 pt-4">
