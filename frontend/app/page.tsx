@@ -1,48 +1,44 @@
+/**
+ * Homepage - Auth-Aware Redirect
+ *
+ * The root path (/) redirects based on authentication state:
+ * - Authenticated users → /dashboard/roster
+ * - Unauthenticated users → /login
+ *
+ * This replaces the old test page that showed the elements list.
+ */
 'use client';
-import { useEffect, useState } from 'react';
-import { fetchElements } from './lib/api';
-import type { Element } from './lib/types/api';
 
-export default function Dashboard() {
-  const [elements, setElements] = useState<Element[]>([]);
-  const [loading, setLoading] = useState(true);
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from './lib/supabase';
+
+export default function HomePage() {
+  const router = useRouter();
 
   useEffect(() => {
-    fetchElements().then((data: Element[]) => {
-      setElements(data);
-      setLoading(false);
+    // Check authentication state and redirect accordingly
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        // User is authenticated → redirect to dashboard
+        router.push('/dashboard/roster');
+      } else {
+        // User is not authenticated → redirect to login
+        router.push('/login');
+      }
     });
-  }, []);
+  }, [router]);
 
+  // Show loading state while checking auth
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-slate-900 mb-8">SkatePlan: Data Library</h1>
-        
-        {loading ? (
-          <p>Loading Library...</p>
-        ) : (
-          <div className="bg-white shadow rounded-lg overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Code</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Element</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Base Value</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {elements.map((el) => (
-                  <tr key={el.id}>
-                    <td className="px-6 py-4 whitespace-nowrap font-mono text-sm text-blue-600">{el.code}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{el.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{el.base_value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="text-center">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
+          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+            Loading...
+          </span>
+        </div>
+        <p className="mt-4 text-sm text-gray-600">Loading SkatePlan...</p>
       </div>
     </div>
   );
