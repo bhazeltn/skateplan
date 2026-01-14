@@ -158,8 +158,34 @@ export default function RosterPage() {
       <nav className="bg-white shadow-sm">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <span className="text-xl font-bold text-gray-900">SkatePlan Roster</span>
+            <div className="flex items-center space-x-8">
+              <span className="text-xl font-bold text-gray-900">SkatePlan</span>
+              <div className="flex space-x-4">
+                <button
+                  onClick={() => router.push('/dashboard/roster')}
+                  className="text-sm font-medium text-blue-600 hover:text-blue-900"
+                >
+                  Roster
+                </button>
+                <button
+                  onClick={() => router.push('/dashboard/teams')}
+                  className="text-sm font-medium text-gray-500 hover:text-gray-900"
+                >
+                  Teams
+                </button>
+                <button
+                  onClick={() => router.push('/dashboard/library')}
+                  className="text-sm font-medium text-gray-500 hover:text-gray-900"
+                >
+                  Library
+                </button>
+                <button
+                  onClick={() => router.push('/dashboard/benchmarks')}
+                  className="text-sm font-medium text-gray-500 hover:text-gray-900"
+                >
+                  Benchmarks
+                </button>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
                 <button

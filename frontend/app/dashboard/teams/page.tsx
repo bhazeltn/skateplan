@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getAuthToken } from '../../lib/supabase';
+import { useRouter } from 'next/navigation';
+import { getAuthToken, signOut } from '../../lib/supabase';
 import AddTeamModal from './add-team-modal';
 
 interface Partnership {
@@ -16,6 +17,7 @@ interface Partnership {
 }
 
 export default function TeamsPage() {
+  const router = useRouter();
   const [partnerships, setPartnerships] = useState<Partnership[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -92,7 +94,56 @@ export default function TeamsPage() {
   }
 
   return (
-    <div className="p-6">
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-white shadow-sm">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center space-x-8">
+              <span className="text-xl font-bold text-gray-900">SkatePlan</span>
+              <div className="flex space-x-4">
+                <button
+                  onClick={() => router.push('/dashboard/roster')}
+                  className="text-sm font-medium text-gray-500 hover:text-gray-900"
+                >
+                  Roster
+                </button>
+                <button
+                  onClick={() => router.push('/dashboard/teams')}
+                  className="text-sm font-medium text-blue-600 hover:text-blue-900"
+                >
+                  Teams
+                </button>
+                <button
+                  onClick={() => router.push('/dashboard/library')}
+                  className="text-sm font-medium text-gray-500 hover:text-gray-900"
+                >
+                  Library
+                </button>
+                <button
+                  onClick={() => router.push('/dashboard/benchmarks')}
+                  className="text-sm font-medium text-gray-500 hover:text-gray-900"
+                >
+                  Benchmarks
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+                <button
+                    onClick={async () => {
+                        await signOut();
+                        router.push('/login');
+                    }}
+                    className="text-sm text-gray-500 hover:text-gray-900"
+                >
+                    Logout
+                </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <main className="py-10">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Teams</h1>
         <button
@@ -162,6 +213,8 @@ export default function TeamsPage() {
           fetchPartnerships();
         }}
       />
+        </div>
+      </main>
     </div>
   );
 }
