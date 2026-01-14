@@ -1,11 +1,12 @@
 import uuid
-from typing import List
+from typing import List, Dict, Any
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from pydantic import BaseModel
 from app.api.deps import get_session, get_current_user
 from app.models.user_models import Profile, SkaterCoachLink
+from app.core.age_calculator import calculate_age_info
 
 router = APIRouter()
 
@@ -248,3 +249,43 @@ def update_skater(
         is_active=skater.is_active,
         home_club=skater.home_club
     )
+
+@router.get("/{skater_id}/age-info", response_model=Dict[str, Any])
+def get_skater_age_info(
+    *,
+    session: Session = Depends(get_session),
+    skater_id: uuid.UUID,
+    current_user: Profile = Depends(get_current_user),
+) -> Dict[str, Any]:
+    """
+    Get comprehensive age information for a skater.
+
+    Returns skating age (July 1st rule), chronological age, and adult age class.
+    Reference: docs/16_DOMAIN_LOGIC_AND_RULES.md Section 4
+    """
+    skater = session.get(Profile, skater_id)
+    if not skater or skater.role != "skater":
+        raise HTTPException(status_code=404, detail="Skater not found")
+
+    # Verify coach has permission to view this skater
+    link = session.exec(
+        select(SkaterCoachLink)
+        .where(SkaterCoachLink.skater_id == skater_id)
+        .where(SkaterCoachLink.coach_id == current_user.id)
+        .where(SkaterCoachLink.status == "active")
+    ).first()
+
+    if not link:
+        raise HTTPException(status_code=403, detail="Not authorized to view this skater")
+
+    # Check if DOB is available
+    if not skater.dob:
+        raise HTTPException(
+            status_code=400,
+            detail="Date of birth not set for this skater"
+        )
+
+    # Calculate age information
+    age_info = calculate_age_info(skater.dob)
+
+    return age_info
