@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '../../lib/supabase';
 
 interface Template {
   id: string;
@@ -14,19 +15,38 @@ export default function BenchmarksPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchTemplates = async () => {
-        const token = localStorage.getItem('token');
+    // Wait for Supabase to load session from localStorage before checking auth
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        router.push('/login');
+        return;
+      }
+
+      // Session loaded successfully, now fetch data
+      const fetchTemplates = async () => {
         const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
         try {
-            const res = await fetch(`${api_url}/benchmarks/templates`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                setTemplates(await res.json());
-            }
-        } catch (e) { console.error(e); }
-    };
-    fetchTemplates();
+          const res = await fetch(`${api_url}/benchmarks/templates`, {
+            headers: { 'Authorization': `Bearer ${session.access_token}` }
+          });
+          if (res.ok) {
+            setTemplates(await res.json());
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      };
+      fetchTemplates();
+    });
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        router.push('/login');
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   return (

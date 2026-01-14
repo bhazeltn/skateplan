@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAuthToken, signOut } from '../../lib/supabase';
+import { supabase, signOut } from '../../lib/supabase';
 import AddSkaterModal from './add-skater-modal';
 
 interface Skater {
@@ -21,13 +21,7 @@ export default function RosterPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
 
-  const fetchSkaters = async () => {
-    const token = await getAuthToken();
-    if (!token) {
-        router.push('/login');
-        return;
-    }
-
+  const fetchSkaters = async (token: string) => {
     const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
     try {
@@ -55,37 +49,60 @@ export default function RosterPage() {
   };
 
   const handleArchive = async (id: string) => {
-    const token = await getAuthToken();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) return;
+
     const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
     try {
         const res = await fetch(`${api_url}/skaters/${id}/archive`, {
             method: 'PATCH',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${session.access_token}`
             }
         });
-        if (res.ok) fetchSkaters();
+        if (res.ok) fetchSkaters(session.access_token);
     } catch (e) { console.error(e); }
   };
 
   const handleRestore = async (id: string) => {
-    const token = await getAuthToken();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) return;
+
     const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
     try {
         const res = await fetch(`${api_url}/skaters/${id}/restore`, {
             method: 'PATCH',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${session.access_token}`
             }
         });
-        if (res.ok) fetchSkaters();
+        if (res.ok) fetchSkaters(session.access_token);
     } catch (e) { console.error(e); }
   };
 
   useEffect(() => {
-    fetchSkaters();
+    // Wait for Supabase to load session from localStorage before checking auth
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        router.push('/login');
+        return;
+      }
+      // Session loaded successfully, now fetch data
+      setLoading(false);
+      fetchSkaters(session.access_token);
+    });
+
+    // Listen for auth state changes (logout, session expiry, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        router.push('/login');
+      }
+    });
+
+    // Cleanup listener on unmount
+    return () => subscription.unsubscribe();
   }, []);
 
   if (loading) return <div className="p-8">Loading Roster...</div>;
@@ -183,10 +200,15 @@ export default function RosterPage() {
         </div>
       </main>
       
-      <AddSkaterModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSuccess={() => fetchSkaters()}
+      <AddSkaterModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={async () => {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.access_token) {
+            fetchSkaters(session.access_token);
+          }
+        }}
       />
     </div>
   );

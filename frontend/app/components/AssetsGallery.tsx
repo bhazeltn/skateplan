@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
 enum AssetType {
   MUSIC = "music",
@@ -22,12 +23,14 @@ export default function AssetsGallery({ skaterId }: { skaterId: string }) {
   const [uploading, setUploading] = useState(false);
 
   const fetchAssets = async () => {
-    const token = localStorage.getItem('token');
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) return;
+
     const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-    
+
     try {
         const res = await fetch(`${api_url}/assets/${skaterId}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 'Authorization': `Bearer ${session.access_token}` }
         });
         if (res.ok) {
             setAssets(await res.json());
@@ -42,19 +45,21 @@ export default function AssetsGallery({ skaterId }: { skaterId: string }) {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
-    
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) return;
+
     setUploading(true);
     const formData = new FormData();
     formData.append('file', file);
     formData.append('file_type', activeTab);
 
-    const token = localStorage.getItem('token');
     const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
     try {
         const res = await fetch(`${api_url}/assets/${skaterId}`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
+            headers: { 'Authorization': `Bearer ${session.access_token}` },
             body: formData
         });
         if (res.ok) {
