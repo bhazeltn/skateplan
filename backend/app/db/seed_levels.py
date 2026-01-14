@@ -70,7 +70,7 @@ def seed_levels(session: Session) -> None:
 
 if __name__ == "__main__":
     # Allow running this script directly for manual seeding
-    from app.db.session import engine
+    from app.core.db import engine
     from sqlmodel import Session
 
     with Session(engine) as session:
