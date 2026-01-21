@@ -196,31 +196,31 @@ export default function EditSkaterModal({ isOpen, onClose, onSuccess, skater }: 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Full Name */}
           <div>
-            <label className="block text-sm font-medium mb-1">Full Name *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           {/* Date of Birth */}
           <div>
-            <label className="block text-sm font-medium mb-1">Date of Birth *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth *</label>
             <input
               type="date"
               value={dob}
               onChange={(e) => setDob(e.target.value)}
               required
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           {/* Federation */}
           <div>
-            <label className="block text-sm font-medium mb-1">Federation *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Federation *</label>
             <select
               value={federationCode}
               onChange={(e) => {
@@ -228,7 +228,7 @@ export default function EditSkaterModal({ isOpen, onClose, onSuccess, skater }: 
                 setLevel(''); // Reset level when federation changes
               }}
               required
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select Federation</option>
               {federations.map((fed) => (
@@ -241,7 +241,7 @@ export default function EditSkaterModal({ isOpen, onClose, onSuccess, skater }: 
 
           {/* Discipline */}
           <div>
-            <label className="block text-sm font-medium mb-1">Discipline *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Discipline *</label>
             <select
               value={discipline}
               onChange={(e) => {
@@ -249,7 +249,7 @@ export default function EditSkaterModal({ isOpen, onClose, onSuccess, skater }: 
                 setLevel(''); // Reset level when discipline changes
               }}
               required
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select Discipline</option>
               {BASE_DISCIPLINES.map((d) => (
@@ -261,12 +261,12 @@ export default function EditSkaterModal({ isOpen, onClose, onSuccess, skater }: 
           {/* Level */}
           {federationCode && discipline && (
             <div>
-              <label className="block text-sm font-medium mb-1">Level *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Level *</label>
               <select
                 value={level}
                 onChange={(e) => setLevel(e.target.value)}
                 required
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Select Level</option>
                 {(() => {
@@ -296,25 +296,25 @@ export default function EditSkaterModal({ isOpen, onClose, onSuccess, skater }: 
 
           {/* Training Site */}
           <div>
-            <label className="block text-sm font-medium mb-1">Training Site</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Training Site</label>
             <input
               type="text"
               value={trainingSite}
               onChange={(e) => setTrainingSite(e.target.value)}
               placeholder="e.g., Toronto Cricket Club"
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           {/* Home Club */}
           <div>
-            <label className="block text-sm font-medium mb-1">Home Club</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Home Club</label>
             <input
               type="text"
               value={homeClub}
               onChange={(e) => setHomeClub(e.target.value)}
               placeholder="e.g., Granite Club"
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 

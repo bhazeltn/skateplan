@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAuthToken, signOut } from '../../lib/supabase';
 import AddTeamModal from './add-team-modal';
+import EditTeamModal from '../../components/EditTeamModal';
 
 interface Partnership {
   id: string;
@@ -20,6 +21,8 @@ export default function TeamsPage() {
   const router = useRouter();
   const [partnerships, setPartnerships] = useState<Partnership[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [teamToEdit, setTeamToEdit] = useState<Partnership | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -189,15 +192,27 @@ export default function TeamsPage() {
                     </span>
                   )}
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteTeam(team.id);
-                  }}
-                  className="text-red-600 hover:text-red-800 text-sm"
-                >
-                  Delete
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTeamToEdit(team);
+                      setIsEditModalOpen(true);
+                    }}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteTeam(team.id);
+                    }}
+                    className="text-red-600 hover:text-red-800 text-sm font-medium"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-1">
@@ -217,6 +232,22 @@ export default function TeamsPage() {
           fetchPartnerships();
         }}
       />
+
+      {teamToEdit && (
+        <EditTeamModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setTeamToEdit(null);
+          }}
+          onSuccess={() => {
+            setIsEditModalOpen(false);
+            setTeamToEdit(null);
+            fetchPartnerships();
+          }}
+          team={teamToEdit}
+        />
+      )}
         </div>
       </main>
     </div>
