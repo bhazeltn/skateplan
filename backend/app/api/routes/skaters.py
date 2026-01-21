@@ -171,6 +171,57 @@ def read_skaters(
     ]
 
 
+@router.get("/{skater_id}", response_model=SkaterRead)
+def get_skater(
+    *,
+    session: Session = Depends(get_session),
+    skater_id: uuid.UUID,
+    current_user: Profile = Depends(get_current_user),
+) -> SkaterRead:
+    """
+    Get a single skater's profile information.
+
+    Returns the skater's profile details including federation information,
+    discipline, and current level from the coach-skater relationship.
+    """
+    # Query skater profile with federation join
+    query = (
+        select(Profile, SkaterCoachLink, Federation)
+        .join(SkaterCoachLink, SkaterCoachLink.skater_id == Profile.id)
+        .join(Federation, Profile.federation == Federation.code, isouter=True)
+        .where(Profile.id == skater_id)
+        .where(Profile.role == "skater")
+        .where(SkaterCoachLink.coach_id == current_user.id)
+        .where(SkaterCoachLink.status == "active")
+    )
+
+    result = session.exec(query).first()
+
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail="Skater not found or you don't have permission to view this skater"
+        )
+
+    profile, link, federation = result
+
+    return SkaterRead(
+        id=str(profile.id),
+        full_name=profile.full_name,
+        email=profile.email,
+        dob=profile.dob,
+        federation_code=profile.federation,
+        federation_name=federation.name if federation else None,
+        federation_iso_code=federation.iso_code if federation else None,
+        country_name=federation.country_name if federation else None,
+        training_site=profile.training_site,
+        home_club=profile.home_club,
+        is_active=profile.is_active,
+        discipline=link.discipline,
+        current_level=link.current_level
+    )
+
+
 @router.patch("/{skater_id}/archive", response_model=SkaterRead)
 def archive_skater(
     *,

@@ -4,7 +4,8 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 from app.core.config import settings
 from app.models.skater_models import Skater
-from app.models.user_models import Profile
+from app.models.user_models import Profile, SkaterCoachLink
+from app.models.federation_models import Federation
 
 def test_create_skater(
     client: TestClient, 
@@ -132,3 +133,126 @@ def test_update_skater_security(
     
     # 3. Assert Forbidden or Not Found
     assert response.status_code in [403, 404]
+
+
+def test_get_skater_with_profile_and_link(
+    client: TestClient,
+    session: Session,
+    normal_user_token_headers
+):
+    """Test GET /skaters/{skater_id} returns complete profile with federation and link data."""
+    # Setup: Create federation
+    federation = Federation(
+        code="CAN",
+        name="Skate Canada",
+        iso_code="ca",
+        country_name="Canada"
+    )
+    session.add(federation)
+
+    # Setup: Create skater profile
+    current_user_id = uuid.UUID("00000000-0000-0000-0000-000000000000")
+    skater_profile = Profile(
+        role="skater",
+        full_name="Jane Doe",
+        email="jane.doe@test.local",
+        dob=date(2010, 5, 15),
+        federation="CAN",
+        training_site="Toronto Cricket Club",
+        home_club="Granite Club",
+        is_active=True
+    )
+    session.add(skater_profile)
+    session.flush()  # Get skater ID
+
+    # Setup: Create coach-skater link
+    link = SkaterCoachLink(
+        skater_id=skater_profile.id,
+        coach_id=current_user_id,
+        discipline="Singles",
+        current_level="Junior",
+        is_primary=True,
+        permission_level="edit",
+        status="active"
+    )
+    session.add(link)
+    session.commit()
+
+    # Test: Get skater detail
+    response = client.get(
+        f"{settings.API_V1_STR}/skaters/{skater_profile.id}",
+        headers=normal_user_token_headers
+    )
+
+    # Verify: Response is successful
+    assert response.status_code == 200
+    content = response.json()
+
+    # Verify: Profile data
+    assert content["id"] == str(skater_profile.id)
+    assert content["full_name"] == "Jane Doe"
+    assert content["email"] == "jane.doe@test.local"
+    assert content["dob"] == "2010-05-15"
+    assert content["training_site"] == "Toronto Cricket Club"
+    assert content["home_club"] == "Granite Club"
+    assert content["is_active"] is True
+
+    # Verify: Federation data
+    assert content["federation_code"] == "CAN"
+    assert content["federation_name"] == "Skate Canada"
+    assert content["federation_iso_code"] == "ca"
+    assert content["country_name"] == "Canada"
+
+    # Verify: Link data (discipline and level)
+    assert content["discipline"] == "Singles"
+    assert content["current_level"] == "Junior"
+
+
+def test_get_skater_not_owned_by_coach(
+    client: TestClient,
+    session: Session,
+    normal_user_token_headers
+):
+    """Test GET /skaters/{skater_id} returns 404 for skater not owned by current coach."""
+    # Setup: Create another coach
+    other_coach = Profile(
+        role="coach",
+        full_name="Other Coach",
+        email="other.coach@example.com",
+        id=uuid.uuid4()
+    )
+    session.add(other_coach)
+
+    # Setup: Create skater profile for other coach
+    skater_profile = Profile(
+        role="skater",
+        full_name="Other Skater",
+        email="other.skater@test.local",
+        dob=date(2012, 3, 10),
+        is_active=True
+    )
+    session.add(skater_profile)
+    session.flush()
+
+    # Setup: Link skater to OTHER coach
+    link = SkaterCoachLink(
+        skater_id=skater_profile.id,
+        coach_id=other_coach.id,
+        discipline="Singles",
+        current_level="Novice",
+        is_primary=True,
+        permission_level="edit",
+        status="active"
+    )
+    session.add(link)
+    session.commit()
+
+    # Test: Try to get skater detail with current user's token
+    response = client.get(
+        f"{settings.API_V1_STR}/skaters/{skater_profile.id}",
+        headers=normal_user_token_headers
+    )
+
+    # Verify: Should return 404 (not found or no permission)
+    assert response.status_code == 404
+    assert "not found" in response.json()["detail"].lower() or "permission" in response.json()["detail"].lower()
