@@ -6,6 +6,7 @@ import { supabase, signOut } from '../../lib/supabase';
 import AddSkaterModal from './add-skater-modal';
 import AddTeamModal from './add-team-modal';
 import EditSkaterModal from '../../components/EditSkaterModal';
+import EditTeamModal from '../../components/EditTeamModal';
 import { FederationFlag } from '../../components/FederationFlag';
 
 interface Skater {
@@ -69,6 +70,8 @@ export default function RosterPage() {
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [skaterToEdit, setSkaterToEdit] = useState<Skater | null>(null);
+  const [isEditTeamModalOpen, setIsEditTeamModalOpen] = useState(false);
+  const [teamToEdit, setTeamToEdit] = useState<Team | null>(null);
   const router = useRouter();
 
   const fetchSkaters = async (token: string) => {
@@ -335,11 +338,23 @@ export default function RosterPage() {
                         </span>
                     </td>
                     <td className="px-6 py-4 text-sm whitespace-nowrap text-left">
-                        {isArchived ? (
-                            <button onClick={(e) => { e.stopPropagation(); handleRestoreTeam(team.id); }} className="text-blue-600 hover:text-blue-900 font-medium">Unarchive</button>
-                        ) : (
-                            <button onClick={(e) => { e.stopPropagation(); handleArchiveTeam(team.id); }} className="text-red-600 hover:text-red-900 font-medium">Archive</button>
-                        )}
+                        <div className="flex gap-3">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setTeamToEdit(team);
+                                    setIsEditTeamModalOpen(true);
+                                }}
+                                className="text-blue-600 hover:text-blue-900 font-medium"
+                            >
+                                Edit
+                            </button>
+                            {isArchived ? (
+                                <button onClick={(e) => { e.stopPropagation(); handleRestoreTeam(team.id); }} className="text-green-600 hover:text-green-900 font-medium">Unarchive</button>
+                            ) : (
+                                <button onClick={(e) => { e.stopPropagation(); handleArchiveTeam(team.id); }} className="text-red-600 hover:text-red-900 font-medium">Archive</button>
+                            )}
+                        </div>
                     </td>
                 </tr>
             ))}
@@ -475,6 +490,25 @@ export default function RosterPage() {
             }
           }}
           skater={skaterToEdit}
+        />
+      )}
+
+      {teamToEdit && (
+        <EditTeamModal
+          isOpen={isEditTeamModalOpen}
+          onClose={() => {
+            setIsEditTeamModalOpen(false);
+            setTeamToEdit(null);
+          }}
+          onSuccess={async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.access_token) {
+              fetchTeams(session.access_token);
+            }
+            setIsEditTeamModalOpen(false);
+            setTeamToEdit(null);
+          }}
+          team={teamToEdit}
         />
       )}
     </div>

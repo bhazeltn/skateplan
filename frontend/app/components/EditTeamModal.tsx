@@ -5,13 +5,16 @@ import { getAuthToken } from '../lib/supabase';
 
 interface Partnership {
   id: string;
-  skater_a_id: string;
-  skater_a_name: string;
-  skater_b_id: string;
-  skater_b_name: string;
+  skater_a_id?: string;
+  skater_a_name?: string;
+  skater_b_id?: string;
+  skater_b_name?: string;
+  partner1_name?: string;
+  partner2_name?: string;
   discipline: string;
-  team_level: string | null;
-  is_active: boolean;
+  team_level?: string | null;
+  current_level?: string;
+  is_active?: boolean;
 }
 
 interface EditTeamModalProps {
@@ -23,15 +26,19 @@ interface EditTeamModalProps {
 
 export default function EditTeamModal({ isOpen, onClose, onSuccess, team }: EditTeamModalProps) {
   const [discipline, setDiscipline] = useState(team.discipline);
-  const [teamLevel, setTeamLevel] = useState(team.team_level || '');
+  const [teamLevel, setTeamLevel] = useState(team.team_level || team.current_level || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Get skater names - handle both Partnership and Team interfaces
+  const skater1Name = team.skater_a_name || team.partner1_name || 'Partner 1';
+  const skater2Name = team.skater_b_name || team.partner2_name || 'Partner 2';
 
   // Reset form when modal opens or team changes
   useEffect(() => {
     if (isOpen) {
       setDiscipline(team.discipline);
-      setTeamLevel(team.team_level || '');
+      setTeamLevel(team.team_level || team.current_level || '');
       setError('');
     }
   }, [isOpen, team]);
@@ -82,7 +89,7 @@ export default function EditTeamModal({ isOpen, onClose, onSuccess, team }: Edit
 
         <div className="mb-4 p-3 bg-gray-50 rounded">
           <p className="text-sm text-gray-700">
-            <strong>{team.skater_a_name}</strong> / <strong>{team.skater_b_name}</strong>
+            <strong>{skater1Name}</strong> / <strong>{skater2Name}</strong>
           </p>
         </div>
 

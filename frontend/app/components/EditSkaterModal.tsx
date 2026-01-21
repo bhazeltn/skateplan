@@ -185,7 +185,7 @@ export default function EditSkaterModal({ isOpen, onClose, onSuccess, skater }: 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-lg shadow-xl p-6">
-        <h2 className="text-2xl font-bold mb-4">Edit Skater</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Edit Skater</h2>
 
         {error && (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -324,7 +324,7 @@ export default function EditSkaterModal({ isOpen, onClose, onSuccess, skater }: 
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 border rounded-md hover:bg-gray-50"
+              className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
             >
               Cancel
             </button>
