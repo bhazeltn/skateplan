@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getAuthToken } from '../lib/supabase';
+import { FederationFlag } from './FederationFlag';
 
 interface Federation {
   id: string;
@@ -237,6 +238,17 @@ export default function EditSkaterModal({ isOpen, onClose, onSuccess, skater }: 
                 </option>
               ))}
             </select>
+            {federationCode && federations.find(f => f.code === federationCode) && (
+              <div className="flex items-center gap-2 mt-2 p-2 bg-gray-50 rounded">
+                <FederationFlag
+                  iso_code={federations.find(f => f.code === federationCode)?.iso_code || ''}
+                  size="small"
+                />
+                <span className="text-sm font-medium text-gray-900">
+                  {federations.find(f => f.code === federationCode)?.name}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Discipline */}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getAuthToken } from '../../lib/supabase';
+import { FederationFlag } from '../../components/FederationFlag';
 
 interface Federation {
   id: string;
@@ -374,11 +375,9 @@ export default function AddSkaterModal({ isOpen, onClose, onSuccess }: AddSkater
               </select>
               {selectedFederation && (
                 <div className="flex items-center gap-2 mt-2 p-2 bg-gray-50 rounded">
-                  <img
-                    src={`https://flagcdn.com/24x18/${selectedFederation.iso_code.toLowerCase()}.png`}
-                    alt={selectedFederation.iso_code}
-                    className="w-6 h-4"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  <FederationFlag
+                    iso_code={selectedFederation.iso_code}
+                    size="small"
                   />
                   <span className="text-sm font-medium text-gray-900">{selectedFederation.name}</span>
                 </div>
