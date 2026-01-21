@@ -9,6 +9,7 @@ class Federation(SQLModel, table=True):
     name: str  # Full name: "Skate Canada"
     code: str = Field(index=True)  # 3-letter: "CAN"
     iso_code: str  # 2-letter lowercase for flag API: "ca"
+    country_name: Optional[str] = None  # Country name for sorting: "Canada"
     is_active: bool = Field(default=True)
 
 class FederationRead(BaseModel):
@@ -16,3 +17,4 @@ class FederationRead(BaseModel):
     name: str
     code: str
     iso_code: str
+    country_name: Optional[str] = None

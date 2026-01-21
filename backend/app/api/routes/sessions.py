@@ -372,7 +372,6 @@ def update_element_progress(
 
     db.add(element)
     db.commit()
-    db.refresh(element)
 
     return SessionElementRead(
         id=element.id,

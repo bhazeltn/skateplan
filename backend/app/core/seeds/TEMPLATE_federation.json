@@ -1,0 +1,19 @@
+{
+  "federation_code": "XXX",
+  "federation_name": "Federation Full Name",
+  "streams": [
+    {
+      "stream_name": "Stream_Name",
+      "stream_display": "Display Name",
+      "discipline": "Singles|Pairs|Ice_Dance|Solo_Dance|Synchro|Artistic",
+      "levels": [
+        {
+          "name": "Level Name",
+          "order": 1,
+          "is_adult": false,
+          "isu_anchor": null
+        }
+      ]
+    }
+  ]
+}

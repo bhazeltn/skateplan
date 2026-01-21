@@ -22,7 +22,7 @@ class Profile(SQLModel, table=True):
 
     # Skater-specific fields (only used when role='skater')
     dob: Optional[date] = None
-    level: Optional[str] = None  # Competition level (e.g., "Junior", "Senior")
+    level: Optional[str] = None  # DEPRECATED: Use SkaterCoachLink.current_level instead
     is_active: bool = Field(default=True)  # Active vs archived
     is_adaptive: bool = Field(default=False)
 
@@ -45,11 +45,19 @@ class SkaterCoachLink(SQLModel, table=True):
     """
     Bridge table linking skaters to coaches.
     Supports multi-coach collaboration with permission levels.
+
+    Discipline and level are stored here (not on Profile) since different
+    coaches can work with the same skater in different disciplines at different levels.
     """
     __tablename__ = "skater_coach_links"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     skater_id: uuid.UUID = Field(foreign_key="profiles.id", index=True)
     coach_id: uuid.UUID = Field(foreign_key="profiles.id", index=True)
+
+    # Discipline and level for this coach-skater relationship
+    discipline: str  # "Singles", "Solo_Dance", "Ice_Dance", "Pairs", "Artistic", "Showcase", "Synchro"
+    current_level: str  # The level this coach is working with skater at
+
     permission_level: str = Field(default="view")  # 'view', 'edit'
     is_primary: bool = Field(default=False)  # Primary coach flag
     created_at: date = Field(default_factory=date.today)

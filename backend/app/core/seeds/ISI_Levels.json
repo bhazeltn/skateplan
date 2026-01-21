@@ -1,0 +1,440 @@
+{
+    "federation_code": "ISI",
+    "federation_name": "Ice Skating Institute",
+    "streams": [
+        {
+            "stream_name": "Learn_to_Skate",
+            "stream_display": "Learn to Skate",
+            "discipline": "Singles",
+            "levels": [
+                {
+                    "name": "Pre-Alpha",
+                    "order": 1,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Alpha",
+                    "order": 2,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Beta",
+                    "order": 3,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Gamma",
+                    "order": 4,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Delta",
+                    "order": 5,
+                    "is_adult": false,
+                    "isu_anchor": null
+                }
+            ]
+        },
+        {
+            "stream_name": "Freestyle",
+            "stream_display": "Freestyle",
+            "discipline": "Singles",
+            "levels": [
+                {
+                    "name": "Freestyle 1",
+                    "order": 101,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle 2",
+                    "order": 102,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle 3",
+                    "order": 103,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle 4",
+                    "order": 104,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle 5",
+                    "order": 105,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle 6",
+                    "order": 106,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle 7",
+                    "order": 107,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle 8",
+                    "order": 108,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle 9",
+                    "order": 109,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle 10",
+                    "order": 110,
+                    "is_adult": false,
+                    "isu_anchor": null
+                }
+            ]
+        },
+        {
+            "stream_name": "Open_Freestyle",
+            "stream_display": "Open Freestyle",
+            "discipline": "Singles",
+            "levels": [
+                {
+                    "name": "Open Bronze",
+                    "order": 201,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Open Silver",
+                    "order": 202,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Open Gold",
+                    "order": 203,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Open Platinum",
+                    "order": 204,
+                    "is_adult": false,
+                    "isu_anchor": null
+                }
+            ]
+        },
+        {
+            "stream_name": "Pair",
+            "stream_display": "Pair",
+            "discipline": "Pairs",
+            "levels": [
+                {
+                    "name": "Pair 1",
+                    "order": 301,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Pair 2",
+                    "order": 302,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Pair 3",
+                    "order": 303,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Pair 4",
+                    "order": 304,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Pair 5",
+                    "order": 305,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Pair 6",
+                    "order": 306,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Pair 7",
+                    "order": 307,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Pair 8",
+                    "order": 308,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Pair 9",
+                    "order": 309,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Pair 10",
+                    "order": 310,
+                    "is_adult": false,
+                    "isu_anchor": null
+                }
+            ]
+        },
+        {
+            "stream_name": "Open_Pair",
+            "stream_display": "Open Pair",
+            "discipline": "Pairs",
+            "levels": [
+                {
+                    "name": "Open Bronze",
+                    "order": 401,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Open Silver",
+                    "order": 402,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Open Gold",
+                    "order": 403,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Open Platinum",
+                    "order": 404,
+                    "is_adult": false,
+                    "isu_anchor": null
+                }
+            ]
+        },
+        {
+            "stream_name": "Ice_Dancing",
+            "stream_display": "Ice Dancing",
+            "discipline": "Ice_Dance",
+            "levels": [
+                {
+                    "name": "Ice Dancing 1",
+                    "order": 501,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Ice Dancing 2",
+                    "order": 502,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Ice Dancing 3",
+                    "order": 503,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Ice Dancing 4",
+                    "order": 504,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Ice Dancing 5",
+                    "order": 505,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Ice Dancing 6",
+                    "order": 506,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Ice Dancing 7",
+                    "order": 507,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Ice Dancing 8",
+                    "order": 508,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Ice Dancing 9",
+                    "order": 509,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Ice Dancing 10",
+                    "order": 510,
+                    "is_adult": false,
+                    "isu_anchor": null
+                }
+            ]
+        },
+        {
+            "stream_name": "Solo_Dance",
+            "stream_display": "Solo Dance",
+            "discipline": "Solo_Dance",
+            "levels": [
+                {
+                    "name": "Solo Dance 1",
+                    "order": 601,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Solo Dance 2",
+                    "order": 602,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Solo Dance 3",
+                    "order": 603,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Solo Dance 4",
+                    "order": 604,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Solo Dance 5",
+                    "order": 605,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Solo Dance 6",
+                    "order": 606,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Solo Dance 7",
+                    "order": 607,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Solo Dance 8",
+                    "order": 608,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Solo Dance 9",
+                    "order": 609,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Solo Dance 10",
+                    "order": 610,
+                    "is_adult": false,
+                    "isu_anchor": null
+                }
+            ]
+        },
+        {
+            "stream_name": "Freestyle_Synchro",
+            "stream_display": "Freestyle Synchro",
+            "discipline": "Synchro",
+            "levels": [
+                {
+                    "name": "Freestyle Synchro 1",
+                    "order": 701,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle Synchro 2",
+                    "order": 702,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle Synchro 3",
+                    "order": 703,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle Synchro 4",
+                    "order": 704,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle Synchro 5",
+                    "order": 705,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle Synchro 6",
+                    "order": 706,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle Synchro 7",
+                    "order": 707,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle Synchro 8",
+                    "order": 708,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle Synchro 9",
+                    "order": 709,
+                    "is_adult": false,
+                    "isu_anchor": null
+                },
+                {
+                    "name": "Freestyle Synchro 10",
+                    "order": 710,
+                    "is_adult": false,
+                    "isu_anchor": null
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,697 @@
+{
+  "federation_code": "USA",
+  "federation_name": "U.S. Figure Skating",
+  "streams": [
+    {
+      "stream_name": "Well_Balanced",
+      "stream_display": "Well Balanced",
+      "discipline": "Singles",
+      "levels": [
+        {
+          "name": "Pre-Preliminary",
+          "order": 1,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Preliminary",
+          "order": 2,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Pre-Juvenile",
+          "order": 3,
+          "is_adult": false,
+          "isu_anchor": "DEVELOPMENTAL"
+        },
+        {
+          "name": "Juvenile/Open Juvenile",
+          "order": 4,
+          "is_adult": false,
+          "isu_anchor": "DEVELOPMENTAL"
+        },
+        {
+          "name": "Intermediate",
+          "order": 5,
+          "is_adult": false,
+          "isu_anchor": "DEVELOPMENTAL"
+        },
+        {
+          "name": "Novice",
+          "order": 6,
+          "is_adult": false,
+          "isu_anchor": "NOVICE_ADV"
+        },
+        {
+          "name": "Junior",
+          "order": 7,
+          "is_adult": false,
+          "isu_anchor": "JUNIOR"
+        },
+        {
+          "name": "Senior",
+          "order": 8,
+          "is_adult": false,
+          "isu_anchor": "SENIOR"
+        }
+      ]
+    },
+    {
+      "stream_name": "Excel_Series",
+      "stream_display": "Excel",
+      "discipline": "Singles",
+      "levels": [
+        {
+          "name": "Excel Pre-Preliminary",
+          "order": 101,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Excel Preliminary",
+          "order": 102,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Excel Preliminary Plus",
+          "order": 103,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Excel Pre-Juvenile Plus",
+          "order": 104,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Excel Juvenile",
+          "order": 105,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Excel Juvenile Plus",
+          "order": 106,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Excel Intermediate",
+          "order": 107,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Excel Intermediate Plus",
+          "order": 108,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Excel Novice",
+          "order": 109,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Excel Junior",
+          "order": 110,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Excel Senior",
+          "order": 111,
+          "is_adult": false,
+          "isu_anchor": null
+        }
+      ]
+    },
+    {
+      "stream_name": "Compete_USA",
+      "stream_display": "Compete USA",
+      "discipline": "Singles",
+      "levels": [
+        {
+          "name": "Snowplow Sam",
+          "order": 201,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Basic 1",
+          "order": 202,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Basic 2",
+          "order": 203,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Basic 3",
+          "order": 204,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Basic 4",
+          "order": 205,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Basic 5",
+          "order": 206,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Basic 6",
+          "order": 207,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Aspire 1",
+          "order": 208,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Aspire 2",
+          "order": 209,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Aspire 3",
+          "order": 210,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Aspire 4",
+          "order": 211,
+          "is_adult": false,
+          "isu_anchor": null
+        }
+      ]
+    },
+    {
+      "stream_name": "Pairs",
+      "stream_display": "Pairs",
+      "discipline": "Pairs",
+      "levels": [
+        {
+          "name": "Juvenile",
+          "order": 301,
+          "is_adult": false,
+          "isu_anchor": "DEVELOPMENTAL"
+        },
+        {
+          "name": "Intermediate",
+          "order": 302,
+          "is_adult": false,
+          "isu_anchor": "DEVELOPMENTAL"
+        },
+        {
+          "name": "Novice",
+          "order": 303,
+          "is_adult": false,
+          "isu_anchor": "NOVICE_ADV"
+        },
+        {
+          "name": "Junior",
+          "order": 304,
+          "is_adult": false,
+          "isu_anchor": "JUNIOR"
+        },
+        {
+          "name": "Senior",
+          "order": 305,
+          "is_adult": false,
+          "isu_anchor": "SENIOR"
+        }
+      ]
+    },
+    {
+      "stream_name": "Ice_Dance",
+      "stream_display": "Ice Dance",
+      "discipline": "Ice_Dance",
+      "levels": [
+        {
+          "name": "Pre-Juvenile",
+          "order": 401,
+          "is_adult": false,
+          "isu_anchor": "DEVELOPMENTAL"
+        },
+        {
+          "name": "Juvenile",
+          "order": 402,
+          "is_adult": false,
+          "isu_anchor": "DEVELOPMENTAL"
+        },
+        {
+          "name": "Intermediate",
+          "order": 403,
+          "is_adult": false,
+          "isu_anchor": "DEVELOPMENTAL"
+        },
+        {
+          "name": "Novice",
+          "order": 404,
+          "is_adult": false,
+          "isu_anchor": "NOVICE_ADV"
+        },
+        {
+          "name": "Junior",
+          "order": 405,
+          "is_adult": false,
+          "isu_anchor": "JUNIOR"
+        },
+        {
+          "name": "Senior",
+          "order": 406,
+          "is_adult": false,
+          "isu_anchor": "SENIOR"
+        }
+      ]
+    },
+    {
+      "stream_name": "Solo_Dance",
+      "stream_display": "Solo Dance",
+      "discipline": "Solo_Dance",
+      "levels": [
+        {
+          "name": "Juvenile",
+          "order": 501,
+          "is_adult": false,
+          "isu_anchor": "DEVELOPMENTAL"
+        },
+        {
+          "name": "Intermediate",
+          "order": 502,
+          "is_adult": false,
+          "isu_anchor": "DEVELOPMENTAL"
+        },
+        {
+          "name": "Novice",
+          "order": 503,
+          "is_adult": false,
+          "isu_anchor": "NOVICE_ADV"
+        },
+        {
+          "name": "Junior",
+          "order": 504,
+          "is_adult": false,
+          "isu_anchor": "JUNIOR"
+        },
+        {
+          "name": "Senior",
+          "order": 505,
+          "is_adult": false,
+          "isu_anchor": "SENIOR"
+        }
+      ]
+    },
+    {
+      "stream_name": "Solo_Pattern_Dance",
+      "stream_display": "Solo Pattern Dance",
+      "discipline": "Solo_Dance",
+      "levels": [
+        {
+          "name": "Preliminary",
+          "order": 601,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Pre-Bronze",
+          "order": 602,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Bronze",
+          "order": 603,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Pre-Silver",
+          "order": 604,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Silver",
+          "order": 605,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Pre-Gold",
+          "order": 606,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Gold",
+          "order": 607,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "International",
+          "order": 608,
+          "is_adult": false,
+          "isu_anchor": null
+        }
+      ]
+    },
+    {
+      "stream_name": "Synchro",
+      "stream_display": "Synchronized Skating",
+      "discipline": "Synchro",
+      "levels": [
+        {
+          "name": "Preliminary",
+          "order": 701,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Pre-Juvenile",
+          "order": 702,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Open Juvenile",
+          "order": 703,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Juvenile",
+          "order": 704,
+          "is_adult": false,
+          "isu_anchor": "DEVELOPMENTAL"
+        },
+        {
+          "name": "Intermediate",
+          "order": 705,
+          "is_adult": false,
+          "isu_anchor": "DEVELOPMENTAL"
+        },
+        {
+          "name": "Novice",
+          "order": 706,
+          "is_adult": false,
+          "isu_anchor": "NOVICE_ADV"
+        },
+        {
+          "name": "Junior",
+          "order": 707,
+          "is_adult": false,
+          "isu_anchor": "JUNIOR"
+        },
+        {
+          "name": "Senior/Senior Elite 12",
+          "order": 708,
+          "is_adult": false,
+          "isu_anchor": "SENIOR"
+        },
+        {
+          "name": "Collegiate",
+          "order": 709,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Open Collegiate",
+          "order": 710,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult",
+          "order": 711,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Masters",
+          "order": 712,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Open Adult/Masters",
+          "order": 713,
+          "is_adult": true,
+          "isu_anchor": null
+        }
+      ]
+    },
+    {
+      "stream_name": "Aspire_Synchro",
+      "stream_display": "Aspire Synchro",
+      "discipline": "Synchro",
+      "levels": [
+        {
+          "name": "Aspire 1",
+          "order": 801,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Aspire 2",
+          "order": 802,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Aspire 3",
+          "order": 803,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Aspire 4",
+          "order": 804,
+          "is_adult": false,
+          "isu_anchor": null
+        },
+        {
+          "name": "Aspire Adult",
+          "order": 805,
+          "is_adult": true,
+          "isu_anchor": null
+        }
+      ]
+    },
+    {
+      "stream_name": "Adult_Singles",
+      "stream_display": "Adult",
+      "discipline": "Singles",
+      "levels": [
+        {
+          "name": "Adult Pre-Bronze",
+          "order": 2001,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Bronze",
+          "order": 2002,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Silver",
+          "order": 2003,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Gold",
+          "order": 2004,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Masters Novice-Intermediate",
+          "order": 2005,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Masters Junior-Senior",
+          "order": 2006,
+          "is_adult": true,
+          "isu_anchor": null
+        }
+      ]
+    },
+    {
+      "stream_name": "Adult_Pairs",
+      "stream_display": "Adult",
+      "discipline": "Pairs",
+      "levels": [
+        {
+          "name": "Adult Bronze Pairs",
+          "order": 2101,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Silver Pairs",
+          "order": 2102,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Gold Pairs",
+          "order": 2103,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Masters Pairs",
+          "order": 2104,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Centennial Pairs",
+          "order": 2105,
+          "is_adult": true,
+          "isu_anchor": null
+        }
+      ]
+    },
+    {
+      "stream_name": "Adult_Partnered_Pattern_Dance",
+      "stream_display": "Adult",
+      "discipline": "Ice_Dance",
+      "levels": [
+        {
+          "name": "Adult Preliminary",
+          "order": 2201,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Pre-Bronze",
+          "order": 2202,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Bronze",
+          "order": 2203,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Pre-Silver",
+          "order": 2204,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Pre-Gold",
+          "order": 2205,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Gold",
+          "order": 2206,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Masters Open",
+          "order": 2207,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Championship Adult",
+          "order": 2208,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Centennial",
+          "order": 2209,
+          "is_adult": true,
+          "isu_anchor": null
+        }
+      ]
+    },
+    {
+      "stream_name": "Adult_Solo_Pattern_Dance",
+      "stream_display": "Adult",
+      "discipline": "Solo_Dance",
+      "levels": [
+        {
+          "name": "Adult Preliminary",
+          "order": 2301,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Pre-Bronze",
+          "order": 2302,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Bronze",
+          "order": 2303,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Pre-Silver",
+          "order": 2304,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Silver",
+          "order": 2305,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Pre-Gold",
+          "order": 2306,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Adult Gold",
+          "order": 2307,
+          "is_adult": true,
+          "isu_anchor": null
+        },
+        {
+          "name": "Championship Adult",
+          "order": 2308,
+          "is_adult": true,
+          "isu_anchor": null
+        }
+      ]
+    }
+  ]
+}
