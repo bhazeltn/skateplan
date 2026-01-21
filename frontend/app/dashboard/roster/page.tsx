@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { supabase, signOut } from '../../lib/supabase';
 import AddSkaterModal from './add-skater-modal';
 import AddTeamModal from './add-team-modal';
+import EditSkaterModal from '../../components/EditSkaterModal';
+import { FederationFlag } from '../../components/FederationFlag';
 
 interface Skater {
   id: string;
@@ -15,6 +17,7 @@ interface Skater {
   current_level: string;
   is_active: boolean;
   home_club: string | null;
+  training_site: string | null;
   federation_code: string | null;
   federation_name: string | null;
   federation_iso_code: string | null;
@@ -64,6 +67,8 @@ export default function RosterPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [skaterToEdit, setSkaterToEdit] = useState<Skater | null>(null);
   const router = useRouter();
 
   const fetchSkaters = async (token: string) => {
@@ -242,7 +247,7 @@ export default function RosterPage() {
                     <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                         {skater.federation_iso_code && (
                             <span className="flex items-center gap-2">
-                                <span className="text-lg">{getFlagEmoji(skater.federation_iso_code)}</span>
+                                <FederationFlag iso_code={skater.federation_iso_code} size="small" />
                                 <span>{skater.country_name || skater.federation_name}</span>
                             </span>
                         )}
@@ -258,11 +263,23 @@ export default function RosterPage() {
                         </span>
                     </td>
                     <td className="px-6 py-4 text-sm whitespace-nowrap text-left">
-                        {isArchived ? (
-                            <button onClick={(e) => { e.stopPropagation(); handleRestore(skater.id); }} className="text-blue-600 hover:text-blue-900 font-medium">Unarchive</button>
-                        ) : (
-                            <button onClick={(e) => { e.stopPropagation(); handleArchive(skater.id); }} className="text-red-600 hover:text-red-900 font-medium">Archive</button>
-                        )}
+                        <div className="flex gap-3">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSkaterToEdit(skater);
+                                    setIsEditModalOpen(true);
+                                }}
+                                className="text-blue-600 hover:text-blue-900 font-medium"
+                            >
+                                Edit
+                            </button>
+                            {isArchived ? (
+                                <button onClick={(e) => { e.stopPropagation(); handleRestore(skater.id); }} className="text-green-600 hover:text-green-900 font-medium">Unarchive</button>
+                            ) : (
+                                <button onClick={(e) => { e.stopPropagation(); handleArchive(skater.id); }} className="text-red-600 hover:text-red-900 font-medium">Archive</button>
+                            )}
+                        </div>
                     </td>
                 </tr>
             ))}
@@ -303,7 +320,7 @@ export default function RosterPage() {
                     <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                         {team.federation_iso_code && (
                             <span className="flex items-center gap-2">
-                                <span className="text-lg">{getFlagEmoji(team.federation_iso_code)}</span>
+                                <FederationFlag iso_code={team.federation_iso_code} size="small" />
                                 <span>{team.country_name || team.federation_name}</span>
                             </span>
                         )}
@@ -443,6 +460,23 @@ export default function RosterPage() {
           }
         }}
       />
+
+      {skaterToEdit && (
+        <EditSkaterModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSkaterToEdit(null);
+          }}
+          onSuccess={async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.access_token) {
+              fetchSkaters(session.access_token);
+            }
+          }}
+          skater={skaterToEdit}
+        />
+      )}
     </div>
   );
 }

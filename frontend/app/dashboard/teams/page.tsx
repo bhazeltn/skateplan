@@ -175,7 +175,8 @@ export default function TeamsPage() {
           {partnerships.map((team) => (
             <div
               key={team.id}
-              className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              onClick={() => router.push(`/dashboard/teams/${team.id}`)}
+              className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
             >
               <div className="flex items-start justify-between mb-3">
                 <div>
@@ -189,7 +190,10 @@ export default function TeamsPage() {
                   )}
                 </div>
                 <button
-                  onClick={() => handleDeleteTeam(team.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteTeam(team.id);
+                  }}
                   className="text-red-600 hover:text-red-800 text-sm"
                 >
                   Delete

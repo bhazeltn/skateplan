@@ -378,18 +378,21 @@ def get_team_levels(
     discipline: str,
 ) -> List[TeamLevelRead]:
     """
-    Get ALL levels for a federation and discipline for team selection.
+    Get ALL levels for a federation and discipline for team selection with smart fallback.
 
-    Unlike the regular levels endpoint which applies fallback logic and age-gating,
-    this endpoint returns ALL streams and ALL levels for the federation+discipline.
-    Frontend should filter based on athletes' ages.
+    Fallback Logic:
+    1. Try to get federation's own levels first
+    2. If none found, fall back to ISU (international standard)
+    3. For adult streams, also include UNIVERSAL if ISU doesn't have adult levels
+
+    Returns ALL streams and ALL levels. Frontend filters based on athletes' ages.
 
     Args:
-        federation_code: Federation code (ISU, CAN, USA, PHI)
+        federation_code: Federation code (ISU, CAN, USA, GRE, etc.)
         discipline: Pairs or Ice_Dance
 
     Returns:
-        All levels from all streams for this federation+discipline
+        All levels from all streams for this federation+discipline (with fallback)
     """
     # Validate federation exists
     federation = session.exec(
@@ -399,50 +402,68 @@ def get_team_levels(
     if not federation:
         raise HTTPException(status_code=404, detail="Federation not found")
 
-    # Get ALL streams for this federation+discipline
-    streams = session.exec(
-        select(Stream)
-        .where(Stream.federation_code == federation_code)
-        .where(Stream.discipline == discipline)
-    ).all()
-
-    levels = []
-    for stream in streams:
-        # Get ALL levels for this stream (both adult and non-adult)
-        stream_levels = session.exec(
-            select(Level)
-            .where(Level.stream_id == stream.id)
-            .order_by(Level.level_order)
+    # Helper function to get levels for a federation+discipline
+    def get_levels_for_federation(fed_code: str) -> List[TeamLevelRead]:
+        streams = session.exec(
+            select(Stream)
+            .where(Stream.federation_code == fed_code)
+            .where(Stream.discipline == discipline)
         ).all()
 
-        for level in stream_levels:
-            # Clean up display name - remove redundant prefixes
-            clean_display = level.display_name
+        levels = []
+        for stream in streams:
+            stream_levels = session.exec(
+                select(Level)
+                .where(Level.stream_id == stream.id)
+                .order_by(Level.level_order)
+            ).all()
 
-            # Remove "Universal Adult" prefix if present
-            if clean_display.startswith("Universal Adult "):
-                clean_display = clean_display.replace("Universal Adult ", "Adult ")
-            # Remove "ISU Standard: " prefix if present
-            if clean_display.startswith("ISU Standard: "):
-                clean_display = clean_display.replace("ISU Standard: ", "")
-            # Remove standalone "Universal Adult"
-            if clean_display == "Universal Adult":
-                clean_display = "Adult"
+            for level in stream_levels:
+                # Clean up display name - remove redundant prefixes
+                clean_display = level.display_name
 
-            levels.append(
-                TeamLevelRead(
-                    id=str(level.id),
-                    stream_id=str(stream.id),
-                    stream_code=stream.stream_code,
-                    stream_display=stream.stream_display,
-                    federation_code=federation_code,
-                    discipline=discipline,
-                    level_name=level.level_name,
-                    display_name=clean_display,
-                    level_order=level.level_order,
-                    is_adult=level.is_adult
+                # Remove "Universal Adult" prefix if present
+                if clean_display.startswith("Universal Adult "):
+                    clean_display = clean_display.replace("Universal Adult ", "Adult ")
+                # Remove "ISU Standard: " prefix if present
+                if clean_display.startswith("ISU Standard: "):
+                    clean_display = clean_display.replace("ISU Standard: ", "")
+                # Remove standalone "Universal Adult"
+                if clean_display == "Universal Adult":
+                    clean_display = "Adult"
+
+                levels.append(
+                    TeamLevelRead(
+                        id=str(level.id),
+                        stream_id=str(stream.id),
+                        stream_code=stream.stream_code,
+                        stream_display=stream.stream_display,
+                        federation_code=federation_code,  # Keep original federation code
+                        discipline=discipline,
+                        level_name=level.level_name,
+                        display_name=clean_display,
+                        level_order=level.level_order,
+                        is_adult=level.is_adult
+                    )
                 )
-            )
+        return levels
+
+    # Step 1: Try to get federation's own levels
+    levels = get_levels_for_federation(federation_code)
+
+    # Step 2: If no levels found, fall back to ISU
+    if not levels:
+        levels = get_levels_for_federation('ISU')
+
+        # Step 3: Check if we have adult levels, if not add UNIVERSAL adult levels
+        has_adult_levels = any(level.is_adult for level in levels)
+
+        if not has_adult_levels:
+            # Add UNIVERSAL adult levels
+            universal_levels = get_levels_for_federation('UNIVERSAL')
+            # Only add adult levels from UNIVERSAL
+            adult_only = [l for l in universal_levels if l.is_adult]
+            levels.extend(adult_only)
 
     # Sort by stream and level order
     levels.sort(key=lambda x: (x.stream_display, x.level_order))

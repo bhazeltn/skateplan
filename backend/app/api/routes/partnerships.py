@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 from app.api.deps import get_session, get_current_user
 from app.models.user_models import Profile, Partnership, SkaterCoachLink
+from app.models.federation_models import Federation
 
 router = APIRouter()
 
@@ -27,6 +28,34 @@ class PartnershipRead(BaseModel):
     discipline: str
     team_level: str | None
     is_active: bool
+
+
+class SkaterDetail(BaseModel):
+    """Detailed skater info for partnership detail view."""
+    id: uuid.UUID
+    full_name: str
+    dob: str | None
+    federation_code: str | None
+    federation_name: str | None
+    federation_iso_code: str | None
+    country_name: str | None
+    current_level: str | None
+
+
+class PartnershipDetail(BaseModel):
+    """Detailed partnership info including full skater details."""
+    id: uuid.UUID
+    skater_a: SkaterDetail
+    skater_b: SkaterDetail
+    discipline: str
+    team_level: str | None
+    is_active: bool
+
+
+class PartnershipUpdate(BaseModel):
+    """Schema for updating partnership."""
+    discipline: str | None = None
+    team_level: str | None = None
 
 
 @router.post("/", response_model=PartnershipRead)
@@ -205,3 +234,154 @@ def delete_partnership(
     partnership.is_active = False
     session.add(partnership)
     session.commit()
+
+
+@router.get("/{partnership_id}", response_model=PartnershipDetail)
+def get_partnership(
+    *,
+    session: Session = Depends(get_session),
+    partnership_id: uuid.UUID,
+    current_user: Profile = Depends(get_current_user),
+) -> PartnershipDetail:
+    """
+    Get detailed information about a specific partnership.
+
+    Includes full skater details with federations, levels, etc.
+    Coach must have permission for at least one skater.
+    """
+    partnership = session.get(Partnership, partnership_id)
+    if not partnership:
+        raise HTTPException(status_code=404, detail="Partnership not found")
+
+    # Verify coach has permission for at least one skater
+    link_a = session.exec(
+        select(SkaterCoachLink)
+        .where(SkaterCoachLink.skater_id == partnership.skater_a_id)
+        .where(SkaterCoachLink.coach_id == current_user.id)
+        .where(SkaterCoachLink.status == "active")
+    ).first()
+
+    link_b = session.exec(
+        select(SkaterCoachLink)
+        .where(SkaterCoachLink.skater_id == partnership.skater_b_id)
+        .where(SkaterCoachLink.coach_id == current_user.id)
+        .where(SkaterCoachLink.status == "active")
+    ).first()
+
+    if not link_a and not link_b:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to view this partnership"
+        )
+
+    # Get full skater details
+    skater_a = session.get(Profile, partnership.skater_a_id)
+    skater_b = session.get(Profile, partnership.skater_b_id)
+
+    if not skater_a or not skater_b:
+        raise HTTPException(status_code=404, detail="Skater not found")
+
+    # Get federation details for both skaters
+    fed_a = None
+    if skater_a.federation:
+        fed_a = session.exec(
+            select(Federation).where(Federation.code == skater_a.federation)
+        ).first()
+
+    fed_b = None
+    if skater_b.federation:
+        fed_b = session.exec(
+            select(Federation).where(Federation.code == skater_b.federation)
+        ).first()
+
+    return PartnershipDetail(
+        id=partnership.id,
+        skater_a=SkaterDetail(
+            id=skater_a.id,
+            full_name=skater_a.full_name,
+            dob=str(skater_a.dob) if skater_a.dob else None,
+            federation_code=skater_a.federation,
+            federation_name=fed_a.name if fed_a else None,
+            federation_iso_code=fed_a.iso_code if fed_a else None,
+            country_name=fed_a.country_name if fed_a else None,
+            current_level=link_a.current_level if link_a else None
+        ),
+        skater_b=SkaterDetail(
+            id=skater_b.id,
+            full_name=skater_b.full_name,
+            dob=str(skater_b.dob) if skater_b.dob else None,
+            federation_code=skater_b.federation,
+            federation_name=fed_b.name if fed_b else None,
+            federation_iso_code=fed_b.iso_code if fed_b else None,
+            country_name=fed_b.country_name if fed_b else None,
+            current_level=link_b.current_level if link_b else None
+        ),
+        discipline=partnership.discipline,
+        team_level=partnership.team_level,
+        is_active=partnership.is_active
+    )
+
+
+@router.patch("/{partnership_id}", response_model=PartnershipDetail)
+def update_partnership(
+    *,
+    session: Session = Depends(get_session),
+    partnership_id: uuid.UUID,
+    partnership_in: PartnershipUpdate,
+    current_user: Profile = Depends(get_current_user),
+) -> PartnershipDetail:
+    """
+    Update a partnership's discipline or team level.
+
+    Cannot change the skaters in a partnership - must delete and recreate instead.
+    Coach must have permission for at least one skater.
+    """
+    partnership = session.get(Partnership, partnership_id)
+    if not partnership:
+        raise HTTPException(status_code=404, detail="Partnership not found")
+
+    # Verify coach has permission for at least one skater
+    link_a = session.exec(
+        select(SkaterCoachLink)
+        .where(SkaterCoachLink.skater_id == partnership.skater_a_id)
+        .where(SkaterCoachLink.coach_id == current_user.id)
+        .where(SkaterCoachLink.status == "active")
+    ).first()
+
+    link_b = session.exec(
+        select(SkaterCoachLink)
+        .where(SkaterCoachLink.skater_id == partnership.skater_b_id)
+        .where(SkaterCoachLink.coach_id == current_user.id)
+        .where(SkaterCoachLink.status == "active")
+    ).first()
+
+    if not link_a and not link_b:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to update this partnership"
+        )
+
+    # Validate discipline if provided
+    if partnership_in.discipline:
+        valid_disciplines = ["PAIRS", "ICE_DANCE", "SYNCHRO"]
+        if partnership_in.discipline.upper() not in valid_disciplines:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid discipline. Must be one of: {', '.join(valid_disciplines)}"
+            )
+        partnership.discipline = partnership_in.discipline.upper()
+
+    # Update team level if provided
+    if partnership_in.team_level is not None:
+        partnership.team_level = partnership_in.team_level
+
+    session.add(partnership)
+    session.commit()
+    session.refresh(partnership)
+
+    # Return full details using the GET endpoint logic
+    return get_partnership(
+        session=session,
+        partnership_id=partnership_id,
+        current_user=current_user
+    )

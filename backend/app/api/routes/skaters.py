@@ -44,6 +44,7 @@ class SkaterRead(BaseModel):
 class SkaterUpdate(BaseModel):
     full_name: str | None = None
     dob: date | None = None
+    federation_code: str | None = None
     training_site: str | None = None
     is_active: bool | None = None
     home_club: str | None = None
@@ -297,6 +298,20 @@ def update_skater(
     # Separate link fields from profile fields
     update_data = skater_in.model_dump(exclude_unset=True)
     link_fields = {"discipline", "current_level"}
+
+    # Validate federation if being updated
+    if "federation_code" in update_data:
+        fed_code = update_data["federation_code"]
+        federation = session.exec(
+            select(Federation).where(Federation.code == fed_code)
+        ).first()
+        if not federation:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Federation '{fed_code}' not found"
+            )
+        # Update federation field name for Profile model
+        update_data["federation"] = update_data.pop("federation_code")
 
     # Update link fields
     for key in link_fields:
