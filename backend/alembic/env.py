@@ -25,14 +25,18 @@ from app.models.skater_models import Skater  # Legacy - being phased out
 from app.models.asset_models import ProgramAsset
 from app.models.program_models import Program, ProgramAssetLink, ProgramElement
 from app.models.benchmark_models import (
-    BenchmarkTemplate,
+    BenchmarkProfile,
     MetricDefinition,
+    ProfileMetric,
     BenchmarkSession,
-    BenchmarkResult
+    SessionResult
 )
 from app.models.reference_models import AdultAgeClass, CompetitiveLevel, TestLevel
 from app.models.federation_models import Federation
 from app.models.library_models import Element
+from app.models.gap_analysis_models import GapAnalysis, GapAnalysisEntry
+from app.models.team_models import Team
+from app.models.session_models import Session as IceSession
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
