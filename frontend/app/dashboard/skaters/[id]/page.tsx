@@ -8,6 +8,7 @@ import EditSkaterModal from '../../../components/EditSkaterModal';
 import { FederationFlag } from '../../../components/FederationFlag';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/Tabs';
 import { SkaterOverview } from '../../../components/SkaterOverview';
+import GapAnalysisView from '../../../components/gap-analysis/GapAnalysisView';
 
 interface Skater {
   id: string;
@@ -52,6 +53,10 @@ export default function SkaterProfilePage() {
   const [recentSessionCount, setRecentSessionCount] = useState(0);
   const [assetCount, setAssetCount] = useState(0);
   const [recentSessions, setRecentSessions] = useState<any[]>([]);
+
+  // Gap Analysis state
+  const [gapAnalysis, setGapAnalysis] = useState<any>(null);
+  const [loadingGap, setLoadingGap] = useState(true);
 
   const fetchSkater = async () => {
     try {
@@ -98,10 +103,35 @@ export default function SkaterProfilePage() {
     }
   };
 
+  const fetchGapAnalysis = async () => {
+    try {
+      const token = await getAuthToken();
+      const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000/api/v1';
+
+      const res = await fetch(`${api_url}/skaters/${skaterId}/gap-analysis`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setGapAnalysis(data);
+      }
+    } catch (err) {
+      console.error('Error fetching gap analysis:', err);
+    } finally {
+      setLoadingGap(false);
+    }
+  };
+
   useEffect(() => {
     fetchSkater();
     fetchOverview();
+    fetchGapAnalysis();
   }, [skaterId]);
+
+  // Calculate if gap analysis is stale (>330 days = ~11 months)
+  const isGapStale = gapAnalysis && gapAnalysis.entries?.length > 0 &&
+    (new Date().getTime() - new Date(gapAnalysis.last_updated).getTime()) / (1000 * 60 * 60 * 24) > 330;
 
   if (loading) {
     return (
@@ -138,7 +168,29 @@ export default function SkaterProfilePage() {
               {skater.federation_iso_code && (
                 <FederationFlag iso_code={skater.federation_iso_code} size="medium" />
               )}
-              <span className="text-xl font-bold text-gray-900">{skater.full_name}</span>
+              <div>
+                <span className="text-xl font-bold text-gray-900">{skater.full_name}</span>
+                {!loadingGap && (
+                  <div className="flex gap-2 mt-1">
+                    {!gapAnalysis?.entries?.length && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 gap-1">
+                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        No Gap Analysis
+                      </span>
+                    )}
+                    {isGapStale && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 gap-1">
+                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Gap Analysis Needs Update (11+ months old)
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="flex items-center">
               <button
@@ -158,6 +210,7 @@ export default function SkaterProfilePage() {
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="gap-analysis">Gap Analysis</TabsTrigger>
               <TabsTrigger value="benchmarks">Benchmarks</TabsTrigger>
               <TabsTrigger value="assets">Assets</TabsTrigger>
             </TabsList>
@@ -281,6 +334,11 @@ export default function SkaterProfilePage() {
                   </div>
                 </div>
               </div>
+            </TabsContent>
+
+            {/* Gap Analysis Tab */}
+            <TabsContent value="gap-analysis">
+              <GapAnalysisView skaterId={skaterId} editable={true} />
             </TabsContent>
 
             {/* Benchmarks Tab */}
