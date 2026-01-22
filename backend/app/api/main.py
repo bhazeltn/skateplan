@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.routes import skaters, admin, library, benchmarks, auth, assets, programs, guardians, federations, levels, partnerships, sessions, teams
+from app.api.routes import skaters, admin, library, auth, assets, programs, guardians, federations, levels, partnerships, sessions, teams, metrics
 
 api_router = APIRouter()
 api_router.include_router(auth.router, tags=["auth"])
@@ -14,4 +14,4 @@ api_router.include_router(partnerships.router, prefix="/partnerships", tags=["pa
 api_router.include_router(sessions.router, prefix="/sessions", tags=["sessions"])
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
 api_router.include_router(library.router, prefix="", tags=["library"])
-api_router.include_router(benchmarks.router, prefix="/benchmarks", tags=["benchmarks"])
+api_router.include_router(metrics.router, prefix="/metrics", tags=["metrics"])

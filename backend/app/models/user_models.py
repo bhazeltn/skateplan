@@ -1,8 +1,11 @@
 import uuid
 from datetime import date
-from typing import Optional, Dict, Any, List
-from sqlmodel import Field, SQLModel
+from typing import Optional, Dict, Any, List, TYPE_CHECKING
+from sqlmodel import Field, SQLModel, Relationship
 from sqlalchemy.types import JSON
+
+if TYPE_CHECKING:
+    from app.models.benchmark_models import MetricDefinition, BenchmarkProfile
 
 class Profile(SQLModel, table=True):
     """
@@ -33,6 +36,10 @@ class Profile(SQLModel, table=True):
 
     # Multi-discipline support
     active_disciplines: List[str] = Field(default=[], sa_type=JSON)
+
+    # Benchmark relationships (for coaches)
+    metrics: List["MetricDefinition"] = Relationship(sa_relationship_kwargs={"foreign_keys": "MetricDefinition.coach_id"})
+    benchmark_profiles: List["BenchmarkProfile"] = Relationship(sa_relationship_kwargs={"foreign_keys": "BenchmarkProfile.coach_id"})
 
 class GuardianLink(SQLModel, table=True):
     __tablename__ = "guardian_links"

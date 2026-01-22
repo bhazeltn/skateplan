@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from app.api.deps import get_session, get_current_user
 from app.models.user_models import Profile, SkaterCoachLink
 from app.models.federation_models import Federation
-from app.models.benchmark_models import BenchmarkTemplate, BenchmarkSession
+from app.models.benchmark_models import BenchmarkProfile, BenchmarkSession
 from app.models.asset_models import ProgramAsset
 from app.core.age_calculator import calculate_age_info
 
@@ -512,11 +512,11 @@ def get_skater_overview(
         current_level=link.current_level
     )
 
-    # Count active benchmark templates created by the coach
-    # Note: We don't have a skater-template assignment table yet, so counting templates created by coach
+    # Count active benchmark profiles created by the coach
     active_benchmarks = session.scalar(
-        select(func.count(BenchmarkTemplate.id))
-        .where(BenchmarkTemplate.created_by_id == current_user.id)
+        select(func.count(BenchmarkProfile.id))
+        .where(BenchmarkProfile.coach_id == current_user.id)
+        .where(BenchmarkProfile.is_active == True)
     ) or 0
 
     # Count recent sessions (last 30 days) for this skater
@@ -534,8 +534,8 @@ def get_skater_overview(
 
     # Get last 5 benchmark sessions
     recent_sessions_query = (
-        select(BenchmarkSession, BenchmarkTemplate)
-        .join(BenchmarkTemplate, BenchmarkSession.template_id == BenchmarkTemplate.id)
+        select(BenchmarkSession, BenchmarkProfile)
+        .join(BenchmarkProfile, BenchmarkSession.profile_id == BenchmarkProfile.id)
         .where(BenchmarkSession.skater_id == skater_id)
         .order_by(BenchmarkSession.created_at.desc())
         .limit(5)
@@ -544,7 +544,7 @@ def get_skater_overview(
     sessions_results = session.exec(recent_sessions_query).all()
 
     recent_sessions = []
-    for bench_session, template in sessions_results:
+    for bench_session, profile in sessions_results:
         # Count how many results are in this session
         result_count = session.scalar(
             select(func.count())
@@ -552,11 +552,11 @@ def get_skater_overview(
             .where(BenchmarkSession.id == bench_session.id)
         ) or 0
 
-        summary = f"Recorded on {bench_session.date.strftime('%Y-%m-%d')}"
+        summary = f"Recorded on {bench_session.recorded_at.strftime('%Y-%m-%d')}"
 
         recent_sessions.append(RecentSessionSummary(
             id=str(bench_session.id),
-            template_name=template.name,
+            template_name=profile.name,
             recorded_at=bench_session.created_at.isoformat(),
             summary=summary
         ))
