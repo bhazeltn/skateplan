@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timedelta
 import uuid
 from fastapi.testclient import TestClient
 from sqlmodel import Session
@@ -6,6 +6,7 @@ from app.core.config import settings
 from app.models.skater_models import Skater
 from app.models.user_models import Profile, SkaterCoachLink
 from app.models.federation_models import Federation
+from app.models.benchmark_models import BenchmarkTemplate, BenchmarkSession, MetricDefinition, MetricDataType
 
 def test_create_skater(
     client: TestClient, 
@@ -256,3 +257,106 @@ def test_get_skater_not_owned_by_coach(
     # Verify: Should return 404 (not found or no permission)
     assert response.status_code == 404
     assert "not found" in response.json()["detail"].lower() or "permission" in response.json()["detail"].lower()
+
+
+def test_get_skater_overview_with_stats(
+    client: TestClient,
+    session: Session,
+    normal_user_token_headers
+):
+    """Test GET /skaters/{skater_id}/overview returns stats and recent activity."""
+    current_user_id = uuid.UUID("00000000-0000-0000-0000-000000000000")
+
+    # Setup: Create federation
+    federation = Federation(
+        code="USA",
+        name="U.S. Figure Skating",
+        iso_code="us",
+        country_name="United States"
+    )
+    session.add(federation)
+
+    # Setup: Create skater profile
+    skater_profile = Profile(
+        role="skater",
+        full_name="Test Skater",
+        email="test.skater@test.local",
+        dob=date(2012, 8, 20),
+        federation="USA",
+        is_active=True
+    )
+    session.add(skater_profile)
+    session.flush()
+
+    # Setup: Create coach-skater link
+    link = SkaterCoachLink(
+        skater_id=skater_profile.id,
+        coach_id=current_user_id,
+        discipline="Singles",
+        current_level="Intermediate",
+        is_primary=True,
+        permission_level="edit",
+        status="active"
+    )
+    session.add(link)
+
+    # Setup: Create benchmark templates
+    template1 = BenchmarkTemplate(
+        name="Speed Test",
+        created_by_id=current_user_id
+    )
+    template2 = BenchmarkTemplate(
+        name="Jump Height",
+        created_by_id=current_user_id
+    )
+    session.add(template1)
+    session.add(template2)
+    session.flush()
+
+    # Setup: Create benchmark sessions
+    session1 = BenchmarkSession(
+        template_id=template1.id,
+        skater_id=skater_profile.id,
+        recorded_by_id=current_user_id,
+        date=date.today(),
+        created_at=datetime.utcnow() - timedelta(days=5)
+    )
+    session2 = BenchmarkSession(
+        template_id=template2.id,
+        skater_id=skater_profile.id,
+        recorded_by_id=current_user_id,
+        date=date.today() - timedelta(days=10),
+        created_at=datetime.utcnow() - timedelta(days=10)
+    )
+    session.add(session1)
+    session.add(session2)
+    session.commit()
+
+    # Test: Get overview
+    response = client.get(
+        f"{settings.API_V1_STR}/skaters/{skater_profile.id}/overview",
+        headers=normal_user_token_headers
+    )
+
+    # Verify: Response is successful
+    assert response.status_code == 200
+    data = response.json()
+
+    # Verify: Skater data is present
+    assert "skater" in data
+    assert data["skater"]["full_name"] == "Test Skater"
+    assert data["skater"]["discipline"] == "Singles"
+    assert data["skater"]["current_level"] == "Intermediate"
+
+    # Verify: Stats are present
+    assert "stats" in data
+    assert data["stats"]["active_benchmarks"] == 2  # 2 templates created by coach
+    assert data["stats"]["recent_sessions_count"] == 2  # 2 sessions in last 30 days
+    assert "asset_count" in data["stats"]
+
+    # Verify: Recent sessions are present
+    assert "recent_sessions" in data
+    assert len(data["recent_sessions"]) == 2
+    # First session should be most recent
+    assert data["recent_sessions"][0]["template_name"] == "Speed Test"
+    assert data["recent_sessions"][1]["template_name"] == "Jump Height"

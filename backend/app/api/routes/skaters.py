@@ -1,12 +1,14 @@
 import uuid
 from typing import List, Dict, Any
-from datetime import date
+from datetime import date, datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
 from pydantic import BaseModel
 from app.api.deps import get_session, get_current_user
 from app.models.user_models import Profile, SkaterCoachLink
 from app.models.federation_models import Federation
+from app.models.benchmark_models import BenchmarkTemplate, BenchmarkSession
+from app.models.asset_models import ProgramAsset
 from app.core.age_calculator import calculate_age_info
 
 router = APIRouter()
@@ -52,6 +54,22 @@ class SkaterUpdate(BaseModel):
     # Allow updating discipline and level on the link
     discipline: str | None = None
     current_level: str | None = None
+
+class RecentSessionSummary(BaseModel):
+    id: str
+    template_name: str
+    recorded_at: str
+    summary: str
+
+class OverviewStats(BaseModel):
+    active_benchmarks: int
+    recent_sessions_count: int
+    asset_count: int
+
+class SkaterOverview(BaseModel):
+    skater: SkaterRead
+    stats: OverviewStats
+    recent_sessions: List[RecentSessionSummary]
 
 
 @router.post("/", response_model=SkaterRead)
@@ -439,3 +457,118 @@ def get_skater_age_info(
     age_info = calculate_age_info(skater.dob)
 
     return age_info
+
+
+@router.get("/{skater_id}/overview", response_model=SkaterOverview)
+def get_skater_overview(
+    *,
+    session: Session = Depends(get_session),
+    skater_id: uuid.UUID,
+    current_user: Profile = Depends(get_current_user),
+) -> SkaterOverview:
+    """
+    Get skater overview with stats and recent activity.
+
+    Returns:
+    - Full skater profile details
+    - Quick stats: active benchmarks, recent sessions, asset count
+    - Last 5 benchmark sessions with summaries
+    """
+    # First get the skater profile (reuse logic from get_skater)
+    query = (
+        select(Profile, SkaterCoachLink, Federation)
+        .join(SkaterCoachLink, SkaterCoachLink.skater_id == Profile.id)
+        .join(Federation, Profile.federation == Federation.code, isouter=True)
+        .where(Profile.id == skater_id)
+        .where(Profile.role == "skater")
+        .where(SkaterCoachLink.coach_id == current_user.id)
+        .where(SkaterCoachLink.status == "active")
+    )
+
+    result = session.exec(query).first()
+
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail="Skater not found or you don't have permission to view this skater"
+        )
+
+    profile, link, federation = result
+
+    # Build SkaterRead
+    skater_read = SkaterRead(
+        id=str(profile.id),
+        full_name=profile.full_name,
+        email=profile.email,
+        dob=profile.dob,
+        federation_code=profile.federation,
+        federation_name=federation.name if federation else None,
+        federation_iso_code=federation.iso_code if federation else None,
+        country_name=federation.country_name if federation else None,
+        training_site=profile.training_site,
+        home_club=profile.home_club,
+        is_active=profile.is_active,
+        discipline=link.discipline,
+        current_level=link.current_level
+    )
+
+    # Count active benchmark templates created by the coach
+    # Note: We don't have a skater-template assignment table yet, so counting templates created by coach
+    active_benchmarks = session.scalar(
+        select(func.count(BenchmarkTemplate.id))
+        .where(BenchmarkTemplate.created_by_id == current_user.id)
+    ) or 0
+
+    # Count recent sessions (last 30 days) for this skater
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    recent_sessions_count = session.scalar(
+        select(func.count(BenchmarkSession.id))
+        .where(BenchmarkSession.skater_id == skater_id)
+        .where(BenchmarkSession.created_at >= thirty_days_ago)
+    ) or 0
+
+    # Count assets for this skater
+    # Note: ProgramAsset links to old skater_id (from Skater table), not Profile id
+    # For now, return 0 until we migrate assets or create proper link
+    asset_count = 0
+
+    # Get last 5 benchmark sessions
+    recent_sessions_query = (
+        select(BenchmarkSession, BenchmarkTemplate)
+        .join(BenchmarkTemplate, BenchmarkSession.template_id == BenchmarkTemplate.id)
+        .where(BenchmarkSession.skater_id == skater_id)
+        .order_by(BenchmarkSession.created_at.desc())
+        .limit(5)
+    )
+
+    sessions_results = session.exec(recent_sessions_query).all()
+
+    recent_sessions = []
+    for bench_session, template in sessions_results:
+        # Count how many results are in this session
+        result_count = session.scalar(
+            select(func.count())
+            .select_from(BenchmarkSession)
+            .where(BenchmarkSession.id == bench_session.id)
+        ) or 0
+
+        summary = f"Recorded on {bench_session.date.strftime('%Y-%m-%d')}"
+
+        recent_sessions.append(RecentSessionSummary(
+            id=str(bench_session.id),
+            template_name=template.name,
+            recorded_at=bench_session.created_at.isoformat(),
+            summary=summary
+        ))
+
+    stats = OverviewStats(
+        active_benchmarks=active_benchmarks,
+        recent_sessions_count=recent_sessions_count,
+        asset_count=asset_count
+    )
+
+    return SkaterOverview(
+        skater=skater_read,
+        stats=stats,
+        recent_sessions=recent_sessions
+    )

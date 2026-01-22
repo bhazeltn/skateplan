@@ -6,6 +6,8 @@ import { getAuthToken } from '../../../lib/supabase';
 import AssetsGallery from '../../../components/AssetsGallery';
 import EditSkaterModal from '../../../components/EditSkaterModal';
 import { FederationFlag } from '../../../components/FederationFlag';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/Tabs';
+import { SkaterOverview } from '../../../components/SkaterOverview';
 
 interface Skater {
   id: string;
@@ -45,6 +47,12 @@ export default function SkaterProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [error, setError] = useState('');
 
+  // Overview stats
+  const [benchmarkCount, setBenchmarkCount] = useState(0);
+  const [recentSessionCount, setRecentSessionCount] = useState(0);
+  const [assetCount, setAssetCount] = useState(0);
+  const [recentSessions, setRecentSessions] = useState<any[]>([]);
+
   const fetchSkater = async () => {
     try {
       const token = await getAuthToken();
@@ -68,8 +76,31 @@ export default function SkaterProfilePage() {
     }
   };
 
+  const fetchOverview = async () => {
+    try {
+      const token = await getAuthToken();
+      const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000/api/v1';
+
+      const res = await fetch(`${api_url}/skaters/${skaterId}/overview`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setBenchmarkCount(data.stats.active_benchmarks);
+        setRecentSessionCount(data.stats.recent_sessions_count);
+        setAssetCount(data.stats.asset_count);
+        setRecentSessions(data.recent_sessions);
+      }
+    } catch (err) {
+      console.error('Error fetching overview:', err);
+      // Don't set error here - overview is optional, skater data is more important
+    }
+  };
+
   useEffect(() => {
     fetchSkater();
+    fetchOverview();
   }, [skaterId]);
 
   if (loading) {
@@ -103,8 +134,19 @@ export default function SkaterProfilePage() {
       <nav className="bg-white shadow-sm">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
+            <div className="flex items-center gap-3">
+              {skater.federation_iso_code && (
+                <FederationFlag iso_code={skater.federation_iso_code} size="medium" />
+              )}
+              <span className="text-xl font-bold text-gray-900">{skater.full_name}</span>
+            </div>
             <div className="flex items-center">
-              <span className="text-xl font-bold text-gray-900">Skater Profile</span>
+              <button
+                onClick={() => router.push('/dashboard/roster')}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                ← Back to Roster
+              </button>
             </div>
           </div>
         </div>
@@ -112,122 +154,169 @@ export default function SkaterProfilePage() {
 
       <main className="py-10">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-          {/* Profile Header */}
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <div className="flex items-start justify-between">
-              {/* Left side - Profile info */}
-              <div className="flex items-center gap-4">
-                {/* Federation flag */}
-                {skater.federation_iso_code && (
-                  <FederationFlag iso_code={skater.federation_iso_code} size="large" />
-                )}
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="benchmarks">Benchmarks</TabsTrigger>
+              <TabsTrigger value="assets">Assets</TabsTrigger>
+            </TabsList>
 
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">{skater.full_name}</h1>
+            {/* Overview Tab */}
+            <TabsContent value="overview">
+              <SkaterOverview
+                skater={skater}
+                benchmarkCount={benchmarkCount}
+                recentSessionCount={recentSessionCount}
+                assetCount={assetCount}
+                recentSessions={recentSessions}
+                onEditProfile={() => setIsEditModalOpen(true)}
+                onRecordBenchmark={() => {
+                  // TODO: Navigate to benchmark recording or open modal
+                  console.log('Record benchmark clicked');
+                }}
+                onUploadAsset={() => {
+                  // TODO: Navigate to assets tab or open upload modal
+                  console.log('Upload asset clicked');
+                }}
+              />
+            </TabsContent>
 
-                  <div className="mt-2 space-y-1 text-sm text-gray-600">
-                    {/* Discipline */}
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">Discipline:</span>
-                      <span>{skater.discipline}</span>
+            {/* Profile Tab */}
+            <TabsContent value="profile">
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-start justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Profile Details</h2>
+                  <button
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                    Edit Profile
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Full Name */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Full Name</p>
+                    <p className="mt-1 text-sm text-gray-900">{skater.full_name}</p>
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Email</p>
+                    <p className="mt-1 text-sm text-gray-900">{skater.email}</p>
+                  </div>
+
+                  {/* Date of Birth */}
+                  {skater.dob && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Date of Birth</p>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {new Date(skater.dob).toLocaleDateString()} ({age} years old)
+                      </p>
                     </div>
+                  )}
 
-                    {/* Level */}
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">Level:</span>
-                      <span>{skater.current_level || 'Not set'}</span>
-                    </div>
+                  {/* Discipline */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Discipline</p>
+                    <p className="mt-1 text-sm text-gray-900">{skater.discipline}</p>
+                  </div>
 
-                    {/* Age */}
-                    {skater.dob && (
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">Age:</span>
-                        <span>{age} years old</span>
-                        <span className="text-gray-400">
-                          (Born: {new Date(skater.dob).toLocaleDateString()})
+                  {/* Current Level */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Current Level</p>
+                    <p className="mt-1 text-sm text-gray-900">{skater.current_level || 'Not set'}</p>
+                  </div>
+
+                  {/* Federation */}
+                  {skater.federation_code && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Federation</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        {skater.federation_iso_code && (
+                          <FederationFlag iso_code={skater.federation_iso_code} size="small" />
+                        )}
+                        <span className="text-sm text-gray-900">
+                          {skater.country_name || skater.federation_name} ({skater.federation_code})
                         </span>
                       </div>
-                    )}
+                    </div>
+                  )}
 
-                    {/* Federation */}
-                    {skater.federation_code && (
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">Federation:</span>
-                        <span>{skater.country_name || skater.federation_name} ({skater.federation_code})</span>
-                      </div>
-                    )}
+                  {/* Training Site */}
+                  {skater.training_site && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Training Site</p>
+                      <p className="mt-1 text-sm text-gray-900">{skater.training_site}</p>
+                    </div>
+                  )}
 
-                    {/* Training Site */}
-                    {skater.training_site && (
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">Training Site:</span>
-                        <span>{skater.training_site}</span>
-                      </div>
-                    )}
+                  {/* Home Club */}
+                  {skater.home_club && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Home Club</p>
+                      <p className="mt-1 text-sm text-gray-900">{skater.home_club}</p>
+                    </div>
+                  )}
 
-                    {/* Home Club */}
-                    {skater.home_club && (
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">Home Club:</span>
-                        <span>{skater.home_club}</span>
-                      </div>
-                    )}
+                  {/* Active Status */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Status</p>
+                    <p className="mt-1">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          skater.is_active
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {skater.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </p>
                   </div>
                 </div>
               </div>
+            </TabsContent>
 
-              {/* Right side - Actions */}
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                  </svg>
-                  Edit Profile
-                </button>
-
-                <button
-                  onClick={() => router.push('/dashboard/roster')}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  ← Back to Roster
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Assets Gallery (Sprint 2 - Keep) */}
-          <AssetsGallery skaterId={skaterId} />
-
-          {/* Benchmarks Section (Sprint 5 - Keep) */}
-          <div className="bg-white shadow sm:rounded-lg mb-8 mt-8">
-            <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">Benchmarks & Goals</h3>
-            </div>
-            <div className="px-4 py-5 sm:p-6">
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div className="p-4 border rounded-md">
-                  <h4 className="font-bold text-gray-800">Pre-Novice Standards</h4>
-                  <ul className="mt-2 space-y-2 text-sm text-gray-600">
-                    <li className="flex justify-between">
-                      <span>Vertical Jump</span>
-                      <span className="font-medium text-gray-900">Target: 14"</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span>Double Axel</span>
-                      <span className="font-medium text-gray-900">Target: Consist.</span>
-                    </li>
-                  </ul>
+            {/* Benchmarks Tab */}
+            <TabsContent value="benchmarks">
+              <div className="bg-white shadow sm:rounded-lg">
+                <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Benchmarks & Goals</h3>
                 </div>
-                {/* Placeholder for "Add New Benchmark" */}
-                <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md text-gray-400 cursor-pointer hover:border-blue-500 hover:text-blue-500">
-                  + Create New Benchmark Profile
+                <div className="px-4 py-5 sm:p-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div className="p-4 border rounded-md">
+                      <h4 className="font-bold text-gray-800">Pre-Novice Standards</h4>
+                      <ul className="mt-2 space-y-2 text-sm text-gray-600">
+                        <li className="flex justify-between">
+                          <span>Vertical Jump</span>
+                          <span className="font-medium text-gray-900">Target: 14"</span>
+                        </li>
+                        <li className="flex justify-between">
+                          <span>Double Axel</span>
+                          <span className="font-medium text-gray-900">Target: Consist.</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md text-gray-400 cursor-pointer hover:border-blue-500 hover:text-blue-500">
+                      + Create New Benchmark Profile
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </TabsContent>
+
+            {/* Assets Tab */}
+            <TabsContent value="assets">
+              <AssetsGallery skaterId={skaterId} />
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
 
