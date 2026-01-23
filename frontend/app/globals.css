@@ -1,95 +1,136 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    /* Background and foreground colors */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
+/* ============================================
+   Tailwind v4 Theme Configuration
+   ============================================
+   In v4, theme is configured with @theme blocks
+   instead of tailwind.config.ts
+   ============================================ */
 
-    /* Shadcn/UI theme colors */
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+@theme {
+  /* Color System using CSS Custom Properties */
+  --color-background: #ffffff;
+  --color-foreground: #171717;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
+  --color-card: #ffffff;
+  --color-card-foreground: #171717;
 
-    --primary: 221 83% 53%;
-    --primary-foreground: 0 0% 98%;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #171717;
 
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
+  --color-primary: #2563eb; /* blue-600 */
+  --color-primary-foreground: #ffffff;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+  --color-secondary: #f3f4f6; /* gray-100 */
+  --color-secondary-foreground: #111827; /* gray-900 */
 
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 9%;
+  --color-muted: #f3f4f6; /* gray-100 */
+  --color-muted-foreground: #6b7280; /* gray-500 */
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+  --color-accent: #f3f4f6; /* gray-100 */
+  --color-accent-foreground: #111827; /* gray-900 */
 
-    --border: 0 0% 89%;
-    --input: 0 0% 89%;
-    --ring: 221 83% 53%;
+  --color-destructive: #ef4444; /* red-500 */
+  --color-destructive-foreground: #ffffff;
 
-    --radius: 0.5rem;
+  --color-border: #e5e7eb; /* gray-200 */
+  --color-input: #e5e7eb; /* gray-200 */
+  --color-ring: #3b82f6; /* blue-500 */
+
+  /* Border Radius */
+  --radius-lg: 0.5rem;
+  --radius-md: calc(0.5rem - 2px);
+  --radius-sm: calc(0.5rem - 4px);
+
+  /* Fonts */
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+}
+
+/* ============================================
+   Dark Mode Theme
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-background: #0a0a0a;
+    --color-foreground: #ededed;
+
+    --color-card: #171717;
+    --color-card-foreground: #ededed;
+
+    --color-popover: #171717;
+    --color-popover-foreground: #ededed;
+
+    --color-primary: #3b82f6; /* blue-500 */
+    --color-primary-foreground: #ffffff;
+
+    --color-secondary: #262626; /* gray-800 */
+    --color-secondary-foreground: #f3f4f6; /* gray-100 */
+
+    --color-muted: #262626; /* gray-800 */
+    --color-muted-foreground: #9ca3af; /* gray-400 */
+
+    --color-accent: #262626; /* gray-800 */
+    --color-accent-foreground: #f3f4f6; /* gray-100 */
+
+    --color-destructive: #ef4444; /* red-500 */
+    --color-destructive-foreground: #ffffff;
+
+    --color-border: #404040; /* gray-700 */
+    --color-input: #404040; /* gray-700 */
+    --color-ring: #3b82f6; /* blue-500 */
   }
+}
 
-  .dark {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 93%;
+/* ============================================
+   Base Element Styles
+   ============================================ */
+* {
+  border-color: var(--color-border);
+}
 
-    --card: 0 0% 4%;
-    --card-foreground: 0 0% 93%;
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
 
-    --popover: 0 0% 4%;
-    --popover-foreground: 0 0% 93%;
+/* ============================================
+   Form Input Text Visibility Fix
+   ============================================
+   CRITICAL: Ensures all form inputs have proper
+   text contrast for readability.
 
-    --primary: 221 83% 53%;
-    --primary-foreground: 0 0% 98%;
+   In Tailwind v4, we use direct CSS instead of
+   @apply directives.
+   ============================================ */
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 93%;
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+textarea,
+select {
+  color: #111827 !important; /* gray-900 for light mode */
+}
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 64%;
+label {
+  color: #111827; /* gray-900 for light mode */
+}
 
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 93%;
+::placeholder {
+  color: #9ca3af; /* gray-400 */
+  opacity: 1;
+}
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
-    --ring: 221 83% 53%;
-  }
-
-  /* ============================================
-     Base Element Styles
-     ============================================ */
-  * {
-    border-color: hsl(var(--border));
-  }
-
-  body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-family: Arial, Helvetica, sans-serif;
-  }
-
-  /* ============================================
-     Form Input Text Visibility Fix
-     ============================================
-     Ensures all form inputs have proper text
-     contrast for readability in light and dark modes.
-     Uses !important to override component-level
-     Tailwind classes.
-     ============================================ */
-
-  /* Input fields - dark text for visibility in light mode */
+/* Dark mode form input overrides */
+@media (prefers-color-scheme: dark) {
   input[type="text"],
   input[type="number"],
   input[type="email"],
@@ -102,50 +143,31 @@
   input[type="datetime-local"],
   textarea,
   select {
-    color: #111827 !important; /* gray-900 for light mode */
+    color: #f3f4f6 !important; /* gray-100 for dark mode */
   }
 
-  /* Labels - dark text for visibility in light mode */
   label {
-    color: #111827 !important; /* gray-900 for light mode */
+    color: #f3f4f6; /* gray-100 for dark mode */
   }
 
-  /* Placeholder text - appropriately lighter but still readable */
   ::placeholder {
-    color: #9ca3af !important; /* gray-400 */
-    opacity: 1;
-  }
-
-  /* Dark mode overrides */
-  .dark input[type="text"],
-  .dark input[type="number"],
-  .dark input[type="email"],
-  .dark input[type="password"],
-  .dark input[type="search"],
-  .dark input[type="tel"],
-  .dark input[type="url"],
-  .dark input[type="date"],
-  .dark input[type="time"],
-  .dark input[type="datetime-local"],
-  .dark textarea,
-  .dark select {
-    color: #f3f4f6 !important; /* gray-100 for dark mode */
-  }
-
-  .dark label {
-    color: #f3f4f6 !important; /* gray-100 for dark mode */
-  }
-
-  .dark ::placeholder {
-    color: #6b7280 !important; /* gray-500 for dark mode */
-    opacity: 1;
+    color: #6b7280; /* gray-500 for dark mode */
   }
 }
 
-@layer components {
-  /* Add custom component styles here */
+/* Disabled state */
+input:disabled,
+textarea:disabled,
+select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-@layer utilities {
-  /* Add custom utility styles here */
-}
+/* ============================================
+   Custom Component Utilities
+   ============================================
+   In Tailwind v4, you can add custom utilities
+   directly in CSS without a config file
+   ============================================ */
+
+/* Example: Add custom utilities here if needed */
