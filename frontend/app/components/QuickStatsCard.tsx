@@ -19,26 +19,26 @@ export function QuickStatsCard({ title, value, icon, trend, subtitle }: QuickSta
       case 'down':
         return 'text-red-600';
       default:
-        return 'text-gray-600';
+        return 'text-muted-foreground';
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+    <div className="bg-card rounded-lg shadow p-6 border border-border">
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600">{title}</p>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <div className="mt-2 flex items-baseline">
-            <p className="text-3xl font-semibold text-gray-900">{value}</p>
+            <p className="text-3xl font-semibold text-foreground">{value}</p>
             {trend && (
               <span className={`ml-2 text-sm font-medium ${getTrendColor()}`}>
                 {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '—'}
               </span>
             )}
           </div>
-          {subtitle && <p className="mt-1 text-xs text-gray-500">{subtitle}</p>}
+          {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
         </div>
-        {icon && <div className="ml-4 flex-shrink-0 text-gray-400">{icon}</div>}
+        {icon && <div className="ml-4 flex-shrink-0 text-muted-foreground">{icon}</div>}
       </div>
     </div>
   );

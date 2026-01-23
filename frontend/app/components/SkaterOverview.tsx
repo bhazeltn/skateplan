@@ -64,25 +64,25 @@ export function SkaterOverview({
   return (
     <div className="space-y-6">
       {/* Profile Summary Card */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-card rounded-lg shadow p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
             {skater.federation_iso_code && (
               <FederationFlag iso_code={skater.federation_iso_code} size="large" />
             )}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">{skater.full_name}</h2>
+              <h2 className="text-2xl font-bold text-foreground">{skater.full_name}</h2>
               <div className="mt-2 flex items-center gap-3">
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary">
                   {skater.current_level}
                 </span>
-                <span className="text-sm text-gray-600">{skater.discipline}</span>
+                <span className="text-sm text-muted-foreground">{skater.discipline}</span>
               </div>
             </div>
           </div>
           <button
             onClick={onEditProfile}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            className="px-4 py-2 border border-border rounded-md text-foreground hover:bg-secondary flex items-center gap-2"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -100,28 +100,28 @@ export function SkaterOverview({
         <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           {age !== null && (
             <div>
-              <p className="text-sm font-medium text-gray-500">Age</p>
-              <p className="mt-1 text-sm text-gray-900">{age} years old</p>
+              <p className="text-sm font-medium text-muted-foreground">Age</p>
+              <p className="mt-1 text-sm text-foreground">{age} years old</p>
             </div>
           )}
           {skater.federation_code && (
             <div>
-              <p className="text-sm font-medium text-gray-500">Federation</p>
-              <p className="mt-1 text-sm text-gray-900">
+              <p className="text-sm font-medium text-muted-foreground">Federation</p>
+              <p className="mt-1 text-sm text-foreground">
                 {skater.country_name || skater.federation_name} ({skater.federation_code})
               </p>
             </div>
           )}
           {skater.training_site && (
             <div>
-              <p className="text-sm font-medium text-gray-500">Training Site</p>
-              <p className="mt-1 text-sm text-gray-900">{skater.training_site}</p>
+              <p className="text-sm font-medium text-muted-foreground">Training Site</p>
+              <p className="mt-1 text-sm text-foreground">{skater.training_site}</p>
             </div>
           )}
           {skater.home_club && (
             <div>
-              <p className="text-sm font-medium text-gray-500">Home Club</p>
-              <p className="mt-1 text-sm text-gray-900">{skater.home_club}</p>
+              <p className="text-sm font-medium text-muted-foreground">Home Club</p>
+              <p className="mt-1 text-sm text-foreground">{skater.home_club}</p>
             </div>
           )}
         </div>
@@ -177,15 +177,15 @@ export function SkaterOverview({
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">Recent Activity</h3>
+      <div className="bg-card rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-border">
+          <h3 className="text-lg font-medium text-foreground">Recent Activity</h3>
         </div>
         <div className="px-6 py-4">
           {recentSessions.length === 0 ? (
             <div className="text-center py-8">
               <svg
-                className="mx-auto h-12 w-12 text-gray-400"
+                className="mx-auto h-12 w-12 text-muted-foreground"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -197,28 +197,28 @@ export function SkaterOverview({
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
-              <p className="mt-2 text-sm text-gray-500">No recent benchmark results</p>
-              <p className="mt-1 text-xs text-gray-400">
+              <p className="mt-2 text-sm text-muted-foreground">No recent benchmark results</p>
+              <p className="mt-1 text-xs text-muted-foreground">
                 Record your first benchmark session to see activity here
               </p>
             </div>
           ) : (
             <div className="space-y-4">
               {recentSessions.map((session) => (
-                <div key={session.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                <div key={session.id} className="flex items-center justify-between py-3 border-b border-border last:border-0">
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{session.template_name}</p>
-                    <p className="text-xs text-gray-500">{session.summary}</p>
+                    <p className="text-sm font-medium text-foreground">{session.template_name}</p>
+                    <p className="text-xs text-muted-foreground">{session.summary}</p>
                   </div>
                   <div className="ml-4 flex-shrink-0">
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       {new Date(session.recorded_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
               ))}
               <div className="pt-2">
-                <a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                <a href="#" className="text-sm font-medium text-primary hover:text-primary/90">
                   View All Benchmarks →
                 </a>
               </div>
@@ -232,7 +232,7 @@ export function SkaterOverview({
         {onRecordBenchmark && (
           <button
             onClick={onRecordBenchmark}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 flex items-center gap-2"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -248,7 +248,7 @@ export function SkaterOverview({
         {onUploadAsset && (
           <button
             onClick={onUploadAsset}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            className="px-4 py-2 border border-border rounded-md text-foreground hover:bg-secondary flex items-center gap-2"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
