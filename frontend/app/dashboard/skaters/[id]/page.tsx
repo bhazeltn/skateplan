@@ -135,15 +135,15 @@ export default function SkaterProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <p className="text-gray-600">Loading skater profile...</p>
+      <div className="min-h-screen bg-background p-6">
+        <p className="text-muted-foreground">Loading skater profile...</p>
       </div>
     );
   }
 
   if (error || !skater) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-background p-6">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           {error || 'Skater not found'}
         </div>
@@ -160,8 +160,8 @@ export default function SkaterProfilePage() {
   const age = calculateAge(skater.dob);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
+    <div className="min-h-screen bg-background">
+      <nav className="bg-card shadow-sm">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center gap-3">
@@ -169,7 +169,7 @@ export default function SkaterProfilePage() {
                 <FederationFlag iso_code={skater.federation_iso_code} size="medium" />
               )}
               <div>
-                <span className="text-xl font-bold text-gray-900">{skater.full_name}</span>
+                <span className="text-xl font-bold text-foreground">{skater.full_name}</span>
                 {!loadingGap && (
                   <div className="flex gap-2 mt-1">
                     {!gapAnalysis?.entries?.length && (
@@ -195,7 +195,7 @@ export default function SkaterProfilePage() {
             <div className="flex items-center">
               <button
                 onClick={() => router.push('/dashboard/roster')}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 border border-border rounded-md text-foreground hover:bg-secondary"
               >
                 ← Back to Roster
               </button>
@@ -237,12 +237,12 @@ export default function SkaterProfilePage() {
 
             {/* Profile Tab */}
             <TabsContent value="profile">
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-card rounded-lg shadow p-6">
                 <div className="flex items-start justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Profile Details</h2>
+                  <h2 className="text-2xl font-bold text-foreground">Profile Details</h2>
                   <button
                     onClick={() => setIsEditModalOpen(true)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                    className="px-4 py-2 border border-border rounded-md text-foreground hover:bg-secondary flex items-center gap-2"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -254,21 +254,21 @@ export default function SkaterProfilePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Full Name */}
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Full Name</p>
-                    <p className="mt-1 text-sm text-gray-900">{skater.full_name}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Full Name</p>
+                    <p className="mt-1 text-sm text-foreground">{skater.full_name}</p>
                   </div>
 
                   {/* Email */}
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Email</p>
-                    <p className="mt-1 text-sm text-gray-900">{skater.email}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Email</p>
+                    <p className="mt-1 text-sm text-foreground">{skater.email}</p>
                   </div>
 
                   {/* Date of Birth */}
                   {skater.dob && (
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Date of Birth</p>
-                      <p className="mt-1 text-sm text-gray-900">
+                      <p className="text-sm font-medium text-muted-foreground">Date of Birth</p>
+                      <p className="mt-1 text-sm text-foreground">
                         {new Date(skater.dob).toLocaleDateString()} ({age} years old)
                       </p>
                     </div>
@@ -276,25 +276,25 @@ export default function SkaterProfilePage() {
 
                   {/* Discipline */}
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Discipline</p>
-                    <p className="mt-1 text-sm text-gray-900">{skater.discipline}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Discipline</p>
+                    <p className="mt-1 text-sm text-foreground">{skater.discipline}</p>
                   </div>
 
                   {/* Current Level */}
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Current Level</p>
-                    <p className="mt-1 text-sm text-gray-900">{skater.current_level || 'Not set'}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Current Level</p>
+                    <p className="mt-1 text-sm text-foreground">{skater.current_level || 'Not set'}</p>
                   </div>
 
                   {/* Federation */}
                   {skater.federation_code && (
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Federation</p>
+                      <p className="text-sm font-medium text-muted-foreground">Federation</p>
                       <div className="mt-1 flex items-center gap-2">
                         {skater.federation_iso_code && (
                           <FederationFlag iso_code={skater.federation_iso_code} size="small" />
                         )}
-                        <span className="text-sm text-gray-900">
+                        <span className="text-sm text-foreground">
                           {skater.country_name || skater.federation_name} ({skater.federation_code})
                         </span>
                       </div>
@@ -304,28 +304,28 @@ export default function SkaterProfilePage() {
                   {/* Training Site */}
                   {skater.training_site && (
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Training Site</p>
-                      <p className="mt-1 text-sm text-gray-900">{skater.training_site}</p>
+                      <p className="text-sm font-medium text-muted-foreground">Training Site</p>
+                      <p className="mt-1 text-sm text-foreground">{skater.training_site}</p>
                     </div>
                   )}
 
                   {/* Home Club */}
                   {skater.home_club && (
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Home Club</p>
-                      <p className="mt-1 text-sm text-gray-900">{skater.home_club}</p>
+                      <p className="text-sm font-medium text-muted-foreground">Home Club</p>
+                      <p className="mt-1 text-sm text-foreground">{skater.home_club}</p>
                     </div>
                   )}
 
                   {/* Active Status */}
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Status</p>
+                    <p className="text-sm font-medium text-muted-foreground">Status</p>
                     <p className="mt-1">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           skater.is_active
                             ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
+                            : 'bg-secondary text-foreground'
                         }`}
                       >
                         {skater.is_active ? 'Active' : 'Inactive'}
@@ -343,26 +343,26 @@ export default function SkaterProfilePage() {
 
             {/* Benchmarks Tab */}
             <TabsContent value="benchmarks">
-              <div className="bg-white shadow sm:rounded-lg">
-                <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Benchmarks & Goals</h3>
+              <div className="bg-card shadow sm:rounded-lg">
+                <div className="px-4 py-5 border-b border-border sm:px-6">
+                  <h3 className="text-lg font-medium leading-6 text-foreground">Benchmarks & Goals</h3>
                 </div>
                 <div className="px-4 py-5 sm:p-6">
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="p-4 border rounded-md">
-                      <h4 className="font-bold text-gray-800">Pre-Novice Standards</h4>
-                      <ul className="mt-2 space-y-2 text-sm text-gray-600">
+                      <h4 className="font-bold text-foreground">Pre-Novice Standards</h4>
+                      <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
                         <li className="flex justify-between">
                           <span>Vertical Jump</span>
-                          <span className="font-medium text-gray-900">Target: 14"</span>
+                          <span className="font-medium text-foreground">Target: 14"</span>
                         </li>
                         <li className="flex justify-between">
                           <span>Double Axel</span>
-                          <span className="font-medium text-gray-900">Target: Consist.</span>
+                          <span className="font-medium text-foreground">Target: Consist.</span>
                         </li>
                       </ul>
                     </div>
-                    <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md text-gray-400 cursor-pointer hover:border-blue-500 hover:text-blue-500">
+                    <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md text-muted-foreground cursor-pointer hover:border-primary hover:text-primary">
                       + Create New Benchmark Profile
                     </div>
                   </div>
