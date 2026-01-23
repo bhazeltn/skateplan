@@ -8,7 +8,7 @@
    ============================================ */
 
 @theme {
-  /* Color System using CSS Custom Properties */
+  /* Color System using CSS Custom Properties - Light Mode */
   --color-background: #ffffff;
   --color-foreground: #171717;
 
@@ -48,17 +48,17 @@
 }
 
 /* ============================================
-   Dark Mode Theme
+   Dark Mode Theme - Use .dark class
    ============================================ */
-@media (prefers-color-scheme: dark) {
+.dark {
   @theme {
     --color-background: #0a0a0a;
     --color-foreground: #ededed;
 
-    --color-card: #171717;
+    --color-card: #1a1a1a; /* Darker card, not bright white */
     --color-card-foreground: #ededed;
 
-    --color-popover: #171717;
+    --color-popover: #1a1a1a; /* Dark popover/modal backgrounds */
     --color-popover-foreground: #ededed;
 
     --color-primary: #3b82f6; /* blue-500 */
@@ -68,7 +68,7 @@
     --color-secondary-foreground: #f3f4f6; /* gray-100 */
 
     --color-muted: #262626; /* gray-800 */
-    --color-muted-foreground: #9ca3af; /* gray-400 */
+    --color-muted-foreground: #a3a3a3; /* gray-400 - readable in dark */
 
     --color-accent: #262626; /* gray-800 */
     --color-accent-foreground: #f3f4f6; /* gray-100 */
@@ -77,7 +77,7 @@
     --color-destructive-foreground: #ffffff;
 
     --color-border: #404040; /* gray-700 */
-    --color-input: #404040; /* gray-700 */
+    --color-input: #262626; /* gray-800 - dark input backgrounds */
     --color-ring: #3b82f6; /* blue-500 */
   }
 }
@@ -99,12 +99,13 @@ body {
    Form Input Text Visibility Fix
    ============================================
    CRITICAL: Ensures all form inputs have proper
-   text contrast for readability.
+   text contrast for readability in both modes.
 
-   In Tailwind v4, we use direct CSS instead of
-   @apply directives.
+   Uses !important to override component-level
+   Tailwind classes.
    ============================================ */
 
+/* Light mode - dark text */
 input[type="text"],
 input[type="number"],
 input[type="email"],
@@ -117,42 +118,42 @@ input[type="time"],
 input[type="datetime-local"],
 textarea,
 select {
-  color: #111827 !important; /* gray-900 for light mode */
+  color: #111827 !important; /* gray-900 */
 }
 
 label {
-  color: #111827; /* gray-900 for light mode */
+  color: #111827 !important; /* gray-900 - always dark in light mode */
+  font-weight: 500;
 }
 
 ::placeholder {
-  color: #9ca3af; /* gray-400 */
+  color: #9ca3af !important; /* gray-400 */
   opacity: 1;
 }
 
-/* Dark mode form input overrides */
-@media (prefers-color-scheme: dark) {
-  input[type="text"],
-  input[type="number"],
-  input[type="email"],
-  input[type="password"],
-  input[type="search"],
-  input[type="tel"],
-  input[type="url"],
-  input[type="date"],
-  input[type="time"],
-  input[type="datetime-local"],
-  textarea,
-  select {
-    color: #f3f4f6 !important; /* gray-100 for dark mode */
-  }
+/* Dark mode - light text */
+.dark input[type="text"],
+.dark input[type="number"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="search"],
+.dark input[type="tel"],
+.dark input[type="url"],
+.dark input[type="date"],
+.dark input[type="time"],
+.dark input[type="datetime-local"],
+.dark textarea,
+.dark select {
+  color: #f3f4f6 !important; /* gray-100 */
+  background-color: #262626 !important; /* Dark input background */
+}
 
-  label {
-    color: #f3f4f6; /* gray-100 for dark mode */
-  }
+.dark label {
+  color: #f3f4f6 !important; /* gray-100 - always light in dark mode */
+}
 
-  ::placeholder {
-    color: #6b7280; /* gray-500 for dark mode */
-  }
+.dark ::placeholder {
+  color: #6b7280 !important; /* gray-500 */
 }
 
 /* Disabled state */
