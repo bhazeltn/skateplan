@@ -1,66 +1,91 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Background and foreground colors */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
+
+    /* Shadcn/UI theme colors */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 89%;
+    --input: 0 0% 89%;
+    --ring: 221 83% 53%;
+
+    --radius: 0.5rem;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+  .dark {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 93%;
 
-/* ============================================
-   Form Input Text Visibility Fix
-   ============================================
-   Ensures all form inputs have proper text
-   contrast for readability in light and dark modes.
-   ============================================ */
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 93%;
 
-/* Input fields - dark text for visibility */
-input[type="text"],
-input[type="number"],
-input[type="email"],
-input[type="password"],
-input[type="search"],
-input[type="tel"],
-input[type="url"],
-input[type="date"],
-input[type="time"],
-input[type="datetime-local"],
-textarea,
-select {
-  color: #111827; /* gray-900 for light mode */
-}
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 93%;
 
-/* Labels - dark text for visibility */
-label {
-  color: #111827; /* gray-900 for light mode */
-}
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 98%;
 
-/* Placeholder text - appropriately lighter but still readable */
-::placeholder {
-  color: #9ca3af; /* gray-400 */
-  opacity: 1;
-}
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 93%;
 
-/* Dark mode overrides */
-@media (prefers-color-scheme: dark) {
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 64%;
+
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 93%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 221 83% 53%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  /* ============================================
+     Form Input Text Visibility Fix
+     ============================================
+     Ensures all form inputs have proper text
+     contrast for readability in light and dark modes.
+     Uses !important to override component-level
+     Tailwind classes.
+     ============================================ */
+
+  /* Input fields - dark text for visibility in light mode */
   input[type="text"],
   input[type="number"],
   input[type="email"],
@@ -73,15 +98,50 @@ label {
   input[type="datetime-local"],
   textarea,
   select {
-    color: #f3f4f6; /* gray-100 for dark mode */
+    color: #111827 !important; /* gray-900 for light mode */
   }
 
+  /* Labels - dark text for visibility in light mode */
   label {
-    color: #f3f4f6; /* gray-100 for dark mode */
+    color: #111827 !important; /* gray-900 for light mode */
   }
 
+  /* Placeholder text - appropriately lighter but still readable */
   ::placeholder {
-    color: #6b7280; /* gray-500 for dark mode */
+    color: #9ca3af !important; /* gray-400 */
     opacity: 1;
   }
+
+  /* Dark mode overrides */
+  .dark input[type="text"],
+  .dark input[type="number"],
+  .dark input[type="email"],
+  .dark input[type="password"],
+  .dark input[type="search"],
+  .dark input[type="tel"],
+  .dark input[type="url"],
+  .dark input[type="date"],
+  .dark input[type="time"],
+  .dark input[type="datetime-local"],
+  .dark textarea,
+  .dark select {
+    color: #f3f4f6 !important; /* gray-100 for dark mode */
+  }
+
+  .dark label {
+    color: #f3f4f6 !important; /* gray-100 for dark mode */
+  }
+
+  .dark ::placeholder {
+    color: #6b7280 !important; /* gray-500 for dark mode */
+    opacity: 1;
+  }
+}
+
+@layer components {
+  /* Add custom component styles here */
+}
+
+@layer utilities {
+  /* Add custom utility styles here */
 }
