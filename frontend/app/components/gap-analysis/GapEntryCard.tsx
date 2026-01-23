@@ -89,17 +89,17 @@ export default function GapEntryCard({ entry, editMode, onUpdate, onArchive }: G
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
+    <div className="bg-card rounded-lg shadow p-4 border border-border">
       <div className="flex justify-between items-start">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <h4 className="font-semibold text-gray-900">{entry.metric_name}</h4>
+            <h4 className="font-semibold text-foreground">{entry.metric_name}</h4>
             <span className="text-2xl">{getStatusIcon(entry.status)}</span>
           </div>
 
           {!isEditing ? (
             <>
-              <div className="text-sm text-gray-600 mb-2">
+              <div className="text-sm text-muted-foreground mb-2">
                 <span className="font-medium">Current:</span> {entry.current_value} {entry.metric_unit || ''}
                 {' | '}
                 <span className="font-medium">Target:</span> {entry.target_value} {entry.metric_unit || ''}
@@ -109,19 +109,19 @@ export default function GapEntryCard({ entry, editMode, onUpdate, onArchive }: G
 
               {/* Progress bar */}
               <div className="mb-2">
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-2 bg-secondary rounded-full overflow-hidden">
                   <div
                     className={`h-full ${getStatusColor(entry.status)}`}
                     style={{ width: `${progressPercent.toFixed(1)}%` }}
                   />
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
+                <div className="text-xs text-muted-foreground mt-1">
                   {progressPercent.toFixed(1)}% of target
                 </div>
               </div>
 
               {entry.notes && (
-                <div className="text-sm text-gray-600 italic mt-2 p-2 bg-gray-50 rounded">
+                <div className="text-sm text-muted-foreground italic mt-2 p-2 bg-secondary rounded">
                   <span className="font-medium">Notes:</span> {entry.notes}
                 </div>
               )}
@@ -130,7 +130,7 @@ export default function GapEntryCard({ entry, editMode, onUpdate, onArchive }: G
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-foreground mb-1">
                     Current Value
                   </label>
                   <input
@@ -138,11 +138,11 @@ export default function GapEntryCard({ entry, editMode, onUpdate, onArchive }: G
                     step="any"
                     value={currentValue}
                     onChange={(e) => setCurrentValue(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    className="w-full px-3 py-2 border border-input rounded-md text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-foreground mb-1">
                     Target Value
                   </label>
                   <input
@@ -150,19 +150,19 @@ export default function GapEntryCard({ entry, editMode, onUpdate, onArchive }: G
                     step="any"
                     value={targetValue}
                     onChange={(e) => setTargetValue(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    className="w-full px-3 py-2 border border-input rounded-md text-sm"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-medium text-foreground mb-1">
                   Notes
                 </label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  className="w-full px-3 py-2 border border-input rounded-md text-sm"
                   placeholder="Add notes about progress..."
                 />
               </div>
@@ -170,14 +170,14 @@ export default function GapEntryCard({ entry, editMode, onUpdate, onArchive }: G
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
+                  className="px-3 py-1 bg-primary text-primary-foreground text-sm rounded hover:bg-primary/90 disabled:opacity-50"
                 >
                   {saving ? 'Saving...' : 'Save'}
                 </button>
                 <button
                   onClick={handleCancel}
                   disabled={saving}
-                  className="px-3 py-1 border border-gray-300 text-gray-700 text-sm rounded hover:bg-gray-50"
+                  className="px-3 py-1 border border-border text-foreground text-sm rounded hover:bg-secondary"
                 >
                   Cancel
                 </button>
@@ -190,7 +190,7 @@ export default function GapEntryCard({ entry, editMode, onUpdate, onArchive }: G
           <div className="flex gap-1 ml-2">
             <button
               onClick={() => setIsEditing(true)}
-              className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded"
+              className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded"
               title="Edit"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -203,7 +203,7 @@ export default function GapEntryCard({ entry, editMode, onUpdate, onArchive }: G
                   onArchive(entry.id);
                 }
               }}
-              className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded"
+              className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded"
               title="Archive"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
