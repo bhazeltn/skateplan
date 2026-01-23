@@ -124,18 +124,18 @@ export default function MetricsLibraryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <nav className="bg-white shadow-sm">
+      <nav className="bg-card shadow-sm">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">Metric Library</h1>
+              <h1 className="text-xl font-bold text-foreground">Metric Library</h1>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => router.push('/dashboard')}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 border border-border rounded-md text-foreground hover:bg-secondary"
               >
                 ← Back to Dashboard
               </button>
@@ -147,11 +147,11 @@ export default function MetricsLibraryPage() {
       {/* Main Content */}
       <main className="py-10">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow">
+          <div className="bg-card rounded-lg shadow">
             {/* Toolbar */}
-            <div className="p-6 border-b border-gray-200">
+            <div className="p-6 border-b border-border">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-foreground">
                   Your Metrics ({metrics.length})
                 </h2>
                 <button
@@ -159,7 +159,7 @@ export default function MetricsLibraryPage() {
                     setEditingMetric(null);
                     setShowMetricModal(true);
                   }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 flex items-center gap-2"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -171,17 +171,17 @@ export default function MetricsLibraryPage() {
               {/* Search and Filter */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Search</label>
                   <div className="relative">
                     <input
                       type="text"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       placeholder="Search metrics..."
-                      className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-md"
+                      className="w-full px-3 py-2 pl-10 border border-input rounded-md"
                     />
                     <svg
-                      className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
+                      className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -192,14 +192,14 @@ export default function MetricsLibraryPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Category</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Filter by Category</label>
                   <select
                     value={filterCategory}
                     onChange={(e) => {
                       setFilterCategory(e.target.value);
                       fetchMetrics();
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-input rounded-md"
                   >
                     <option value="All">All Categories</option>
                     <option value="Technical">Technical</option>
@@ -215,11 +215,11 @@ export default function MetricsLibraryPage() {
             {/* Metrics List */}
             <div className="p-6">
               {loading ? (
-                <p className="text-gray-600">Loading metrics...</p>
+                <p className="text-muted-foreground">Loading metrics...</p>
               ) : categories.length === 0 ? (
                 <div className="text-center py-12">
                   <svg
-                    className="mx-auto h-12 w-12 text-gray-400"
+                    className="mx-auto h-12 w-12 text-muted-foreground"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -231,8 +231,8 @@ export default function MetricsLibraryPage() {
                       d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                     />
                   </svg>
-                  <h3 className="mt-2 text-lg font-semibold text-gray-900">No metrics yet</h3>
-                  <p className="mt-1 text-gray-600 mb-4">
+                  <h3 className="mt-2 text-lg font-semibold text-foreground">No metrics yet</h3>
+                  <p className="mt-1 text-muted-foreground mb-4">
                     {searchTerm ? 'No metrics match your search.' : 'Get started by creating your first metric.'}
                   </p>
                   {!searchTerm && (
@@ -241,7 +241,7 @@ export default function MetricsLibraryPage() {
                         setEditingMetric(null);
                         setShowMetricModal(true);
                       }}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                      className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
                     >
                       Create Your First Metric
                     </button>
@@ -251,31 +251,31 @@ export default function MetricsLibraryPage() {
                 <div className="space-y-6">
                   {categories.map(category => (
                     <div key={category}>
-                      <h3 className="text-md font-semibold text-gray-900 mb-3">
+                      <h3 className="text-md font-semibold text-foreground mb-3">
                         {category} ({metricsByCategory[category].length} metric{metricsByCategory[category].length !== 1 ? 's' : ''})
                       </h3>
                       <div className="space-y-2">
                         {metricsByCategory[category].map(metric => (
                           <div
                             key={metric.id}
-                            className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                            className="border border-border rounded-lg p-4 hover:bg-secondary transition-colors"
                           >
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
                                 <div className="flex items-center gap-3">
-                                  <h4 className="font-semibold text-gray-900">{metric.name}</h4>
-                                  <span className="text-sm text-gray-500">
+                                  <h4 className="font-semibold text-foreground">{metric.name}</h4>
+                                  <span className="text-sm text-muted-foreground">
                                     {getDataTypeDisplay(metric)}
                                   </span>
                                 </div>
                                 {metric.description && (
-                                  <p className="mt-1 text-sm text-gray-600">{metric.description}</p>
+                                  <p className="mt-1 text-sm text-muted-foreground">{metric.description}</p>
                                 )}
                               </div>
                               <div className="flex gap-2 ml-4">
                                 <button
                                   onClick={() => handleEditMetric(metric)}
-                                  className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100"
+                                  className="px-3 py-1 text-sm border border-border rounded hover:bg-secondary"
                                   title="Edit metric"
                                 >
                                   Edit
