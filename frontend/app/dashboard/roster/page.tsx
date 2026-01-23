@@ -223,31 +223,31 @@ export default function RosterPage() {
   const archivedSkaters = skaters.filter(s => !s.is_active);
 
   const SkaterTable = ({ data, isArchived }: { data: Skater[], isArchived?: boolean }) => (
-    <div className={`overflow-hidden bg-white shadow sm:rounded-lg ${isArchived ? 'opacity-60' : ''}`}>
-        <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+    <div className={`overflow-hidden bg-card shadow sm:rounded-lg ${isArchived ? 'opacity-60' : ''}`}>
+        <table className="min-w-full divide-y divide-border">
+            <thead className="bg-secondary">
             <tr>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Name</th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Federation/Country</th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Age</th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Discipline</th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Level</th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Actions</th>
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-muted-foreground uppercase">Name</th>
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-muted-foreground uppercase">Federation/Country</th>
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-muted-foreground uppercase">Age</th>
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-muted-foreground uppercase">Discipline</th>
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-muted-foreground uppercase">Level</th>
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-muted-foreground uppercase">Status</th>
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-muted-foreground uppercase">Actions</th>
             </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-card divide-y divide-border">
             {data.length === 0 && (
                 <tr>
-                    <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan={7} className="px-6 py-4 text-center text-muted-foreground">
                         No skaters found.
                     </td>
                 </tr>
             )}
             {data.map((skater) => (
-                <tr key={skater.id} className="cursor-pointer hover:bg-gray-50" onClick={() => router.push(`/dashboard/skaters/${skater.id}`)}>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">{skater.full_name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                <tr key={skater.id} className="cursor-pointer hover:bg-secondary" onClick={() => router.push(`/dashboard/skaters/${skater.id}`)}>
+                    <td className="px-6 py-4 text-sm font-medium text-foreground whitespace-nowrap">{skater.full_name}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground whitespace-nowrap">
                         {skater.federation_iso_code && (
                             <span className="flex items-center gap-2">
                                 <FederationFlag iso_code={skater.federation_iso_code} size="small" />
@@ -255,13 +255,13 @@ export default function RosterPage() {
                             </span>
                         )}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                    <td className="px-6 py-4 text-sm text-muted-foreground whitespace-nowrap">
                         {calculateAge(skater.dob) || '—'}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{skater.discipline}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{skater.current_level}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground whitespace-nowrap">{skater.discipline}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground whitespace-nowrap">{skater.current_level}</td>
                     <td className="px-6 py-4 text-sm whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${skater.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${skater.is_active ? 'bg-green-100 text-green-800' : 'bg-secondary text-foreground'}`}>
                             {skater.is_active ? 'Active' : 'Archived'}
                         </span>
                     </td>
@@ -273,7 +273,7 @@ export default function RosterPage() {
                                     setSkaterToEdit(skater);
                                     setIsEditModalOpen(true);
                                 }}
-                                className="text-blue-600 hover:text-blue-900 font-medium"
+                                className="text-primary hover:text-primary/90 font-medium"
                             >
                                 Edit
                             </button>
@@ -295,32 +295,32 @@ export default function RosterPage() {
   const archivedTeams = teams.filter(t => !t.is_active);
 
   const TeamsTable = ({ data, isArchived }: { data: Team[], isArchived?: boolean }) => (
-    <div className={`overflow-hidden bg-white shadow sm:rounded-lg ${isArchived ? 'opacity-60' : ''}`}>
-        <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+    <div className={`overflow-hidden bg-card shadow sm:rounded-lg ${isArchived ? 'opacity-60' : ''}`}>
+        <table className="min-w-full divide-y divide-border">
+            <thead className="bg-secondary">
             <tr>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Team</th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Federation/Country</th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Discipline</th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Level</th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Actions</th>
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-muted-foreground uppercase">Team</th>
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-muted-foreground uppercase">Federation/Country</th>
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-muted-foreground uppercase">Discipline</th>
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-muted-foreground uppercase">Level</th>
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-muted-foreground uppercase">Status</th>
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-muted-foreground uppercase">Actions</th>
             </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-card divide-y divide-border">
             {data.length === 0 && (
                 <tr>
-                    <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan={6} className="px-6 py-4 text-center text-muted-foreground">
                         No teams found.
                     </td>
                 </tr>
             )}
             {data.map((team) => (
-                <tr key={team.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                <tr key={team.id} className="hover:bg-secondary">
+                    <td className="px-6 py-4 text-sm font-medium text-foreground">
                         {team.partner1_name} / {team.partner2_name}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                    <td className="px-6 py-4 text-sm text-muted-foreground whitespace-nowrap">
                         {team.federation_iso_code && (
                             <span className="flex items-center gap-2">
                                 <FederationFlag iso_code={team.federation_iso_code} size="small" />
@@ -328,12 +328,12 @@ export default function RosterPage() {
                             </span>
                         )}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                    <td className="px-6 py-4 text-sm text-muted-foreground whitespace-nowrap">
                         {team.discipline === 'Ice_Dance' ? 'Ice Dance' : 'Pairs'}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{team.current_level}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground whitespace-nowrap">{team.current_level}</td>
                     <td className="px-6 py-4 text-sm whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${team.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${team.is_active ? 'bg-green-100 text-green-800' : 'bg-secondary text-foreground'}`}>
                             {team.is_active ? 'Active' : 'Archived'}
                         </span>
                     </td>
@@ -345,7 +345,7 @@ export default function RosterPage() {
                                     setTeamToEdit(team);
                                     setIsEditTeamModalOpen(true);
                                 }}
-                                className="text-blue-600 hover:text-blue-900 font-medium"
+                                className="text-primary hover:text-primary/90 font-medium"
                             >
                                 Edit
                             </button>
@@ -364,28 +364,28 @@ export default function RosterPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
+    <div className="min-h-screen bg-secondary">
+      <nav className="bg-card shadow-sm">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center space-x-8">
-              <span className="text-xl font-bold text-gray-900">SkatePlan</span>
+              <span className="text-xl font-bold text-foreground">SkatePlan</span>
               <div className="flex space-x-4">
                 <button
                   onClick={() => router.push('/dashboard/roster')}
-                  className="text-sm font-medium text-blue-600 hover:text-blue-900"
+                  className="text-sm font-medium text-primary hover:text-primary/90"
                 >
                   Roster
                 </button>
                 <button
                   onClick={() => router.push('/dashboard/library')}
-                  className="text-sm font-medium text-gray-500 hover:text-gray-900"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground"
                 >
                   Library
                 </button>
                 <button
                   onClick={() => router.push('/dashboard/benchmarks')}
-                  className="text-sm font-medium text-gray-500 hover:text-gray-900"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground"
                 >
                   Benchmarks
                 </button>
@@ -397,7 +397,7 @@ export default function RosterPage() {
                         await signOut();
                         router.push('/login');
                     }}
-                    className="text-sm text-gray-500 hover:text-gray-900"
+                    className="text-sm text-muted-foreground hover:text-foreground"
                 >
                     Logout
                 </button>
@@ -409,7 +409,7 @@ export default function RosterPage() {
       <main className="py-10">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex justify-between mb-6">
-            <h1 className="text-3xl font-bold leading-tight text-gray-900">Active Skaters</h1>
+            <h1 className="text-3xl font-bold leading-tight text-foreground">Active Skaters</h1>
             <button 
                 onClick={() => setIsModalOpen(true)}
                 className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
@@ -423,7 +423,7 @@ export default function RosterPage() {
           {archivedSkaters.length > 0 && (
             <div className="mt-12">
                 <hr className="mb-8 border-gray-300" />
-                <h2 className="text-2xl font-bold leading-tight text-gray-500 mb-6">Archived Skaters</h2>
+                <h2 className="text-2xl font-bold leading-tight text-muted-foreground mb-6">Archived Skaters</h2>
                 <SkaterTable data={archivedSkaters} isArchived />
             </div>
           )}
@@ -432,7 +432,7 @@ export default function RosterPage() {
           <div className="mt-16">
             <hr className="mb-8 border-gray-300" />
             <div className="flex justify-between mb-6">
-              <h2 className="text-3xl font-bold leading-tight text-gray-900">Active Ice Dance / Pairs Teams</h2>
+              <h2 className="text-3xl font-bold leading-tight text-foreground">Active Ice Dance / Pairs Teams</h2>
               <button
                   onClick={() => setIsTeamModalOpen(true)}
                   className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
@@ -446,7 +446,7 @@ export default function RosterPage() {
             {archivedTeams.length > 0 && (
               <div className="mt-12">
                   <hr className="mb-8 border-gray-300" />
-                  <h2 className="text-2xl font-bold leading-tight text-gray-500 mb-6">Archived Teams</h2>
+                  <h2 className="text-2xl font-bold leading-tight text-muted-foreground mb-6">Archived Teams</h2>
                   <TeamsTable data={archivedTeams} isArchived />
               </div>
             )}
