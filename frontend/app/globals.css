@@ -24,3 +24,64 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ============================================
+   Form Input Text Visibility Fix
+   ============================================
+   Ensures all form inputs have proper text
+   contrast for readability in light and dark modes.
+   ============================================ */
+
+/* Input fields - dark text for visibility */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+textarea,
+select {
+  color: #111827; /* gray-900 for light mode */
+}
+
+/* Labels - dark text for visibility */
+label {
+  color: #111827; /* gray-900 for light mode */
+}
+
+/* Placeholder text - appropriately lighter but still readable */
+::placeholder {
+  color: #9ca3af; /* gray-400 */
+  opacity: 1;
+}
+
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  textarea,
+  select {
+    color: #f3f4f6; /* gray-100 for dark mode */
+  }
+
+  label {
+    color: #f3f4f6; /* gray-100 for dark mode */
+  }
+
+  ::placeholder {
+    color: #6b7280; /* gray-500 for dark mode */
+    opacity: 1;
+  }
+}
