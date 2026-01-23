@@ -193,20 +193,20 @@ export default function GapAnalysisView({ skaterId, editable = true }: GapAnalys
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-600">Loading gap analysis...</p>
+      <div className="bg-card rounded-lg shadow p-6">
+        <p className="text-muted-foreground">Loading gap analysis...</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-card rounded-lg shadow p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Gap Analysis</h2>
+            <h2 className="text-2xl font-bold text-foreground">Gap Analysis</h2>
             {gapAnalysis && (
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Last updated: {formatLastUpdated(gapAnalysis.last_updated)}
               </p>
             )}
@@ -216,7 +216,7 @@ export default function GapAnalysisView({ skaterId, editable = true }: GapAnalys
             <div className="flex gap-2 items-center">
               <button
                 onClick={() => setShowAddMetric(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 flex items-center gap-2"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -228,7 +228,7 @@ export default function GapAnalysisView({ skaterId, editable = true }: GapAnalys
                 <div className="relative">
                   <button
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                    className="px-4 py-2 border border-border rounded-md text-foreground hover:bg-secondary flex items-center gap-2"
                   >
                     Import from Profile
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -242,17 +242,17 @@ export default function GapAnalysisView({ skaterId, editable = true }: GapAnalys
                         className="fixed inset-0 z-10"
                         onClick={() => setShowProfileMenu(false)}
                       />
-                      <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-20 border border-gray-200">
+                      <div className="absolute right-0 mt-2 w-64 bg-card rounded-md shadow-lg z-20 border border-border">
                         <div className="py-1">
                           {profiles.map((profile) => (
                             <button
                               key={profile.id}
                               onClick={() => handleImportFromProfile(profile.id)}
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-secondary"
                             >
                               <div className="font-medium">{profile.name}</div>
                               {profile.description && (
-                                <div className="text-xs text-gray-500">{profile.description}</div>
+                                <div className="text-xs text-muted-foreground">{profile.description}</div>
                               )}
                             </button>
                           ))}
@@ -270,7 +270,7 @@ export default function GapAnalysisView({ skaterId, editable = true }: GapAnalys
         {Object.keys(entriesByCategory).length > 0 ? (
           Object.entries(entriesByCategory).map(([category, entries]) => (
             <div key={category} className="mb-6 last:mb-0">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              <h3 className="text-lg font-semibold text-foreground mb-3">
                 {category} ({entries.length} metric{entries.length !== 1 ? 's' : ''})
               </h3>
               <div className="space-y-3">
@@ -288,9 +288,9 @@ export default function GapAnalysisView({ skaterId, editable = true }: GapAnalys
           ))
         ) : (
           /* Empty state */
-          <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+          <div className="text-center py-12 border-2 border-dashed border-border rounded-lg">
             <svg
-              className="mx-auto h-12 w-12 text-gray-400"
+              className="mx-auto h-12 w-12 text-muted-foreground"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -302,15 +302,15 @@ export default function GapAnalysisView({ skaterId, editable = true }: GapAnalys
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
-            <h3 className="mt-2 text-lg font-semibold text-gray-900">No Gap Analysis Yet</h3>
-            <p className="mt-1 text-gray-600 mb-4">
+            <h3 className="mt-2 text-lg font-semibold text-foreground">No Gap Analysis Yet</h3>
+            <p className="mt-1 text-muted-foreground mb-4">
               Start by adding metrics or importing from a benchmark profile
             </p>
             {editable && (
               <div className="flex gap-2 justify-center">
                 <button
                   onClick={() => setShowAddMetric(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 flex items-center gap-2"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -321,7 +321,7 @@ export default function GapAnalysisView({ skaterId, editable = true }: GapAnalys
                   <div className="relative">
                     <button
                       onClick={() => setShowProfileMenu(!showProfileMenu)}
-                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                      className="px-4 py-2 border border-border rounded-md text-foreground hover:bg-secondary"
                     >
                       Import from Profile
                     </button>
@@ -331,17 +331,17 @@ export default function GapAnalysisView({ skaterId, editable = true }: GapAnalys
                           className="fixed inset-0 z-10"
                           onClick={() => setShowProfileMenu(false)}
                         />
-                        <div className="absolute left-0 mt-2 w-64 bg-white rounded-md shadow-lg z-20 border border-gray-200">
+                        <div className="absolute left-0 mt-2 w-64 bg-card rounded-md shadow-lg z-20 border border-border">
                           <div className="py-1">
                             {profiles.map((profile) => (
                               <button
                                 key={profile.id}
                                 onClick={() => handleImportFromProfile(profile.id)}
-                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-secondary"
                               >
                                 <div className="font-medium">{profile.name}</div>
                                 {profile.description && (
-                                  <div className="text-xs text-gray-500">{profile.description}</div>
+                                  <div className="text-xs text-muted-foreground">{profile.description}</div>
                                 )}
                               </button>
                             ))}
