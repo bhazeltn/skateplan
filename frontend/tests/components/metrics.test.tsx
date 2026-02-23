@@ -124,3 +124,4 @@ describe('Metrics Library & Search Bar UI Fix', () => {
       expect(booleanMetric).toBeInTheDocument();
     });
 });
+});

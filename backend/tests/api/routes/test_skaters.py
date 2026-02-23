@@ -6,7 +6,7 @@ from app.core.config import settings
 from app.models.skater_models import Skater
 from app.models.user_models import Profile, SkaterCoachLink
 from app.models.federation_models import Federation
-from app.models.benchmark_models import BenchmarkTemplate, BenchmarkSession, MetricDefinition, MetricDataType
+from app.models.benchmark_models import BenchmarkProfile, BenchmarkSession, MetricDefinition, MetricDataType
 
 def test_create_skater(
     client: TestClient, 
@@ -301,11 +301,11 @@ def test_get_skater_overview_with_stats(
     session.add(link)
 
     # Setup: Create benchmark templates
-    template1 = BenchmarkTemplate(
+    template1 = BenchmarkProfile(
         name="Speed Test",
-        created_by_id=current_user_id
+        coach_id=current_user_id
     )
-    template2 = BenchmarkTemplate(
+    template2 = BenchmarkProfile(
         name="Jump Height",
         created_by_id=current_user_id
     )

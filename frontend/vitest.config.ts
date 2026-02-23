@@ -7,9 +7,11 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: [],
+    setupFiles: ['./tests/setup.ts'],
     alias: {
         '@': path.resolve(__dirname, '.')
-    }
+    },
+    // Prevent Vitest from trying to run Playwright E2E tests
+    exclude: ['**/node_modules/**', '**/dist/**', '**/*.spec.ts'],
   },
 });
