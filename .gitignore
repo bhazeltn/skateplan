@@ -8,6 +8,10 @@ infra/.env
 # Ignore any backup or old env files
 *.env.bak
 *.env.old
+.claude/
+.clauderules
+GEMINI_CONTEXT.md
+
 
 # =================================================================
 # 2. DOCKER & INFRASTRUCTURE DATA
