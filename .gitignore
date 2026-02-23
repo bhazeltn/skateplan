@@ -18,11 +18,8 @@ GEMINI_CONTEXT.md
 # =================================================================
 # Ignore the actual database data and logs
 volumes/db/data/
-infra/volumes/db/data/
-infra/volumes/storage/
-infra/volumes/logs/
+infra/
 # Ignore the pgsodium/vault keys created by the DB
-infra/volumes/db/pg_stat_statements/
 /etc/postgresql-custom/
 docs/
 
