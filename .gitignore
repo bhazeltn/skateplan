@@ -20,6 +20,7 @@ infra/volumes/logs/
 # Ignore the pgsodium/vault keys created by the DB
 infra/volumes/db/pg_stat_statements/
 /etc/postgresql-custom/
+docs/
 
 # =================================================================
 # 3. BACKEND (Python/FastAPI)
