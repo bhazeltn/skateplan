@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { isAuthenticated, signOut } from '../lib/supabase';
-import ThemeToggle from '../components/ThemeToggle';
 
 export default function DashboardLayout({
   children,
@@ -69,7 +68,6 @@ export default function DashboardLayout({
             </div>
 
             <div className="flex items-center gap-4">
-              <ThemeToggle />
               <button
                 onClick={handleLogout}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"

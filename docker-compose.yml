@@ -1,57 +1,212 @@
 # ~/development/skateplan/docker-compose.yml
-
-include:
-  - path: infra/docker-compose.yml
-    env_file: infra/.env
+name: skateplan
 
 services:
+  # =================================================================
+  # 1. DATABASE (Supabase Core)
+  # =================================================================
+  db:
+    container_name: supabase-db
+    image: supabase/postgres:15.8.1.085
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    environment:
+      POSTGRES_HOST: /var/run/postgresql
+      PGPORT: 5432
+      POSTGRES_PORT: 5432
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXP: ${JWT_EXPIRY}
+    volumes:
+      - ./infra/volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
+      - ./infra/volumes/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
+      - ./infra/volumes/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z
+      - ./infra/volumes/db/data:/var/lib/postgresql/data:Z
+      - db-config:/etc/postgresql-custom
+    networks:
+      - skateplan_net
+
+  # =================================================================
+  # 2. API GATEWAY & AUTH (Supabase)
+  # =================================================================
+  kong:
+    container_name: supabase-kong
+    image: kong:2.8.1
+    restart: unless-stopped
+    ports:
+      - "${KONG_HTTP_PORT:-8080}:8000"
+      - "${KONG_HTTPS_PORT:-8443}:8443"
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /home/kong/kong.yml
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
+      DASHBOARD_USERNAME: ${DASHBOARD_USERNAME}
+      DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
+    volumes:
+      - ./infra/volumes/api/kong.yml:/home/kong/temp.yml:ro
+    entrypoint: bash -c 'eval "echo \"$$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
+    depends_on:
+      - db
+    networks:
+      - skateplan_net
+
+  auth:
+    container_name: supabase-auth
+    image: supabase/gotrue:v2.184.0
+    restart: unless-stopped
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: ${API_EXTERNAL_URL}
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      GOTRUE_SITE_URL: ${SITE_URL}
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
+      GOTRUE_JWT_EXP: ${JWT_EXPIRY}
+      GOTRUE_DB_DRIVER: postgres
+    depends_on:
+      - db
+    networks:
+      - skateplan_net
+
+  rest:
+    container_name: supabase-rest
+    image: postgrest/postgrest:v14.1
+    restart: unless-stopped
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      PGRST_DB_SCHEMAS: ${PGRST_DB_SCHEMAS:-public,storage,graphql,realtime}
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      - db
+    networks:
+      - skateplan_net
+
+  # =================================================================
+  # 3. STORAGE LAYER (S3 / Minio)
+  # =================================================================
+  minio:
+    container_name: supabase-minio
+    image: minio/minio
+    ports:
+      - '9000:9000'
+      - '9005:9001'
+    environment:
+      MINIO_ROOT_USER: supa-storage
+      MINIO_ROOT_PASSWORD: secret1234
+    command: server --console-address ":9001" /data
+    volumes:
+      - ./infra/volumes/storage:/data:z
+    networks:
+      - skateplan_net
+
+  storage:
+    container_name: supabase-storage
+    image: supabase/storage-api:v1.11.13
+    restart: unless-stopped
+    environment:
+      ANON_KEY: ${ANON_KEY}
+      SERVICE_KEY: ${SERVICE_ROLE_KEY}
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      STORAGE_BACKEND: s3
+      GLOBAL_S3_BUCKET: stub
+      GLOBAL_S3_ENDPOINT: http://minio:9000
+      GLOBAL_S3_PROTOCOL: http
+      AWS_ACCESS_KEY_ID: supa-storage
+      AWS_SECRET_ACCESS_KEY: secret1234
+    volumes:
+      - ./infra/volumes/storage:/var/lib/storage:z
+    depends_on:
+      - db
+      - minio
+    networks:
+      - skateplan_net
+
+  # =================================================================
+  # 4. TOOLS (Supabase Studio)
+  # =================================================================
+  studio:
+    container_name: supabase-studio
+    image: supabase/studio:2025.12.17-sha-43f4f7f
+    restart: unless-stopped
+    ports:
+      - "${STUDIO_PORT:-3001}:3000"
+    environment:
+      STUDIO_PG_META_URL: http://meta:8080
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      SUPABASE_URL: http://kong:8000
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
+    networks:
+      - skateplan_net
+
+  meta:
+    container_name: supabase-meta
+    image: supabase/postgres-meta:v0.95.1
+    environment:
+      PG_META_DB_HOST: db
+      PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - skateplan_net
+
+  # =================================================================
+  # 5. CUSTOM SKATEPLAN APPLICATIONS
+  # =================================================================
   backend:
-    build: ./backend
     container_name: skateplan-backend
+    build: ./backend
     restart: always
     ports:
       - "8000:8000"
-    # Added python-multipart installation just in case it's missing from requirements.txt
-    command: sh -c "pip install python-multipart && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
-    env_file:
-      - infra/.env
+    command: sh -c "pip install python-multipart pycountry && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     environment:
       - POSTGRES_SERVER=db
-      - API_EXTERNAL_URL=https://api.skateplan.bradnet.net
-      # FIX: Mapped to the actual variable names found in your infra/.env
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       - SUPABASE_URL=http://kong:8000
       - SUPABASE_KEY=${SERVICE_ROLE_KEY}
       - SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY}
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres
+      - JWT_SECRET=${JWT_SECRET}
+      - API_EXTERNAL_URL=${API_EXTERNAL_URL}
     depends_on:
       db:
         condition: service_healthy
-    networks:
-      - default
-    user: "${DOCKER_UID}:${DOCKER_GID}"
     volumes:
       - ./backend:/app
+    networks:
+      - skateplan_net
 
   frontend:
-    build: ./frontend
     container_name: skateplan-frontend
+    build: ./frontend
     restart: always
     ports:
       - "3000:3000"
-    # FIX: Corrected command to 'npx next dev'
     command: sh -c "npm install && npx next dev --webpack -H 0.0.0.0"
     environment:
-      - NEXT_PUBLIC_API_URL=https://api.skateplan.bradnet.net/api/v1
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${ANON_KEY}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
       - API_INTERNAL_URL=http://backend:8000
       - NEXT_TURBOPACK=0
     depends_on:
       - backend
-    networks:
-      - default
-    user: "${DOCKER_UID}:${DOCKER_GID}"
     volumes:
       - ./frontend:/app
+    networks:
+      - skateplan_net
 
+# =================================================================
+# SHARED RESOURCES
+# =================================================================
 networks:
-  default:
-    name: skateplan_default
+  skateplan_net:
+    name: skateplan_network
+
+volumes:
+  db-config:

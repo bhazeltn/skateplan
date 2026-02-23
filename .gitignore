@@ -1,7 +1,56 @@
+# =================================================================
+# 1. SECRETS & ENVIRONMENT (CRITICAL)
+# =================================================================
 .env
+.env.local
+.env.*.local
+infra/.env
+# Ignore any backup or old env files
+*.env.bak
+*.env.old
+
+# =================================================================
+# 2. DOCKER & INFRASTRUCTURE DATA
+# =================================================================
+# Ignore the actual database data and logs
+volumes/db/data/
+infra/volumes/db/data/
+infra/volumes/storage/
+infra/volumes/logs/
+# Ignore the pgsodium/vault keys created by the DB
+infra/volumes/db/pg_stat_statements/
+/etc/postgresql-custom/
+
+# =================================================================
+# 3. BACKEND (Python/FastAPI)
+# =================================================================
 __pycache__/
-.venv/
+*.py[cod]
+*$py.class
+.venv
+venv/
+ENV/
+.pytest_cache/
+.mypy_cache/
+
+# =================================================================
+# 4. FRONTEND (Next.js/Node)
+# =================================================================
 node_modules/
+.next/
+out/
+build/
+.vercel
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =================================================================
+# 5. OS & IDE
+# =================================================================
 .DS_Store
-*.pyc
-infra/volumes
+.idea/
+.vscode/
+*.swp
+*.swo

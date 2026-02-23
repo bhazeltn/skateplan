@@ -1,0 +1,57 @@
+# ~/development/skateplan/docker-compose.yml
+
+include:
+  - path: infra/docker-compose.yml
+    env_file: infra/.env
+
+services:
+  backend:
+    build: ./backend
+    container_name: skateplan-backend
+    restart: always
+    ports:
+      - "8000:8000"
+    # Added python-multipart installation just in case it's missing from requirements.txt
+    command: sh -c "pip install python-multipart && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    env_file:
+      - infra/.env
+    environment:
+      - POSTGRES_SERVER=db
+      - API_EXTERNAL_URL=https://api.skateplan.bradnet.net
+      # FIX: Mapped to the actual variable names found in your infra/.env
+      - SUPABASE_URL=http://kong:8000
+      - SUPABASE_KEY=${SERVICE_ROLE_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY}
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default
+    user: "${DOCKER_UID}:${DOCKER_GID}"
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    container_name: skateplan-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    # FIX: Corrected command to 'npx next dev'
+    command: sh -c "npm install && npx next dev --webpack -H 0.0.0.0"
+    environment:
+      - NEXT_PUBLIC_API_URL=https://api.skateplan.bradnet.net/api/v1
+      - API_INTERNAL_URL=http://backend:8000
+      - NEXT_TURBOPACK=0
+    depends_on:
+      - backend
+    networks:
+      - default
+    user: "${DOCKER_UID}:${DOCKER_GID}"
+    volumes:
+      - ./frontend:/app
+
+networks:
+  default:
+    name: skateplan_default

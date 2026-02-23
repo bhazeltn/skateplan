@@ -67,6 +67,11 @@ export default function MetricModal({ isOpen, onClose, metric, onSuccess }: Metr
       return;
     }
 
+    if (!description.trim()) {
+      setError('Description is required');
+      return;
+    }
+
     if (dataType === 'scale') {
       const min = parseInt(scaleMin);
       const max = parseInt(scaleMax);
@@ -182,14 +187,14 @@ export default function MetricModal({ isOpen, onClose, metric, onSuccess }: Metr
             {/* Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description (optional)
+                Description * <span className="text-xs text-gray-500">(required)</span>
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={2}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                placeholder="Brief description of what this metric measures..."
+                placeholder="Describe how this metric is measured to ensure consistency"
               />
             </div>
 

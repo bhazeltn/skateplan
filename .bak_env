@@ -1,0 +1,104 @@
+# -----------------------------------------------------------------
+# 1. CREDENTIALS & KEYS (YOU MUST CHANGE THESE)
+# -----------------------------------------------------------------
+
+# The password for the 'postgres' superuser in the database
+POSTGRES_PASSWORD=e1d8ca08642f16e55d686733c20f871a18c0ae42fe3a1dbe000580cd7f215359
+
+# Generate a JWT Secret (use `openssl rand -hex 32` or just mash your keyboard for dev)
+JWT_SECRET=3d34d1badb810d27188bec8ea7b99b1d75b5e95ea0bc1e3661e8c8aa1dba935f
+
+# Valid JWT for the 'anon' key (Public API Key)
+# In production, Supabase generates this based on JWT_SECRET.
+# For local dev, you can use this dummy key or generate a real one.
+# If this fails validation, check the Supabase docs for generating a token with role 'anon'.
+ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzY4MDIyMjU0LCJleHAiOjIwODMzODIyNTR9.OlotS4xbgq3hsLaR2-itYEdMqX9dJZeVXWQSaXZdPmU
+
+# Valid JWT for the 'service_role' key (Admin API Key - SUPER SECRET)
+SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3NjgwMjIyNTQsImV4cCI6MjA4MzM4MjI1NH0.3JJSYXh3AnyMZtp_1uR8ykvJyh25Cv0OYr7w0vur9wk
+
+# -----------------------------------------------------------------
+# 2. PORTS & NETWORKING (CRITICAL FOR SKATEPLAN)
+# -----------------------------------------------------------------
+
+# The API Gateway (Kong). We moved this from 8000 to 8080 to free up 8000 for Python.
+KONG_HTTP_PORT=8080
+KONG_HTTPS_PORT=8443
+
+# The Database Port (Postgres)
+POSTGRES_PORT=54322
+
+# The Dashboard UI (Studio)
+STUDIO_PORT=3001
+
+# The Email Sandbox (Inbucket)
+INBUCKET_PORT=54324
+
+# -----------------------------------------------------------------
+# 3. INTERNAL CONFIG (DEFAULTS ARE USUALLY FINE)
+# -----------------------------------------------------------------
+DASHBOARD_USERNAME=admin
+DASHBOARD_PASSWORD=admin
+
+# Where the data lives inside the container
+DATA_DIR=./volumes/db
+
+# API Config
+API_EXTERNAL_URL=https://supabase.skateplan.bradnet.net
+SUPABASE_PUBLIC_URL=https://supabase.skateplan.bradnet.net
+GOTRUE_URI_ALLOW_LIST=*
+GOTRUE_DISABLE_SIGNUP=false
+GOTRUE_SITE_URL=http://localhost:3000
+
+# -----------------------------------------------------------------
+# 4. MISSING DEFAULTS (REQUIRED TO PREVENT CRASHES)
+# -----------------------------------------------------------------
+
+# CRITICAL: This fixes the "empty section between colons" crash
+# On Linux (devbert), this is almost always /var/run/docker.sock
+DOCKER_SOCKET_LOCATION=/var/run/docker.sock
+
+# General Config
+SITE_URL=http://localhost:3000
+ADDITIONAL_REDIRECT_URLS=
+JWT_EXPIRY=3600
+DISABLE_SIGNUP=false
+ENABLE_EMAIL_SIGNUP=true
+ENABLE_EMAIL_AUTOCONFIRM=true
+ENABLE_PHONE_SIGNUP=true
+ENABLE_PHONE_AUTOCONFIRM=true
+ENABLE_ANONYMOUS_USERS=false
+
+# Postgres Connection Details (Internal Docker Network)
+POSTGRES_HOST=db
+POSTGRES_DB=postgres
+POSTGRES_PORT=5432
+PGRST_DB_SCHEMAS=public,storage,graphql,realtime
+
+# Mailer (SMTP) - Defaults to empty/fake for Dev
+SMTP_ADMIN_EMAIL=admin@example.com
+SMTP_HOST=supabase-mail
+SMTP_PORT=2500
+SMTP_USER=fake_mail_user
+SMTP_PASS=fake_mail_password
+SMTP_SENDER_NAME=SkatePlan_Dev
+MAILER_URLPATHS_CONFIRMATION=/auth/v1/verify
+MAILER_URLPATHS_INVITE=/auth/v1/verify
+MAILER_URLPATHS_RECOVERY=/auth/v1/verify
+MAILER_URLPATHS_EMAIL_CHANGE=/auth/v1/verify
+
+# Studio / Dashboard Config
+STUDIO_DEFAULT_ORGANIZATION=SkatePlanOrg
+STUDIO_DEFAULT_PROJECT=SkatePlanDev
+
+# Logflare (Required dummy values to prevent warnings)
+LOGFLARE_PUBLIC_ACCESS_TOKEN=your-super-secret-and-long-token-that-is-32-chars
+LOGFLARE_PRIVATE_ACCESS_TOKEN=your-super-secret-and-long-token-that-is-32-chars
+
+# Miscellaneous
+SECRETS_KEY_BASE=your-super-secret-and-long-token-that-is-32-chars
+VAULT_ENC_KEY=your-super-secret-and-long-token-that-is-32-chars
+NEXT_PUBLIC_API_URL=https://api.skateplan.bradnet.net/api/v1
+DOCKER_UID=1000
+DOCKER_GID=1000
+SUPABASE_URL=http://kong:8000

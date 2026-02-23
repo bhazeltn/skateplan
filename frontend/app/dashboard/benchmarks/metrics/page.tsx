@@ -115,11 +115,11 @@ export default function MetricsLibraryPage() {
 
   const getDataTypeDisplay = (metric: Metric) => {
     if (metric.data_type === 'numeric') {
-      return `Numeric${metric.unit ? ` | ${metric.unit}` : ''}`;
+      return `Number / Measurement${metric.unit ? ` (${metric.unit})` : ''}`;
     } else if (metric.data_type === 'scale') {
-      return `Scale | ${metric.scale_min}-${metric.scale_max}`;
+      return `Rating Scale (${metric.scale_min} - ${metric.scale_max})`;
     } else {
-      return 'Boolean';
+      return 'Yes / No (Pass / Fail)';
     }
   };
 
@@ -178,7 +178,7 @@ export default function MetricsLibraryPage() {
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       placeholder="Search metrics..."
-                      className="w-full px-3 py-2 pl-10 border border-input rounded-md"
+                      className="w-full pl-10 py-2 pr-4 border border-input rounded-md"
                     />
                     <svg
                       className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground"
