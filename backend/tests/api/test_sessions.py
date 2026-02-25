@@ -29,7 +29,6 @@ def skater(session: Session) -> Profile:
         full_name="Test Skater",
         email="skater@test.com",
         dob=date(2010, 1, 1),
-        level="Junior",
         federation="ISU",
         is_active=True
     )
@@ -40,6 +39,8 @@ def skater(session: Session) -> Profile:
     link = SkaterCoachLink(
         skater_id=skater.id,
         coach_id=TEST_COACH_ID,
+        discipline="Singles",
+        current_level="Junior",
         is_primary=True,
         permission_level="edit",
         status="active"

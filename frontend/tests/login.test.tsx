@@ -10,8 +10,13 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
-// Mock fetch
-global.fetch = vi.fn();
+const { mockSignIn } = vi.hoisted(() => ({
+  mockSignIn: vi.fn()
+}));
+
+vi.mock('../app/lib/supabase', () => ({
+  supabase: { auth: { signInWithPassword: mockSignIn } }
+}));
 
 describe('LoginPage', () => {
   it('renders login form', () => {
@@ -22,10 +27,10 @@ describe('LoginPage', () => {
   });
 
   it('submits form and redirects on success', async () => {
-    // Mock successful fetch
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ access_token: 'fake-token' }),
+    // Mock successful Supabase sign in
+    mockSignIn.mockResolvedValueOnce({
+      data: { session: { access_token: 'fake-token' } },
+      error: null,
     });
 
     render(<LoginPage />);
@@ -35,20 +40,19 @@ describe('LoginPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /Sign in/i }));
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/login/access-token'),
-        expect.objectContaining({
-          method: 'POST',
-        })
-      );
+      expect(mockSignIn).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        password: 'password',
+      });
       expect(pushMock).toHaveBeenCalledWith('/dashboard/roster');
     });
   });
 
   it('displays error message on failure', async () => {
-    // Mock failed fetch
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: false,
+    // Mock failed Supabase sign in
+    mockSignIn.mockResolvedValueOnce({
+      data: null,
+      error: new Error('Invalid login credentials'),
     });
 
     render(<LoginPage />);
@@ -58,7 +62,7 @@ describe('LoginPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /Sign in/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/Invalid credentials/i)).toBeDefined();
+      expect(screen.getByText(/Invalid login credentials/i)).toBeDefined();
     });
   });
 });

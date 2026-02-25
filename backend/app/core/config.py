@@ -11,7 +11,8 @@ class Settings(BaseSettings):
     SUPABASE_URL: str = Field(default="http://kong:8000", description="Supabase API URL")
     SUPABASE_KEY: str = Field(description="Supabase Anon Key (for client-side)")
     SUPABASE_SERVICE_ROLE_KEY: str = Field(description="Supabase Service Role Key (for backend admin operations)")
-    JWT_SECRET: str = Field(description="Supabase JWT secret for token verification")
+    JWT_SECRET: str = Field(default="test-secret-key-for-jwt", description="Supabase JWT secret for token verification")
+    JWT_ALGORITHM: str = "HS256"
     
     # Database
     POSTGRES_SERVER: str = "localhost"

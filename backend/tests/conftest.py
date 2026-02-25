@@ -71,3 +71,28 @@ def normal_user_token_headers_fixture(client: TestClient, session: Session):
     access_token = jwt.encode(token_data, settings.JWT_SECRET, algorithm="HS256")
 
     return {"Authorization": f"Bearer {access_token}"}
+
+
+@pytest.fixture(name="client")
+def client_fixture(session: Session):
+    def get_session_override():
+        return session
+
+    app.dependency_overrides[get_session] = get_session_override
+    app.dependency_overrides[get_current_user] = get_current_user_override_factory(session)
+    client = TestClient(app, raise_server_exceptions=False)
+    yield client
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture(name="client_no_auth")
+def client_no_auth_fixture(session: Session):
+    """Client fixture WITHOUT auth override - for testing unauthorized endpoints."""
+    def get_session_override():
+        return session
+
+    app.dependency_overrides[get_session] = get_session_override
+    # Do NOT override get_current_user - use real auth
+    client = TestClient(app, raise_server_exceptions=False)
+    yield client
+    app.dependency_overrides.clear()

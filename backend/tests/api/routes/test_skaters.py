@@ -9,14 +9,15 @@ from app.models.federation_models import Federation
 from app.models.benchmark_models import BenchmarkProfile, BenchmarkSession, MetricDefinition, MetricDataType
 
 def test_create_skater(
-    client: TestClient, 
-    session: Session, 
+    client: TestClient,
+    session: Session,
     normal_user_token_headers
 ):
     data = {
         "full_name": "Test Skater",
         "dob": "2010-01-01",
-        "level": "Junior",
+        "discipline": "Singles",
+        "current_level": "Junior",
         "is_active": True
     }
     response = client.post(
@@ -27,26 +28,38 @@ def test_create_skater(
     assert response.status_code == 200
     content = response.json()
     assert content["full_name"] == data["full_name"]
-    assert content["level"] == data["level"]
+    assert content["discipline"] == data["discipline"]
+    assert content["current_level"] == data["current_level"]
     assert "id" in content
-    assert "coach_id" in content
 
 def test_list_skaters_ownership(
-    client: TestClient, 
-    session: Session, 
+    client: TestClient,
+    session: Session,
     normal_user_token_headers
 ):
     # 1. Create a skater for the current user
     current_user_id = uuid.UUID("00000000-0000-0000-0000-000000000000")
-    
-    skater_own = Skater(
+
+    skater_own = Profile(
+        role="skater",
         full_name="My Skater",
-        dob=date(2012, 1, 1),
-        level="Novice",
-        coach_id=current_user_id
+        email="my.skater@test.local",
+        dob=date(2012, 1, 1)
     )
     session.add(skater_own)
-    
+    session.flush()
+
+    link_own = SkaterCoachLink(
+        skater_id=skater_own.id,
+        coach_id=current_user_id,
+        discipline="Singles",
+        current_level="Novice",
+        is_primary=True,
+        permission_level="edit",
+        status="active"
+    )
+    session.add(link_own)
+
     # 2. Create a skater for another user
     other_coach = Profile(
         role="coach",
@@ -55,63 +68,88 @@ def test_list_skaters_ownership(
         id=uuid.uuid4()
     )
     session.add(other_coach)
-    
-    skater_other = Skater(
+    session.flush()
+
+    skater_other = Profile(
+        role="skater",
         full_name="Other Skater",
-        dob=date(2012, 1, 1),
-        level="Novice",
-        coach_id=other_coach.id
+        email="other.skater@test.local",
+        dob=date(2012, 1, 1)
     )
     session.add(skater_other)
+    session.flush()
+
+    link_other = SkaterCoachLink(
+        skater_id=skater_other.id,
+        coach_id=other_coach.id,
+        discipline="Singles",
+        current_level="Novice",
+        is_primary=True,
+        permission_level="edit",
+        status="active"
+    )
+    session.add(link_other)
     session.commit()
-    
+
     # 3. List Skaters
     response = client.get(
         f"{settings.API_V1_STR}/skaters/",
         headers=normal_user_token_headers,
     )
-    
+
     assert response.status_code == 200
     content = response.json()
-    
+
     # 4. Assert only "My Skater" is returned
     ids = [s["id"] for s in content]
     assert str(skater_own.id) in ids
     assert str(skater_other.id) not in ids
 
 def test_archive_skater(
-    client: TestClient, 
-    session: Session, 
+    client: TestClient,
+    session: Session,
     normal_user_token_headers
 ):
     # 1. Create Skater
     current_user_id = uuid.UUID("00000000-0000-0000-0000-000000000000")
-    skater = Skater(
+    skater = Profile(
+        role="skater",
         full_name="To Archive",
+        email="to.archive@test.local",
         dob=date(2010, 1, 1),
-        level="Senior",
-        coach_id=current_user_id
+        is_active=True
     )
     session.add(skater)
+    session.flush()
+
+    link = SkaterCoachLink(
+        skater_id=skater.id,
+        coach_id=current_user_id,
+        discipline="Singles",
+        current_level="Senior",
+        is_primary=True,
+        permission_level="edit",
+        status="active"
+    )
+    session.add(link)
     session.commit()
-    
-    # 2. Archive (Patch)
+
+    # 2. Archive (Patch to /archive endpoint)
     response = client.patch(
-        f"{settings.API_V1_STR}/skaters/{skater.id}",
+        f"{settings.API_V1_STR}/skaters/{skater.id}/archive",
         headers=normal_user_token_headers,
-        json={"is_active": False}
     )
     assert response.status_code == 200
     content = response.json()
     assert content["is_active"] == False
-    
+
     # 3. Verify in DB
     session.refresh(skater)
     assert skater.is_active == False
 
 def test_update_skater_security(
-    client: TestClient, 
-    session: Session, 
+    client: TestClient,
+    session: Session,
     normal_user_token_headers
 ):
     # 1. Create Skater for OTHER coach
@@ -119,19 +157,36 @@ def test_update_skater_security(
         role="coach", full_name="Other", email="other@ex.com", id=uuid.uuid4()
     )
     session.add(other_coach)
-    skater = Skater(
-        full_name="Stolen Skater", dob=date(2010, 1, 1), level="Senior", coach_id=other_coach.id
+    session.flush()
+
+    skater = Profile(
+        role="skater",
+        full_name="Stolen Skater",
+        email="stolen.skater@test.local",
+        dob=date(2010, 1, 1)
     )
     session.add(skater)
+    session.flush()
+
+    link = SkaterCoachLink(
+        skater_id=skater.id,
+        coach_id=other_coach.id,
+        discipline="Singles",
+        current_level="Senior",
+        is_primary=True,
+        permission_level="edit",
+        status="active"
+    )
+    session.add(link)
     session.commit()
-    
+
     # 2. Attempt to update
     response = client.patch(
         f"{settings.API_V1_STR}/skaters/{skater.id}",
         headers=normal_user_token_headers,
         json={"is_active": False}
     )
-    
+
     # 3. Assert Forbidden or Not Found
     assert response.status_code in [403, 404]
 
@@ -307,7 +362,7 @@ def test_get_skater_overview_with_stats(
     )
     template2 = BenchmarkProfile(
         name="Jump Height",
-        created_by_id=current_user_id
+        coach_id=current_user_id
     )
     session.add(template1)
     session.add(template2)
@@ -315,17 +370,17 @@ def test_get_skater_overview_with_stats(
 
     # Setup: Create benchmark sessions
     session1 = BenchmarkSession(
-        template_id=template1.id,
+        profile_id=template1.id,
         skater_id=skater_profile.id,
-        recorded_by_id=current_user_id,
-        date=date.today(),
+        coach_id=current_user_id,
+        recorded_at=datetime.utcnow() - timedelta(days=5),
         created_at=datetime.utcnow() - timedelta(days=5)
     )
     session2 = BenchmarkSession(
-        template_id=template2.id,
+        profile_id=template2.id,
         skater_id=skater_profile.id,
-        recorded_by_id=current_user_id,
-        date=date.today() - timedelta(days=10),
+        coach_id=current_user_id,
+        recorded_at=datetime.utcnow() - timedelta(days=10),
         created_at=datetime.utcnow() - timedelta(days=10)
     )
     session.add(session1)

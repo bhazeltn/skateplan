@@ -172,7 +172,7 @@ export default function MetricModal({ isOpen, onClose, metric, onSuccess }: Metr
             {/* Metric Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Metric Name *
+                Metric Name
               </label>
               <input
                 type="text"
@@ -187,7 +187,7 @@ export default function MetricModal({ isOpen, onClose, metric, onSuccess }: Metr
             {/* Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description * <span className="text-xs text-gray-500">(required)</span>
+                Description
               </label>
               <textarea
                 value={description}
@@ -201,7 +201,7 @@ export default function MetricModal({ isOpen, onClose, metric, onSuccess }: Metr
             {/* Category */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category *
+                Category
               </label>
               <select
                 value={category}
@@ -218,26 +218,36 @@ export default function MetricModal({ isOpen, onClose, metric, onSuccess }: Metr
             {/* Data Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Data Type *
+                Data Type
               </label>
               <div className="space-y-2">
-                {DATA_TYPES.map(type => (
-                  <label key={type} className="flex items-center">
-                    <input
-                      type="radio"
-                      value={type}
-                      checked={dataType === type}
-                      onChange={(e) => setDataType(e.target.value)}
-                      className="mr-2"
-                    />
-                    <span className="text-sm text-gray-700 capitalize">{type}</span>
-                    <span className="ml-2 text-xs text-gray-500">
-                      {type === 'numeric' && '(e.g., 12.5, 85)'}
-                      {type === 'scale' && '(e.g., 1-10, 1-5)'}
-                      {type === 'boolean' && '(Yes/No, True/False)'}
-                    </span>
-                  </label>
-                ))}
+                <label className="flex flex-row items-start gap-3 p-3 border rounded-md cursor-pointer hover:bg-secondary/50">
+                  <div className="flex items-center h-5 mt-0.5">
+                    <input type="radio" name="data_type" value="numeric" className="w-4 h-4" checked={dataType === 'numeric'} onChange={(e) => setDataType(e.target.value)} />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="font-medium text-foreground">Number / Measurement</span>
+                    <span className="text-sm text-muted-foreground">(e.g., jump height, number of reps)</span>
+                  </div>
+                </label>
+                <label className="flex flex-row items-start gap-3 p-3 border rounded-md cursor-pointer hover:bg-secondary/50">
+                  <div className="flex items-center h-5 mt-0.5">
+                    <input type="radio" name="data_type" value="scale" className="w-4 h-4" checked={dataType === 'scale'} onChange={(e) => setDataType(e.target.value)} />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="font-medium text-foreground">Rating Scale</span>
+                    <span className="text-sm text-muted-foreground">(e.g., 1-10 effort level, 1-5 component score)</span>
+                  </div>
+                </label>
+                <label className="flex flex-row items-start gap-3 p-3 border rounded-md cursor-pointer hover:bg-secondary/50">
+                  <div className="flex items-center h-5 mt-0.5">
+                    <input type="radio" name="data_type" value="boolean" className="w-4 h-4" checked={dataType === 'boolean'} onChange={(e) => setDataType(e.target.value)} />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="font-medium text-foreground">Yes / No</span>
+                    <span className="text-sm text-muted-foreground">(e.g., Pass/Fail, Landed/Popped, Completed)</span>
+                  </div>
+                </label>
               </div>
             </div>
 
@@ -264,7 +274,7 @@ export default function MetricModal({ isOpen, onClose, metric, onSuccess }: Metr
             {dataType === 'scale' && (
               <div className="border border-gray-200 rounded-md p-4 bg-gray-50">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Scale Range *
+                  Scale Range
                 </label>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -298,7 +308,7 @@ export default function MetricModal({ isOpen, onClose, metric, onSuccess }: Metr
             {dataType === 'boolean' && (
               <div className="border border-gray-200 rounded-md p-4 bg-gray-50">
                 <p className="text-sm text-gray-600">
-                  Boolean metrics are answered with Yes/No or True/False.
+                  This metric is answered with Yes or No.
                   <br />
                   Examples: "Passed STAR 10 test", "Completed mental training"
                 </p>

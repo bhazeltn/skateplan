@@ -83,13 +83,15 @@ class ProfileMetric(SQLModel, table=True):
 
 class BenchmarkSession(SQLModel, table=True):
     """
-    A recorded benchmark testing session for a skater.
+    A recorded benchmark testing session for a skater or team.
     Uses a specific profile and records actual values.
+    Can be linked to either skater_id (individual) OR team_id (Ice Dance/Pairs).
     """
     __tablename__ = "benchmark_sessions"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    skater_id: uuid.UUID = Field(foreign_key="profiles.id", index=True)
+    skater_id: Optional[uuid.UUID] = Field(default=None, foreign_key="profiles.id", index=True)
+    team_id: Optional[uuid.UUID] = Field(default=None, index=True)
     profile_id: uuid.UUID = Field(foreign_key="benchmark_profiles.id", index=True)
     coach_id: uuid.UUID = Field(foreign_key="profiles.id")
     recorded_at: datetime

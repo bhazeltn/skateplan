@@ -27,6 +27,10 @@ def get_current_user(
     )
 
     try:
+        # Check if credentials are provided (FastAPI's HTTPBearer sets credentials to None if missing)
+        if credentials.credentials is None:
+            raise credentials_exception
+
         # Verify Supabase JWT token
         user_data = verify_supabase_jwt(credentials.credentials)
 
