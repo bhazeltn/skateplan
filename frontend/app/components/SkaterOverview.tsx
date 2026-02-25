@@ -1,7 +1,10 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { getAuthToken } from '../lib/supabase';
 import { QuickStatsCard } from './QuickStatsCard';
 import { FederationFlag } from './FederationFlag';
+import RecordSessionModal, { type Skater as ModalSkater, type Metric } from './benchmarks/RecordSessionModal';
 
 interface SkaterDetail {
   id: string;
@@ -47,6 +50,53 @@ export function SkaterOverview({
   onRecordBenchmark,
   onUploadAsset,
 }: SkaterOverviewProps) {
+  const [isRecordSessionOpen, setIsRecordSessionOpen] = useState(false);
+  const [metrics, setMetrics] = useState<Metric[]>([]);
+  const [profileId, setProfileId] = useState<string>('');
+  const [loadingMetrics, setLoadingMetrics] = useState(false);
+
+  // Fetch metrics when modal opens
+  useEffect(() => {
+    if (isRecordSessionOpen) {
+      fetchMetricsAndProfile();
+    }
+  }, [isRecordSessionOpen]);
+
+  const fetchMetricsAndProfile = async () => {
+    setLoadingMetrics(true);
+    try {
+      const token = await getAuthToken();
+      const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+
+      // Fetch metrics
+      const metricsResponse = await fetch(`${api_url}/metrics/`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      // Fetch user profile
+      const profileResponse = await fetch(`${api_url}/profiles/`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (metricsResponse.ok) {
+        const metricsData = await metricsResponse.json();
+        setMetrics(metricsData);
+      }
+
+      if (profileResponse.ok) {
+        const profilesData = await profileResponse.json();
+        // Use the first profile found (or could add profile selection UI)
+        if (profilesData && profilesData.length > 0) {
+          setProfileId(profilesData[0].id);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch metrics:', error);
+    } finally {
+      setLoadingMetrics(false);
+    }
+  };
+
   const calculateAge = (birthDate: string | null): number | null => {
     if (!birthDate) return null;
     const today = new Date();
@@ -178,8 +228,22 @@ export function SkaterOverview({
 
       {/* Recent Activity */}
       <div className="bg-card rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-border">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h3 className="text-lg font-medium text-foreground">Recent Activity</h3>
+          <button
+            onClick={() => setIsRecordSessionOpen(true)}
+            className="px-3 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 flex items-center gap-1.5"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Record Session
+          </button>
         </div>
         <div className="px-6 py-4">
           {recentSessions.length === 0 ? (
@@ -262,6 +326,18 @@ export function SkaterOverview({
           </button>
         )}
       </div>
+
+      {/* Record Session Modal */}
+      {profileId && (
+        <RecordSessionModal
+          isOpen={isRecordSessionOpen}
+          onClose={() => setIsRecordSessionOpen(false)}
+          initialMetrics={metrics}
+          initialSkaters={[{ id: skater.id, name: skater.full_name } as ModalSkater]}
+          initialTeams={[]}
+          profileId={profileId}
+        />
+      )}
     </div>
   );
 }
