@@ -9,13 +9,20 @@ vi.mock('../../app/lib/supabase', () => ({
 }));
 
 // Mock components - simplified versions for tests
-vi.mock('../../app/components/EquipmentList', () => ({
-  default: ({ equipment, onAdd }: any) => (
+vi.mock('../../app/components/equipment/EquipmentList', () => ({
+  default: ({ equipment, onAdd, onLogMaintenance, onEditEquipment }: any) => (
     <div data-testid="equipment-list">
+      <button data-testid="add-equipment-button" onClick={onAdd}>Add Equipment</button>
       {equipment?.length === 0 && <div data-testid="empty-state">No equipment found</div>}
       {equipment?.map((eq: any) => (
         <div key={eq.id} data-testid={`equipment-${eq.id}`} data-name={eq.name} data-type={eq.type}>
           {eq.name || `${eq.type} - ${eq.brand} ${eq.model}`}
+          <button
+            data-testid={`log-maintenance-${eq.id}`}
+            onClick={() => onLogMaintenance(eq.id, eq)}
+          >
+            Log Maintenance
+          </button>
         </div>
       ))}
     </div>
@@ -87,9 +94,9 @@ vi.mock('../../app/components/MaintenanceModal', () => ({
   ) : null,
 }));
 
-import EquipmentList from '../../app/components/EquipmentList';
-import AddEquipmentModal from '../../app/components/AddEquipmentModal';
-import MaintenanceModal from '../../app/components/MaintenanceModal';
+import EquipmentList from '../../app/components/equipment/EquipmentList';
+import AddEquipmentModal from '../../app/components/equipment/AddEquipmentModal';
+import MaintenanceModal from '../../app/components/equipment/MaintenanceModal';
 
 // Global fetch mock
 const mockFetch = vi.fn() as any;
@@ -141,7 +148,7 @@ describe('Equipment Module - EquipmentList', () => {
     );
 
     // Should render equipment items
-    const equipmentItems = screen.getAllByTestId(/equipment-/);
+    const equipmentItems = screen.getAllByTestId(/^equipment-eq-/);
     expect(equipmentItems.length).toBe(2);
     expect(screen.getByTestId('equipment-eq-1')).toBeInTheDocument();
     expect(screen.getByTestId('equipment-eq-2')).toBeInTheDocument();

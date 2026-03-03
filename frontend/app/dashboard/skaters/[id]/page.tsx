@@ -212,6 +212,7 @@ export default function SkaterProfilePage() {
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="gap-analysis">Gap Analysis</TabsTrigger>
+              <TabsTrigger value="equipment">Equipment</TabsTrigger>
               <TabsTrigger value="assets">Assets</TabsTrigger>
             </TabsList>
 
@@ -335,6 +336,11 @@ export default function SkaterProfilePage() {
             {/* Gap Analysis Tab */}
             <TabsContent value="gap-analysis">
               <GapAnalysisView skaterId={skaterId} editable={true} />
+            </TabsContent>
+
+            {/* Equipment Tab */}
+            <TabsContent value="equipment">
+              <EquipmentList skaterId={skaterId} />
             </TabsContent>
 
             {/* Assets Tab */}
