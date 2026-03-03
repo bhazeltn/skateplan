@@ -64,6 +64,44 @@ export type CompetitionLevel =
 // Asset types
 export type AssetType = 'music' | 'costume' | 'choreography' | 'video' | 'technical';
 
+// Equipment types
+export type EquipmentType = 'boot' | 'blade';
+
+export interface Equipment {
+  id: UUID;
+  skater_id: UUID;
+  name: string | null;
+  type: EquipmentType;
+  brand: string;
+  model: string;
+  size: string;
+  purchase_date: string | null;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+// Maintenance types
+export type MaintenanceType =
+  | 'sharpening'
+  | 'mounting'
+  | 'waterproofing'
+  | 'repair'
+  | 'replacement'
+  | 'other';
+
+export interface MaintenanceLog {
+  id: UUID;
+  equipment_id: UUID;
+  date: string;
+  maintenance_type: MaintenanceType;
+  location: string;
+  technician: string | null;
+  specifications: string | null;
+  notes: string | null;
+  created_at: Date;
+}
+
 // Form state types
 export interface SkaterFormData {
   full_name: string;
@@ -78,4 +116,23 @@ export interface ProfileFormData {
   home_club: string;
   training_site: string;
   federation: Profile['federation'];
+}
+
+export interface EquipmentFormData {
+  name: string | null;
+  type: EquipmentType;
+  brand: string;
+  model: string;
+  size: string;
+  purchase_date: string | null;
+  is_active: boolean;
+}
+
+export interface MaintenanceFormData {
+  date: string;
+  maintenance_type: MaintenanceType;
+  location: string;
+  technician: string | null;
+  specifications: string | null;
+  notes: string | null;
 }

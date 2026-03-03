@@ -9,6 +9,7 @@ import { FederationFlag } from '../../../components/FederationFlag';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/Tabs';
 import { SkaterOverview } from '../../../components/SkaterOverview';
 import GapAnalysisView from '../../../components/gap-analysis/GapAnalysisView';
+import EquipmentList from '../../../components/equipment/EquipmentList';
 
 interface Skater {
   id: string;
@@ -61,7 +62,7 @@ export default function SkaterProfilePage() {
   const fetchSkater = async () => {
     try {
       const token = await getAuthToken();
-      const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000/api/v1';
+      const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
       const res = await fetch(`${api_url}/skaters/${skaterId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -84,7 +85,7 @@ export default function SkaterProfilePage() {
   const fetchOverview = async () => {
     try {
       const token = await getAuthToken();
-      const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000/api/v1';
+      const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
       const res = await fetch(`${api_url}/skaters/${skaterId}/overview`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -106,7 +107,7 @@ export default function SkaterProfilePage() {
   const fetchGapAnalysis = async () => {
     try {
       const token = await getAuthToken();
-      const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000/api/v1';
+      const api_url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
       const res = await fetch(`${api_url}/skaters/${skaterId}/gap-analysis`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -211,7 +212,6 @@ export default function SkaterProfilePage() {
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="gap-analysis">Gap Analysis</TabsTrigger>
-              <TabsTrigger value="benchmarks">Benchmarks</TabsTrigger>
               <TabsTrigger value="assets">Assets</TabsTrigger>
             </TabsList>
 
@@ -224,10 +224,6 @@ export default function SkaterProfilePage() {
                 assetCount={assetCount}
                 recentSessions={recentSessions}
                 onEditProfile={() => setIsEditModalOpen(true)}
-                onRecordBenchmark={() => {
-                  // TODO: Navigate to benchmark recording or open modal
-                  console.log('Record benchmark clicked');
-                }}
                 onUploadAsset={() => {
                   // TODO: Navigate to assets tab or open upload modal
                   console.log('Upload asset clicked');
@@ -339,35 +335,6 @@ export default function SkaterProfilePage() {
             {/* Gap Analysis Tab */}
             <TabsContent value="gap-analysis">
               <GapAnalysisView skaterId={skaterId} editable={true} />
-            </TabsContent>
-
-            {/* Benchmarks Tab */}
-            <TabsContent value="benchmarks">
-              <div className="bg-card shadow sm:rounded-lg">
-                <div className="px-4 py-5 border-b border-border sm:px-6">
-                  <h3 className="text-lg font-medium leading-6 text-foreground">Benchmarks & Goals</h3>
-                </div>
-                <div className="px-4 py-5 sm:p-6">
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <div className="p-4 border rounded-md">
-                      <h4 className="font-bold text-foreground">Pre-Novice Standards</h4>
-                      <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-                        <li className="flex justify-between">
-                          <span>Vertical Jump</span>
-                          <span className="font-medium text-foreground">Target: 14"</span>
-                        </li>
-                        <li className="flex justify-between">
-                          <span>Double Axel</span>
-                          <span className="font-medium text-foreground">Target: Consist.</span>
-                        </li>
-                      </ul>
-                    </div>
-                    <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md text-muted-foreground cursor-pointer hover:border-primary hover:text-primary">
-                      + Create New Benchmark Profile
-                    </div>
-                  </div>
-                </div>
-              </div>
             </TabsContent>
 
             {/* Assets Tab */}
