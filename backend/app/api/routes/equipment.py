@@ -11,7 +11,6 @@ from pydantic import BaseModel, Field
 
 from app.api.deps import get_session, get_current_user
 from app.models.user_models import Profile
-from app.models.skater_models import Skater
 from app.models.equipment_models import (
     Equipment,
     EquipmentType,
@@ -78,9 +77,9 @@ class MaintenanceRead(BaseModel):
 def _get_skater_or_404(
     skater_id: uuid.UUID,
     session: Session
-) -> Skater:
+) -> Profile:
     """Get skater or raise 404 if not found."""
-    stmt = select(Skater).where(Skater.id == skater_id)
+    stmt = select(Profile).where(Profile.id == skater_id, Profile.role == 'skater')
     skater = session.exec(stmt).first()
     if not skater:
         raise HTTPException(status_code=404, detail="Skater not found")
