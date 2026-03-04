@@ -35,7 +35,7 @@ def test_create_equipment_boot(
 
     Expected: 201 status, returns created equipment ID.
     """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-000000000000000000")
+    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-000000000000")
 
     # Create a test skater profile
     skater = Profile(
@@ -88,7 +88,7 @@ def test_create_equipment_blade(
 
     Expected: 201 status, returns created equipment ID.
     """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-000000000000000")
+    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-000000000000")
 
     skater = Profile(
         role="skater",
@@ -116,7 +116,7 @@ def test_create_equipment_blade(
         }
     )
 
-    assert response.status_code == 201, f"Expected 201 for blade, got {blade_response.status_code}"
+    assert response.status_code == 201, f"Expected 201, got {blade_response.status_code}"
     data = response.json()
     assert "id" in data
     assert data["name"] == "Freeskate Blades"
@@ -152,7 +152,7 @@ def test_create_equipment_for_nonexistent_skater_fails(
 
     assert response.status_code == 404, f"Expected 404, got {response.status_code}: {response.text}"
     data = response.json()
-    assert "not found" in str(data.get("detail", "")).lower()
+    assert "not found" in str(data.get("detail", "").lower()
 
 
 def test_retrieve_skater_equipment(
@@ -166,7 +166,7 @@ def test_retrieve_skater_equipment(
 
     Expected: 200 status, list of skater's equipment (boots and blades).
     """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-0000-000000000000000")
+    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-000000")
 
     # Create a test skater profile
     skater = Profile(
@@ -207,13 +207,13 @@ def test_create_maintenance_log_sharpening(
     - date: when maintenance occurred
     - maintenance_type: 'sharpening', 'mounting', 'waterproofing', etc.
     - location: where service was performed
-    - technician: optional - who performed => service
+    - technician: optional - who performed
     - specifications: details like hollow, profile for sharpening
     - notes: optional notes
 
     Expected: 201 status, returns created log ID.
     """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-000000000000")
+    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-000000000")
 
     # Create skater profile and equipment
     skater = Profile(
@@ -277,7 +277,7 @@ def test_create_maintenance_log_mounting(
 
     Expected: 201 status, maintenance logged correctly.
     """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-0000-000000000000000")
+    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-000000")
 
     skater = Profile(
         role="skater",
@@ -336,7 +336,7 @@ def test_create_maintenance_log_waterproofing(
 
     Expected: 201 status, maintenance logged correctly.
     """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-0000-000000000000000000")
+    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-000000000")
 
     skater = Profile(
         role="skater",
@@ -418,7 +418,7 @@ def test_retrieve_maintenance_history(
 
     Expected: 200 status, chronological list of maintenance logs.
     """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-0000-0000-0000-000000000000000000")
+    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-000000000")
 
     skater = Profile(
         role="skater",
@@ -450,6 +450,7 @@ def test_retrieve_maintenance_history(
         headers=normal_user_token_headers
     )
 
+    # Expected to return 200 with empty list (since no maintenance logs created via DB)
     assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
     data = response.json()
     assert isinstance(data, list), "Response should be a list of maintenance logs"
@@ -466,7 +467,7 @@ def test_maintenance_history_chronological_order(
 
     Expected: 200 status, logs ordered by date (newest first or oldest first).
     """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-0000-0000-000000000000000000")
+    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-000000000")
 
     skater = Profile(
         role="skater",
@@ -506,7 +507,7 @@ def test_maintenance_history_chronological_order(
         maintenance_type="sharpening",
         location="Pro Shop B",
         specifications="Second sharpening"
-    )
+        )
     log3 = MaintenanceLog(
         equipment_id=equipment.id,
         date=datetime(2024, 3, 10),
@@ -514,6 +515,7 @@ def test_maintenance_history_chronological_order(
         location="Pro Shop C",
         specifications="Third sharpening"
         )
+
     session.add_all([log1, log2, log3])
     session.commit()
 
@@ -522,7 +524,7 @@ def test_maintenance_history_chronological_order(
         headers=normal_user_token_headers
         )
 
-    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.status_code}: {response.text}"
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
     data = response.json()
     assert isinstance(data, list)
     # Verify chronological order (newest first)
@@ -555,13 +557,12 @@ def test_create_equipment_without_auth_fails(
         }
     )
 
-    assert response.status_code == 401, f"Expected 401, got {response.status_code}: {response.status_code}: {response.text}"
+    assert response.status_code == 401, f"Expected 401, got {response.status_code}: {response.status_code}: {response.status_code}: {response.text}"
 
 
 def test_create_maintenance_without_auth_fails(
     client_no_auth: TestClient,
     session: Session
-):
 ):
     """Test that creating maintenance logs without authentication fails (401).
 
@@ -571,7 +572,6 @@ def test_create_maintenance_without_auth_fails(
 
     response = client_no_auth.post(
         f"{settings.API_V1_STR}/equipment/{fake_equipment_id}/maintenance",
-        headers=normal_user_token_headers,
         json={
             "date": "2024-03-01",
             "maintenance_type": "sharpening",
@@ -580,7 +580,7 @@ def test_create_maintenance_without_auth_fails(
         }
     )
 
-    assert response.status_code == 401, f"Expected 401, got {response.status_code}: {response.status_code}: {response.text}"
+    assert response.status_code == 401, f"Expected 401, got {response.status_code}: {response.status_code}: {response.status_code}: {response.status_code}: {response.status_code}"
 
 
 def test_create_equipment_invalid_type_fails(
@@ -588,12 +588,11 @@ def test_create_equipment_invalid_type_fails(
     session: Session,
     normal_user_token_headers
 ):
-):
     """Test that creating equipment with invalid type fails validation (422).
 
     Type must be either 'boot' or 'blade'.
     """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-0000-0000-000000000000000000")
+    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-000000000")
 
     skater = Profile(
         role="skater",
@@ -621,7 +620,7 @@ def test_create_equipment_invalid_type_fails(
         }
     )
 
-    assert response.status_code == 422, f"Expected 422, got {response.status_code}: {response.status_code}: {response.text}"
+    assert response.status_code == 422, f"Expected 422, got {response.status_code}: {response.status_code}: {response.status_code}: {response.status_code}: {response.status_code}: {response.status_code}: {response.status_code}"
 
 
 def test_create_maintenance_invalid_type_fails(
@@ -629,12 +628,11 @@ def test_create_maintenance_invalid_type_fails(
     session: Session,
     normal_user_token_headers
 ):
-):
     """Test that creating maintenance with invalid type fails validation (422).
 
     Type must be one of: 'sharpening', 'mounting', 'waterproofing', etc.
     """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-0000-0000-0000-0000-000000000000000000")
+    current_user_id = uuid.UUID("00000-00000-0000-0000-0000-0000-0000-000000000000000")
 
     skater = Profile(
         role="skater",
@@ -643,7 +641,7 @@ def test_create_maintenance_invalid_type_fails(
         dob=date(2010, 1, 1),
         level="Junior",
         is_active=True
-    )
+        )
 
     session.add(skater)
     session.commit()
@@ -661,7 +659,7 @@ def test_create_maintenance_invalid_type_fails(
         }
     )
 
-    assert response.status_code == 422, f"Expected 422, got {response.status_code}: {response.status_code}: {response.text}"
+    assert response.status_code == 422, f"Expected 422, got {response.status_code}: {response.status_code}: {response.status_code}: {response.status_code}: {response.status_code}"
 
 
 # ==================== Skate Setup Tests ====================
@@ -681,7 +679,7 @@ def test_create_skate_setup_boot_and_blade(
 
     Expected: 201 status, returns created skate setup with boot_id and blade_id.
     """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-0000-0000-0000-0000-0000-000000000000000000")
+    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-000000000000")
 
     # Create a test skater profile
     skater = Profile(
@@ -755,14 +753,13 @@ def test_retrieve_skate_setups(
     session: Session,
     normal_user_token_headers
 ):
-):
     """Test retrieving all skate setups for a skater.
 
     GET /skaters/{skater_id}/skates
 
     Expected: 200 status, list of skate setups with nested boot and blade objects.
     """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-0000-0000-0000-0000-0000-000000000000000000")
+    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-000000000")
 
     # Create a test skater profile
     skater = Profile(
@@ -825,9 +822,9 @@ def test_retrieve_skate_setups(
     response = client.get(
         f"{settings.API_V1_STR}/skaters/{skater.id}/skates",
         headers=normal_user_token_headers
-        )
+    )
 
-    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.status_code}"
     data = response.json()
     assert isinstance(data, list), "Response should be a list of skate setups"
     assert len(data) == 1, "Should have one skate setup"
@@ -844,16 +841,15 @@ def test_update_skate_setup_swap_blade(
     session: Session,
     normal_user_token_headers
 ):
-):
-    """Test updating a Skate Setup by swapping blades.
+    """Test updating a Skate Setup by swapping blade.
 
     Create initial boot and blade, then a Skate Setup.
     Create a second blade.
-    PUT /skates/{skate_id} to swap to blade.
+    PUT /skates/{skate_id}/skates/{skate_id} to swap to blade.
 
-    Expected: 200 status, setup now reflects= new blade_id.
+    Expected: 200 status, setup now reflects the new blade_id.
     """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-0000-0000-0000-0000-0000-0000-0000-000000000000000")
+    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-000000000")
 
     # Create a test skater profile
     skater = Profile(
@@ -878,7 +874,8 @@ def test_update_skate_setup_swap_blade(
             "size": "7.0",
             "is_active": True
         }
-    )
+        )
+
     boot_id = boot_response.json()["id"]
 
     # Create initial blade
@@ -892,7 +889,7 @@ def test_update_skate_setup_swap_blade(
             "size": "9.75",
             "is_active": True
         }
-    )
+        )
 
     blade_id_1 = blade1_response.json()["id"]
 
@@ -906,7 +903,7 @@ def test_update_skate_setup_swap_blade(
             "blade_id": str(blade_id_1),
             "is_active": True
         }
-    )
+        )
 
     skate_setup_id = skate_setup_response.json()["id"]
 
@@ -921,11 +918,11 @@ def test_update_skate_setup_swap_blade(
             "size": "9.75",
             "is_active": True
         }
-    )
+        )
 
     blade_id_2 = blade2_response.json()["id"]
 
-    # Update Skate Setup with a new blade
+    # Update to Skate Setup with a new blade
     update_response = client.put(
         f"{settings.API_V1_STR}/skaters/{skater.id}/skates/{skate_setup_id}",
         headers=normal_user_token_headers,
