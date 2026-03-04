@@ -3,9 +3,6 @@ from datetime import date
 from typing import List, Optional
 from sqlmodel import Field, SQLModel, Relationship
 
-if True:  # TYPE_CHECKING
-    from app.models.equipment_models import Equipment
-
 class SkaterBase(SQLModel):
     full_name: str
     dob: date
@@ -16,9 +13,6 @@ class Skater(SkaterBase, table=True):
     __tablename__ = "skaters"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     coach_id: uuid.UUID = Field(foreign_key="profiles.id", index=True)
-
-    # Relationships
-    equipment: List["Equipment"] = Relationship(back_populates="skater")
 
 class SkaterCreate(SkaterBase):
     pass

@@ -15,7 +15,7 @@ from app.models.equipment_models import (
     Equipment,
     EquipmentType,
     MaintenanceLog,
-    MaintenanceType
+    MaintenanceType, SkateSetup
 )
 
 router = APIRouter()
@@ -70,6 +70,28 @@ class MaintenanceRead(BaseModel):
     specifications: Optional[str]
     notes: Optional[str]
     created_at: datetime
+
+class SkateSetupCreate(BaseModel):
+    name: str = Field(max_length=100)
+    boot_id: str
+    blade_id: str
+    is_active: bool = True
+
+class SkateSetupRead(BaseModel):
+    id: str
+    skater_id: str
+    name: str
+    boot_id: str
+    blade_id: str
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+class SkateSetupUpdate(BaseModel):
+    name: Optional[str] = None
+    boot_id: Optional[str] = None
+    blade_id: Optional[str] = None
+    is_active: Optional[bool] = None
 
 
 # ==================== Helper Functions ====================
@@ -294,3 +316,104 @@ def get_maintenance_history(
     logs = session.exec(stmt).all()
 
     return [_maintenance_to_read(log) for log in logs]
+
+@router.post(
+    "/skaters/{skater_id}/skates",
+    response_model=SkateSetupRead,
+    status_code=status.HTTP_201_CREATED
+)
+def create_skate_setup(
+    *,
+    session: Session = Depends(get_session),
+    skater_id: uuid.UUID,
+    setup_in: SkateSetupCreate,
+    current_user: Profile = Depends(get_current_user)
+) -> SkateSetupRead:
+    """Create a new skate setup linking a boot and blade."""
+    _get_skater_or_404(skater_id, session)
+    
+    # Verify equipment exists
+    _get_equipment_or_404(uuid.UUID(setup_in.boot_id), session)
+    _get_equipment_or_404(uuid.UUID(setup_in.blade_id), session)
+
+    setup = SkateSetup(
+        skater_id=skater_id,
+        name=setup_in.name,
+        boot_id=uuid.UUID(setup_in.boot_id),
+        blade_id=uuid.UUID(setup_in.blade_id),
+        is_active=setup_in.is_active
+    )
+    
+    session.add(setup)
+    session.commit()
+    session.refresh(setup)
+    
+    return SkateSetupRead(
+        id=str(setup.id), skater_id=str(setup.skater_id),
+        name=setup.name, boot_id=str(setup.boot_id),
+        blade_id=str(setup.blade_id), is_active=setup.is_active,
+        created_at=setup.created_at, updated_at=setup.updated_at
+    )
+
+
+@router.get("/skaters/{skater_id}/skates", response_model=List[SkateSetupRead])
+def get_skate_setups(
+    *,
+    session: Session = Depends(get_session),
+    skater_id: uuid.UUID,
+    current_user: Profile = Depends(get_current_user)
+) -> List[SkateSetupRead]:
+    """Get all skate setups for a skater."""
+    _get_skater_or_404(skater_id, session)
+
+    stmt = select(SkateSetup).where(SkateSetup.skater_id == skater_id).order_by(SkateSetup.created_at.desc())
+    setups = session.exec(stmt).all()
+
+    return [
+        SkateSetupRead(
+            id=str(s.id), skater_id=str(s.skater_id), name=s.name,
+            boot_id=str(s.boot_id), blade_id=str(s.blade_id),
+            is_active=s.is_active, created_at=s.created_at, updated_at=s.updated_at
+        ) for s in setups
+    ]
+
+
+@router.put("/skaters/{skater_id}/skates/{skate_id}", response_model=SkateSetupRead)
+def update_skate_setup(
+    *,
+    session: Session = Depends(get_session),
+    skater_id: uuid.UUID,
+    skate_id: uuid.UUID,
+    setup_in: SkateSetupUpdate,
+    current_user: Profile = Depends(get_current_user)
+) -> SkateSetupRead:
+    """Update a skate setup (e.g., swapping a blade)."""
+    _get_skater_or_404(skater_id, session)
+
+    stmt = select(SkateSetup).where(SkateSetup.id == skate_id, SkateSetup.skater_id == skater_id)
+    setup = session.exec(stmt).first()
+    if not setup:
+        raise HTTPException(status_code=404, detail="Skate setup not found")
+
+    if setup_in.name is not None:
+        setup.name = setup_in.name
+    if setup_in.boot_id is not None:
+        _get_equipment_or_404(uuid.UUID(setup_in.boot_id), session)
+        setup.boot_id = uuid.UUID(setup_in.boot_id)
+    if setup_in.blade_id is not None:
+        _get_equipment_or_404(uuid.UUID(setup_in.blade_id), session)
+        setup.blade_id = uuid.UUID(setup_in.blade_id)
+    if setup_in.is_active is not None:
+        setup.is_active = setup_in.is_active
+
+    setup.updated_at = datetime.utcnow()
+    session.add(setup)
+    session.commit()
+    session.refresh(setup)
+
+    return SkateSetupRead(
+        id=str(setup.id), skater_id=str(setup.skater_id),
+        name=setup.name, boot_id=str(setup.boot_id),
+        blade_id=str(setup.blade_id), is_active=setup.is_active,
+        created_at=setup.created_at, updated_at=setup.updated_at
+    )

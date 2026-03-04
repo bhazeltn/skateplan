@@ -23,20 +23,7 @@ def test_create_equipment_boot(
     session: Session,
     normal_user_token_headers
 ):
-    """Test creating a boot equipment record.
-
-    POST to /skaters/{skater_id}/equipment with:
-    - type: 'boot' (or 'blade')
-    - brand: manufacturer name
-    - model: equipment model
-    - size: equipment size
-    - purchase_date: when equipment was purchased
-    - is_active: boolean flag
-
-    Expected: 201 status, returns created equipment ID.
-    """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-000000000000")
-
+    """Test creating a boot equipment record."""
     # Create a test skater profile
     skater = Profile(
         role="skater",
@@ -82,14 +69,7 @@ def test_create_equipment_blade(
     session: Session,
     normal_user_token_headers
 ):
-    """Test creating a blade equipment record.
-
-    POST to /skaters/{skater_id}/equipment with type='blade'.
-
-    Expected: 201 status, returns created equipment ID.
-    """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-000000000000")
-
+    """Test creating a blade equipment record."""
     skater = Profile(
         role="skater",
         full_name="Test Skater",
@@ -116,7 +96,7 @@ def test_create_equipment_blade(
         }
     )
 
-    assert response.status_code == 201, f"Expected 201, got {blade_response.status_code}"
+    assert response.status_code == 201, f"Expected 201, got {response.status_code}"
     data = response.json()
     assert "id" in data
     assert data["name"] == "Freeskate Blades"
@@ -130,10 +110,7 @@ def test_create_equipment_for_nonexistent_skater_fails(
     session: Session,
     normal_user_token_headers
 ):
-    """Test that creating equipment for a non-existent skater fails (404).
-
-    Validation should reject equipment creation for skaters that don't exist.
-    """
+    """Test that creating equipment for a non-existent skater fails (404)."""
     fake_skater_id = uuid.uuid4()
 
     response = client.post(
@@ -152,7 +129,7 @@ def test_create_equipment_for_nonexistent_skater_fails(
 
     assert response.status_code == 404, f"Expected 404, got {response.status_code}: {response.text}"
     data = response.json()
-    assert "not found" in str(data.get("detail", "").lower()
+    assert "not found" in str(data.get("detail", "")).lower()
 
 
 def test_retrieve_skater_equipment(
@@ -160,15 +137,7 @@ def test_retrieve_skater_equipment(
     session: Session,
     normal_user_token_headers
 ):
-    """Test retrieving all equipment for a specific skater.
-
-    GET to /skaters/{skater_id}/equipment
-
-    Expected: 200 status, list of skater's equipment (boots and blades).
-    """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-000000")
-
-    # Create a test skater profile
+    """Test retrieving all equipment for a specific skater."""
     skater = Profile(
         role="skater",
         full_name="Test Skater",
@@ -180,17 +149,11 @@ def test_retrieve_skater_equipment(
     session.add(skater)
     session.flush()
 
-    # Note: Direct DB creation here since POST endpoint doesn't exist yet
-    # Once implemented, these should be replaced with actual POST calls
-    # For TDD, we're just testing GET endpoint behavior
-
-    # Retrieve equipment for skater
     response = client.get(
         f"{settings.API_V1_STR}/skaters/{skater.id}/equipment",
         headers=normal_user_token_headers
     )
 
-    # Expected to return 200 with empty list (since no equipment created via DB)
     assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
     data = response.json()
     assert isinstance(data, list), "Response should be a list of equipment"
@@ -201,21 +164,7 @@ def test_create_maintenance_log_sharpening(
     session: Session,
     normal_user_token_headers
 ):
-    """Test logging a maintenance event (sharpening).
-
-    POST to /equipment/{equipment_id}/maintenance with:
-    - date: when maintenance occurred
-    - maintenance_type: 'sharpening', 'mounting', 'waterproofing', etc.
-    - location: where service was performed
-    - technician: optional - who performed
-    - specifications: details like hollow, profile for sharpening
-    - notes: optional notes
-
-    Expected: 201 status, returns created log ID.
-    """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-000000000")
-
-    # Create skater profile and equipment
+    """Test logging a maintenance event (sharpening)."""
     skater = Profile(
         role="skater",
         full_name="Test Skater",
@@ -227,7 +176,6 @@ def test_create_maintenance_log_sharpening(
     session.add(skater)
     session.flush()
 
-    # Create equipment first
     from app.models.equipment_models import Equipment
     equipment = Equipment(
         skater_id=skater.id,
@@ -241,7 +189,6 @@ def test_create_maintenance_log_sharpening(
     session.add(equipment)
     session.commit()
 
-    # Log a sharpening maintenance
     response = client.post(
         f"{settings.API_V1_STR}/equipment/{equipment.id}/maintenance",
         headers=normal_user_token_headers,
@@ -271,14 +218,7 @@ def test_create_maintenance_log_mounting(
     session: Session,
     normal_user_token_headers
 ):
-    """Test logging a blade mounting maintenance event.
-
-    POST to /equipment/{equipment_id}/maintenance with type='mounting'.
-
-    Expected: 201 status, maintenance logged correctly.
-    """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-000000")
-
+    """Test logging a blade mounting maintenance event."""
     skater = Profile(
         role="skater",
         full_name="Test Skater",
@@ -330,14 +270,7 @@ def test_create_maintenance_log_waterproofing(
     session: Session,
     normal_user_token_headers
 ):
-    """Test logging a boot waterproofing maintenance event.
-
-    POST to /equipment/{equipment_id}/maintenance with type='waterproofing'.
-
-    Expected: 201 status, maintenance logged correctly.
-    """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-000000000")
-
+    """Test logging a boot waterproofing maintenance event."""
     skater = Profile(
         role="skater",
         full_name="Test Skater",
@@ -385,10 +318,7 @@ def test_create_maintenance_log_for_nonexistent_equipment_fails(
     session: Session,
     normal_user_token_headers
 ):
-    """Test that logging maintenance for non-existent equipment fails (404).
-
-    Validation should reject maintenance logs for equipment that doesn't exist.
-    """
+    """Test that logging maintenance for non-existent equipment fails (404)."""
     fake_equipment_id = uuid.uuid4()
 
     response = client.post(
@@ -404,7 +334,7 @@ def test_create_maintenance_log_for_nonexistent_equipment_fails(
 
     assert response.status_code == 404, f"Expected 404, got {response.status_code}: {response.text}"
     data = response.json()
-    assert "not found" in str(data.get("detail", "").lower()
+    assert "not found" in str(data.get("detail", "")).lower()
 
 
 def test_retrieve_maintenance_history(
@@ -412,14 +342,7 @@ def test_retrieve_maintenance_history(
     session: Session,
     normal_user_token_headers
 ):
-    """Test retrieving maintenance history for a specific equipment.
-
-    GET to /equipment/{equipment_id}/maintenance
-
-    Expected: 200 status, chronological list of maintenance logs.
-    """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-000000000")
-
+    """Test retrieving maintenance history for a specific equipment."""
     skater = Profile(
         role="skater",
         full_name="Test Skater",
@@ -444,13 +367,11 @@ def test_retrieve_maintenance_history(
     session.add(equipment)
     session.commit()
 
-    # Retrieve maintenance history for equipment
     response = client.get(
         f"{settings.API_V1_STR}/equipment/{equipment.id}/maintenance",
         headers=normal_user_token_headers
     )
 
-    # Expected to return 200 with empty list (since no maintenance logs created via DB)
     assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
     data = response.json()
     assert isinstance(data, list), "Response should be a list of maintenance logs"
@@ -461,14 +382,7 @@ def test_maintenance_history_chronological_order(
     session: Session,
     normal_user_token_headers
 ):
-    """Test that maintenance history is returned in chronological order.
-
-    GET to /equipment/{equipment_id}/maintenance
-
-    Expected: 200 status, logs ordered by date (newest first or oldest first).
-    """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-000000000")
-
+    """Test that maintenance history is returned in chronological order."""
     skater = Profile(
         role="skater",
         full_name="Test Skater",
@@ -507,14 +421,14 @@ def test_maintenance_history_chronological_order(
         maintenance_type="sharpening",
         location="Pro Shop B",
         specifications="Second sharpening"
-        )
+    )
     log3 = MaintenanceLog(
         equipment_id=equipment.id,
         date=datetime(2024, 3, 10),
         maintenance_type="sharpening",
         location="Pro Shop C",
         specifications="Third sharpening"
-        )
+    )
 
     session.add_all([log1, log2, log3])
     session.commit()
@@ -522,14 +436,12 @@ def test_maintenance_history_chronological_order(
     response = client.get(
         f"{settings.API_V1_STR}/equipment/{equipment.id}/maintenance",
         headers=normal_user_token_headers
-        )
+    )
 
     assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
     data = response.json()
     assert isinstance(data, list)
-    # Verify chronological order (newest first)
     assert len(data) == 3
-    # Verify dates are in descending order
     dates = [log["date"] for log in data]
     assert dates == sorted(dates, reverse=True)
 
@@ -538,10 +450,7 @@ def test_create_equipment_without_auth_fails(
     client_no_auth: TestClient,
     session: Session
 ):
-    """Test that creating equipment without authentication fails (401).
-
-    Authentication should be required for equipment management.
-    """
+    """Test that creating equipment without authentication fails (401)."""
     fake_skater_id = uuid.uuid4()
 
     response = client_no_auth.post(
@@ -556,18 +465,14 @@ def test_create_equipment_without_auth_fails(
             "is_active": True
         }
     )
-
-    assert response.status_code == 401, f"Expected 401, got {response.status_code}: {response.status_code}: {response.status_code}: {response.text}"
+    assert response.status_code == 401
 
 
 def test_create_maintenance_without_auth_fails(
     client_no_auth: TestClient,
     session: Session
 ):
-    """Test that creating maintenance logs without authentication fails (401).
-
-    Authentication should be required for maintenance logging.
-    """
+    """Test that creating maintenance logs without authentication fails (401)."""
     fake_equipment_id = uuid.uuid4()
 
     response = client_no_auth.post(
@@ -579,8 +484,7 @@ def test_create_maintenance_without_auth_fails(
             "specifications": "Hollow: 7/16"
         }
     )
-
-    assert response.status_code == 401, f"Expected 401, got {response.status_code}: {response.status_code}: {response.status_code}: {response.status_code}: {response.status_code}"
+    assert response.status_code == 401
 
 
 def test_create_equipment_invalid_type_fails(
@@ -588,12 +492,7 @@ def test_create_equipment_invalid_type_fails(
     session: Session,
     normal_user_token_headers
 ):
-    """Test that creating equipment with invalid type fails validation (422).
-
-    Type must be either 'boot' or 'blade'.
-    """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-000000000")
-
+    """Test that creating equipment with invalid type fails validation (422)."""
     skater = Profile(
         role="skater",
         full_name="Test Skater",
@@ -602,7 +501,6 @@ def test_create_equipment_invalid_type_fails(
         level="Junior",
         is_active=True
     )
-
     session.add(skater)
     session.commit()
 
@@ -619,8 +517,7 @@ def test_create_equipment_invalid_type_fails(
             "is_active": True
         }
     )
-
-    assert response.status_code == 422, f"Expected 422, got {response.status_code}: {response.status_code}: {response.status_code}: {response.status_code}: {response.status_code}: {response.status_code}: {response.status_code}"
+    assert response.status_code == 422
 
 
 def test_create_maintenance_invalid_type_fails(
@@ -628,12 +525,7 @@ def test_create_maintenance_invalid_type_fails(
     session: Session,
     normal_user_token_headers
 ):
-    """Test that creating maintenance with invalid type fails validation (422).
-
-    Type must be one of: 'sharpening', 'mounting', 'waterproofing', etc.
-    """
-    current_user_id = uuid.UUID("00000-00000-0000-0000-0000-0000-0000-000000000000000")
-
+    """Test that creating maintenance with invalid type fails validation (422)."""
     skater = Profile(
         role="skater",
         full_name="Test Skater",
@@ -641,8 +533,7 @@ def test_create_maintenance_invalid_type_fails(
         dob=date(2010, 1, 1),
         level="Junior",
         is_active=True
-        )
-
+    )
     session.add(skater)
     session.commit()
 
@@ -658,30 +549,17 @@ def test_create_maintenance_invalid_type_fails(
             "specifications": "Test"
         }
     )
-
-    assert response.status_code == 422, f"Expected 422, got {response.status_code}: {response.status_code}: {response.status_code}: {response.status_code}: {response.status_code}"
+    assert response.status_code == 422
 
 
 # ==================== Skate Setup Tests ====================
-# These tests define the API contract for the new SkateSetup entity
-# which represents a complete skate (boot + blade combination) for a skater.
 
 def test_create_skate_setup_boot_and_blade(
     client: TestClient,
     session: Session,
     normal_user_token_headers
 ):
-    """Test creating a Skate Setup by first creating a boot, then a blade, then linking them.
-
-    POST /skaters/{skater_id}/equipment to create a boot.
-    POST /skaters/{skater_id}/equipment to create a blade.
-    POST /skaters/{skater_id}/skates to create a Skate Setup.
-
-    Expected: 201 status, returns created skate setup with boot_id and blade_id.
-    """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-000000000000")
-
-    # Create a test skater profile
+    """Test creating a Skate Setup by first creating a boot, then a blade, then linking them."""
     skater = Profile(
         role="skater",
         full_name="Test Skater",
@@ -693,7 +571,6 @@ def test_create_skate_setup_boot_and_blade(
     session.add(skater)
     session.commit()
 
-    # Create a boot
     boot_response = client.post(
         f"{settings.API_V1_STR}/skaters/{skater.id}/equipment",
         headers=normal_user_token_headers,
@@ -706,11 +583,9 @@ def test_create_skate_setup_boot_and_blade(
             "is_active": True
         }
     )
-
-    assert boot_response.status_code == 201, f"Expected 201 for boot, got {boot_response.status_code}"
+    assert boot_response.status_code == 201
     boot_id = boot_response.json()["id"]
 
-    # Create a blade
     blade_response = client.post(
         f"{settings.API_V1_STR}/skaters/{skater.id}/equipment",
         headers=normal_user_token_headers,
@@ -723,11 +598,9 @@ def test_create_skate_setup_boot_and_blade(
             "is_active": True
         }
     )
-
-    assert blade_response.status_code == 201, f"Expected 201 for blade, got {blade_response.status_code}"
+    assert blade_response.status_code == 201
     blade_id = blade_response.json()["id"]
 
-    # Create a Skate Setup linking boot and blade
     skate_setup_response = client.post(
         f"{settings.API_V1_STR}/skaters/{skater.id}/skates",
         headers=normal_user_token_headers,
@@ -741,10 +614,10 @@ def test_create_skate_setup_boot_and_blade(
 
     assert skate_setup_response.status_code == 201, f"Expected 201, got {skate_setup_response.status_code}: {skate_setup_response.text}"
     data = skate_setup_response.json()
-    assert "id" in data, "Skate setup ID should be returned"
+    assert "id" in data
     assert data["name"] == "Freeskate Skates"
-    assert data["boot_id"] == str(boot_id), "Boot ID should match"
-    assert data["blade_id"] == str(blade_id), "Blade ID should match"
+    assert data["boot_id"] == str(boot_id)
+    assert data["blade_id"] == str(blade_id)
     assert data["is_active"] is True
 
 
@@ -753,15 +626,7 @@ def test_retrieve_skate_setups(
     session: Session,
     normal_user_token_headers
 ):
-    """Test retrieving all skate setups for a skater.
-
-    GET /skaters/{skater_id}/skates
-
-    Expected: 200 status, list of skate setups with nested boot and blade objects.
-    """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-000000000")
-
-    # Create a test skater profile
+    """Test retrieving all skate setups for a skater."""
     skater = Profile(
         role="skater",
         full_name="Test Skater",
@@ -773,67 +638,40 @@ def test_retrieve_skate_setups(
     session.add(skater)
     session.commit()
 
-    # Create a boot
     boot_response = client.post(
         f"{settings.API_V1_STR}/skaters/{skater.id}/equipment",
         headers=normal_user_token_headers,
-        json={
-            "type": "boot",
-            "brand": "Jackson",
-            "model": "Debut",
-            "size": "7.0",
-            "is_active": True
-        }
+        json={"type": "boot", "brand": "Jackson", "model": "Debut", "size": "7.0", "is_active": True}
     )
-
     boot_id = boot_response.json()["id"]
 
-    # Create a blade
     blade_response = client.post(
         f"{settings.API_V1_STR}/skaters/{skater.id}/equipment",
         headers=normal_user_token_headers,
-        json={
-            "type": "blade",
-            "brand": "John Wilson",
-            "model": "Coronation Ace",
-            "size": "9.75",
-            "purchase_date": "2024-02-01",
-            "is_active": True
-        }
+        json={"type": "blade", "brand": "John Wilson", "model": "Coronation Ace", "size": "9.75", "is_active": True}
     )
-
     blade_id = blade_response.json()["id"]
 
-    # Create a Skate Setup
     skate_setup_response = client.post(
         f"{settings.API_V1_STR}/skaters/{skater.id}/skates",
         headers=normal_user_token_headers,
-        json={
-            "name": "Freeskate Skates",
-            "boot_id": str(boot_id),
-            "blade_id": str(blade_id),
-            "is_active": True
-        }
+        json={"name": "Freeskate Skates", "boot_id": str(boot_id), "blade_id": str(blade_id), "is_active": True}
     )
 
-    skate_setup_id = skate_setup_response.json()["id"]
-
-    # Retrieve skate setups
     response = client.get(
         f"{settings.API_V1_STR}/skaters/{skater.id}/skates",
         headers=normal_user_token_headers
     )
 
-    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.status_code}"
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}"
     data = response.json()
-    assert isinstance(data, list), "Response should be a list of skate setups"
-    assert len(data) == 1, "Should have one skate setup"
+    assert isinstance(data, list)
+    assert len(data) == 1
 
-    # Verify/setup contains boot and blade objects/IDs
     setup = data[0]
-    assert "id" in setup, "Setup ID should be present"
-    assert "boot_id" in setup or "boot" in setup, "Setup should reference boot"
-    assert "blade_id" in setup or "blade" in setup, "Setup should reference blade"
+    assert "id" in setup
+    assert "boot_id" in setup or "boot" in setup
+    assert "blade_id" in setup or "blade" in setup
 
 
 def test_update_skate_setup_swap_blade(
@@ -841,17 +679,7 @@ def test_update_skate_setup_swap_blade(
     session: Session,
     normal_user_token_headers
 ):
-    """Test updating a Skate Setup by swapping blade.
-
-    Create initial boot and blade, then a Skate Setup.
-    Create a second blade.
-    PUT /skates/{skate_id}/skates/{skate_id} to swap to blade.
-
-    Expected: 200 status, setup now reflects the new blade_id.
-    """
-    current_user_id = uuid.UUID("00000000-0000-0000-0000-0000-0000-000000000")
-
-    # Create a test skater profile
+    """Test updating a Skate Setup by swapping blade."""
     skater = Profile(
         role="skater",
         full_name="Test Skater",
@@ -863,76 +691,40 @@ def test_update_skate_setup_swap_blade(
     session.add(skater)
     session.commit()
 
-    # Create initial boot
     boot_response = client.post(
         f"{settings.API_V1_STR}/skaters/{skater.id}/equipment",
         headers=normal_user_token_headers,
-        json={
-            "type": "boot",
-            "brand": "Jackson",
-            "model": "Debut",
-            "size": "7.0",
-            "is_active": True
-        }
-        )
-
+        json={"type": "boot", "brand": "Jackson", "model": "Debut", "size": "7.0", "is_active": True}
+    )
     boot_id = boot_response.json()["id"]
 
-    # Create initial blade
     blade1_response = client.post(
         f"{settings.API_V1_STR}/skaters/{skater.id}/equipment",
         headers=normal_user_token_headers,
-        json={
-            "type": "blade",
-            "brand": "John Wilson",
-            "model": "Coronation Ace",
-            "size": "9.75",
-            "is_active": True
-        }
-        )
-
+        json={"type": "blade", "brand": "John Wilson", "model": "Coronation Ace", "size": "9.75", "is_active": True}
+    )
     blade_id_1 = blade1_response.json()["id"]
 
-    # Create a Skate Setup
     skate_setup_response = client.post(
         f"{settings.API_V1_STR}/skaters/{skater.id}/skates",
         headers=normal_user_token_headers,
-        json={
-            "name": "Freeskate Skates",
-            "boot_id": str(boot_id),
-            "blade_id": str(blade_id_1),
-            "is_active": True
-        }
-        )
-
+        json={"name": "Freeskate Skates", "boot_id": str(boot_id), "blade_id": str(blade_id_1), "is_active": True}
+    )
     skate_setup_id = skate_setup_response.json()["id"]
 
-    # Create a second blade
     blade2_response = client.post(
         f"{settings.API_V1_STR}/skaters/{skater.id}/equipment",
         headers=normal_user_token_headers,
-        json={
-            "type": "blade",
-            "brand": "John Wilson",
-            "model": "Pattern 99",
-            "size": "9.75",
-            "is_active": True
-        }
-        )
-
+        json={"type": "blade", "brand": "John Wilson", "model": "Pattern 99", "size": "9.75", "is_active": True}
+    )
     blade_id_2 = blade2_response.json()["id"]
 
-    # Update to Skate Setup with a new blade
     update_response = client.put(
         f"{settings.API_V1_STR}/skaters/{skater.id}/skates/{skate_setup_id}",
         headers=normal_user_token_headers,
-        json={
-            "boot_id": str(boot_id),
-            "blade_id": str(blade_id_2),
-            "is_active": True
-        }
+        json={"boot_id": str(boot_id), "blade_id": str(blade_id_2), "is_active": True}
     )
 
     assert update_response.status_code == 200, f"Expected 200, got {update_response.status_code}: {update_response.text}"
     data = update_response.json()
-    assert data["blade_id"] == str(blade_id_2), "Blade ID should be updated to new blade"
+    assert data["blade_id"] == str(blade_id_2)

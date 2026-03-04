@@ -1,15 +1,12 @@
-"""Equipment Maintenance Models.
-
-Models for tracking skating equipment (boots, blades) and maintenance logs.
-"""
+"""Equipment Maintenance Models."""
 import uuid
 from datetime import datetime
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Optional
 from enum import Enum
 from sqlmodel import Field, SQLModel, Relationship
 
-if TYPE_CHECKING:
-    from app.models.skater_models import Skater
+# Use Unified Profile instead of Skater
+from app.models.user_models import Profile
 
 
 class EquipmentType(str, Enum):
@@ -30,14 +27,10 @@ class MaintenanceType(str, Enum):
 # ==================== Equipment Models ====================
 
 class Equipment(SQLModel, table=True):
-    """
-    Represents a piece of skating equipment (boot or blade).
-    Skaters can have multiple equipment items (e.g., dance boots, freeskate boots).
-    """
     __tablename__ = "equipment"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    skater_id: uuid.UUID = Field(foreign_key="skaters.id", index=True)
+    skater_id: uuid.UUID = Field(foreign_key="profiles.id", index=True)
     name: Optional[str] = Field(default=None, max_length=100)
     type: EquipmentType = Field(index=True)
     brand: str = Field(max_length=100)
@@ -49,15 +42,11 @@ class Equipment(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     # Relationships
-    skater: Optional["Skater"] = Relationship(back_populates="equipment")
+    skater: Optional[Profile] = Relationship()
     maintenance_logs: List["MaintenanceLog"] = Relationship(back_populates="equipment", cascade_delete=True)
 
 
 class MaintenanceLog(SQLModel, table=True):
-    """
-    A maintenance event for a piece of equipment.
-    Tracks when equipment was serviced, what was done, and by whom.
-    """
     __tablename__ = "maintenance_logs"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -71,4 +60,23 @@ class MaintenanceLog(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     # Relationships
-    equipment: Optional["Equipment"] = Relationship(back_populates="maintenance_logs")
+    equipment: Optional[Equipment] = Relationship(back_populates="maintenance_logs")
+
+
+class SkateSetup(SQLModel, table=True):
+    """
+    A complete skate setup linking a specific boot and blade to a skater.
+    """
+    __tablename__ = "skate_setups"
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    skater_id: uuid.UUID = Field(foreign_key="profiles.id", index=True)
+    name: str = Field(max_length=100)
+    boot_id: uuid.UUID = Field(foreign_key="equipment.id")
+    blade_id: uuid.UUID = Field(foreign_key="equipment.id")
+    is_active: bool = Field(default=True, index=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Safe, one-way relationship that doesn't require back_populates
+    skater: Optional[Profile] = Relationship()
