@@ -162,3 +162,30 @@ export interface SkateSetupUpdate {
   blade_id?: string;
   is_active?: boolean;
 }
+
+// Event types
+export type EventType = 'COMPETITION' | 'TEST_DAY' | 'SIMULATION' | 'CAMP';
+
+export interface Competition {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  location?: string;
+  city?: string;
+  region?: string;
+  is_verified: boolean;
+  created_at: string;
+}
+
+export interface SkaterEvent {
+  id: string;
+  skater_id: string;
+  event_type: EventType;
+  competition_id?: string;
+  name?: string;
+  start_date: string;
+  end_date: string;
+  is_peak_event: boolean;
+  created_at: string;
+}

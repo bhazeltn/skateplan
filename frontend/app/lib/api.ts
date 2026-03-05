@@ -3,7 +3,7 @@
  */
 
 import { getAuthToken } from './supabase';
-import type { SkateSetupCreate, SkateSetupRead, SkateSetupUpdate } from './types/models';
+import type { SkateSetupCreate, SkateSetupRead, SkateSetupUpdate, Competition, SkaterEvent, EventType } from './types/models';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
@@ -104,4 +104,26 @@ export async function createSkateSetup(skaterId: string, data: SkateSetupCreate)
 
 export async function updateSkateSetup(skaterId: string, setupId: string, data: SkateSetupUpdate): Promise<SkateSetupRead> {
   return apiPut(`/skaters/${skaterId}/skates/${setupId}`, data);
+}
+
+/**
+ * Competitions API functions
+ */
+export async function searchCompetitions(query: string): Promise<Competition[]> {
+  return apiGet(`/competitions/?q=${encodeURIComponent(query)}`);
+}
+
+export async function createCompetition(data: Partial<Competition>): Promise<Competition> {
+  return apiPost('/competitions/', data);
+}
+
+/**
+ * Skater Events API functions
+ */
+export async function getSkaterEvents(skaterId: string): Promise<SkaterEvent[]> {
+  return apiGet(`/skaters/${skaterId}/events`);
+}
+
+export async function createSkaterEvent(skaterId: string, data: Partial<SkaterEvent>): Promise<SkaterEvent> {
+  return apiPost(`/skaters/${skaterId}/events`, data);
 }

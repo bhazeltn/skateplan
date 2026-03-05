@@ -37,6 +37,8 @@ from app.models.library_models import Element
 from app.models.gap_analysis_models import GapAnalysis, GapAnalysisEntry
 from app.models.team_models import Team
 from app.models.session_models import Session as IceSession
+from app.models.equipment_models import Equipment, MaintenanceLog, SkateSetup
+from app.models.events import Competition, SkaterEvent, EventType
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
