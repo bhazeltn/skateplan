@@ -3,6 +3,7 @@
  */
 
 import { getAuthToken } from './supabase';
+import type { SkateSetupCreate, SkateSetupRead, SkateSetupUpdate } from './types/models';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
@@ -88,4 +89,19 @@ export async function apiDelete(endpoint: string) {
  */
 export async function fetchElements() {
   return apiGet('/elements');
+}
+
+/**
+ * Skate Setup API functions
+ */
+export async function getSkateSetups(skaterId: string): Promise<SkateSetupRead[]> {
+  return apiGet(`/skaters/${skaterId}/skates`);
+}
+
+export async function createSkateSetup(skaterId: string, data: SkateSetupCreate): Promise<SkateSetupRead> {
+  return apiPost(`/skaters/${skaterId}/skates`, data);
+}
+
+export async function updateSkateSetup(skaterId: string, setupId: string, data: SkateSetupUpdate): Promise<SkateSetupRead> {
+  return apiPut(`/skaters/${skaterId}/skates/${setupId}`, data);
 }

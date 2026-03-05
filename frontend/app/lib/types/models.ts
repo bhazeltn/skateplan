@@ -136,3 +136,29 @@ export interface MaintenanceFormData {
   specifications: string | null;
   notes: string | null;
 }
+
+// Skate Setup types
+export interface SkateSetupCreate {
+  name: string;
+  boot_id: string;
+  blade_id: string;
+  is_active?: boolean;
+}
+
+export interface SkateSetupRead {
+  id: string;
+  skater_id: string;
+  name: string;
+  boot_id: string;
+  blade_id: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SkateSetupUpdate {
+  name?: string;
+  boot_id?: string;
+  blade_id?: string;
+  is_active?: boolean;
+}
