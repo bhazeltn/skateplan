@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import type {
   Element,
   SkaterProfile,
@@ -7,16 +7,28 @@ import type {
   UUID
 } from '../api';
 
-// Import the API functions we're testing
+// Mock global fetch
+const originalFetch = globalThis.fetch;
+
+// Mock Supabase getAuthToken - must be at TOP before any imports
+vi.mock('../../supabase', () => ({
+  getAuthToken: vi.fn().mockResolvedValue('fake-token')
+}));
+
+// Note: Adjust path based on your directory structure
+// api.test.ts is in lib/types/__tests__/, api.ts is in lib/
 import {
   searchCompetitions,
   createCompetition,
   getSkaterEvents,
   createSkaterEvent
-} from '../api';
+} from '../../api'; // Two levels up: __tests__ -> lib -> api
 
-// Mock global fetch
-const originalFetch = globalThis.fetch;
+// Import types
+import type {
+  Competition,
+  SkaterEvent
+} from '../models';
 
 describe('API Type Definitions', () => {
   it('should allow valid Element type', () => {
@@ -105,14 +117,8 @@ describe('API Client Functions', () => {
     // @ts-ignore - mocking global fetch for testing
     globalThis.fetch = mockFetch;
 
-    // Import and call the function
-    const api = (await import('../api'));
-    // Note: Since the function doesn't exist yet, we're testing the contract
-    // When implemented, it should call:
-    // fetch('http://localhost:8000/api/v1/competitions/?q=Sunsational', {
-    //   method: 'GET',
-    //   headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer fake-token' }
-    // })
+    // Call function directly (no api. prefix)
+    await searchCompetitions('Sunsational');
 
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/competitions/?q=Sunsational'),
@@ -134,18 +140,14 @@ describe('API Client Functions', () => {
     // @ts-ignore
     globalThis.fetch = mockFetch;
 
-    // When implemented, it should call:
-    // fetch('http://localhost:8000/api/v1/competitions/', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer fake-token' },
-    //   body: JSON.stringify(mockData)
-    // })
-
     const mockData = {
       name: 'Test Competition',
       start_date: '2026-04-17',
       end_date: '2026-04-19'
     };
+
+    // Call function directly
+    await createCompetition(mockData);
 
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/competitions/'),
@@ -167,11 +169,8 @@ describe('API Client Functions', () => {
     // @ts-ignore
     globalThis.fetch = mockFetch;
 
-    // When implemented, it should call:
-    // fetch('http://localhost:8000/api/v1/skaters/skater-123/events', {
-    //   method: 'GET',
-    //   headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer fake-token' }
-    // })
+    // Call function directly
+    await getSkaterEvents('skater-123');
 
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/skaters/skater-123/events'),
@@ -200,12 +199,8 @@ describe('API Client Functions', () => {
       end_date: '2026-05-15'
     };
 
-    // When implemented, it should call:
-    // fetch('http://localhost:8000/api/v1/skaters/skater-123/events', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer fake-token' },
-    //   body: JSON.stringify(mockData)
-    // })
+    // Call function directly
+    await createSkaterEvent('skater-123', mockData);
 
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/skaters/skater-123/events'),
