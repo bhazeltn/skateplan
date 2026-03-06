@@ -34,7 +34,6 @@ describe('AddEventModal Component', () => {
     fireEvent.change(nameInput, { target: { value: 'Sunsational' } });
 
     await waitFor(() => {
-      // Use querySelector because JSDOM doesn't expose datalist options to getByRole
       const option = document.querySelector('option[value="Sunsational"]');
       expect(option).toBeInTheDocument();
     });
@@ -60,7 +59,7 @@ describe('AddEventModal Component', () => {
     fireEvent.change(screen.getByLabelText(/start date/i), { target: { value: '2026-05-15' } });
     fireEvent.change(screen.getByLabelText(/end date/i), { target: { value: '2026-05-15' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /save anchor/i }));
+    fireEvent.click(screen.getByRole('button', { name: /save event/i }));
 
     await waitFor(() => {
       expect(createSkaterEvent).toHaveBeenCalledWith('skater-123', expect.objectContaining({

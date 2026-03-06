@@ -16,9 +16,9 @@ class CompetitionBase(SQLModel):
     name: str
     start_date: date
     end_date: date
-    location: Optional[str] = None
+    country: Optional[str] = None
+    state_province: Optional[str] = None
     city: Optional[str] = None
-    region: Optional[str] = None  # e.g., AB, ON, etc.
     is_verified: bool = Field(default=False)  # True if admin imported
 
 
@@ -35,6 +35,9 @@ class SkaterEventBase(SQLModel):
     name: Optional[str] = None  # Used if it's a custom simulation/test day
     start_date: date
     end_date: date
+    country: Optional[str] = None
+    state_province: Optional[str] = None
+    city: Optional[str] = None
     is_peak_event: bool = Field(default=False)  # Tells the YTP to build a peak macrocycle
 
 

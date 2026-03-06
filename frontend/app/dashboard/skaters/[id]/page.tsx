@@ -10,6 +10,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/Ta
 import { SkaterOverview } from '../../../components/SkaterOverview';
 import GapAnalysisView from '../../../components/gap-analysis/GapAnalysisView';
 import EquipmentList from '../../../components/equipment/EquipmentList';
+import { EventList } from '../../../components/events/EventList';
+import AddEventModal from '../../../components/events/AddEventModal';
 
 interface Skater {
   id: string;
@@ -47,6 +49,8 @@ export default function SkaterProfilePage() {
   const [skater, setSkater] = useState<Skater | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddEventModalOpen, setIsAddEventModalOpen] = useState(false);
+  const [eventRefreshKey, setEventRefreshKey] = useState(0);
   const [error, setError] = useState('');
 
   // Overview stats
@@ -213,6 +217,7 @@ export default function SkaterProfilePage() {
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="gap-analysis">Gap Analysis</TabsTrigger>
               <TabsTrigger value="equipment">Equipment</TabsTrigger>
+              <TabsTrigger value="events">Events</TabsTrigger>
               <TabsTrigger value="assets">Assets</TabsTrigger>
             </TabsList>
 
@@ -319,11 +324,10 @@ export default function SkaterProfilePage() {
                     <p className="text-sm font-medium text-muted-foreground">Status</p>
                     <p className="mt-1">
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          skater.is_active
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-secondary text-foreground'
-                        }`}
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${skater.is_active
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-secondary text-foreground'
+                          }`}
                       >
                         {skater.is_active ? 'Active' : 'Inactive'}
                       </span>
@@ -343,6 +347,28 @@ export default function SkaterProfilePage() {
               <EquipmentList skaterId={skaterId} />
             </TabsContent>
 
+            {/* Events Tab */}
+            <TabsContent value="events">
+              <div className="bg-card rounded-lg shadow p-6">
+                <div className="flex items-start justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold text-foreground">Events</h2>
+                    <p className="text-sm text-muted-foreground mt-1">Manage competitions, test days, and camps.</p>
+                  </div>
+                  <button
+                    onClick={() => setIsAddEventModalOpen(true)}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors flex items-center gap-2 shadow-sm"
+                  >
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Event
+                  </button>
+                </div>
+                <EventList skaterId={skaterId} key={eventRefreshKey} />
+              </div>
+            </TabsContent>
+
             {/* Assets Tab */}
             <TabsContent value="assets">
               <AssetsGallery skaterId={skaterId} />
@@ -359,6 +385,17 @@ export default function SkaterProfilePage() {
         onSuccess={() => {
           fetchSkater();
           setIsEditModalOpen(false);
+        }}
+      />
+
+      {/* Add Event Modal */}
+      <AddEventModal
+        isOpen={isAddEventModalOpen}
+        onClose={() => setIsAddEventModalOpen(false)}
+        skaterId={skaterId}
+        onSuccess={() => {
+          setEventRefreshKey(prev => prev + 1);
+          setIsAddEventModalOpen(false);
         }}
       />
     </div>
