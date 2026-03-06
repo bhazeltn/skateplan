@@ -32,7 +32,8 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
       }
       throw new Error('Unauthorized');
     }
-    throw new Error(`API request failed: ${response.statusText}`);
+    // Include status code in error message for parsing
+    throw new Error(`API request failed: ${response.status} - ${response.statusText}`);
   }
 
   return response.json();
@@ -121,9 +122,17 @@ export async function createCompetition(data: Partial<Competition>): Promise<Com
  * Skater Events API functions
  */
 export async function getSkaterEvents(skaterId: string): Promise<SkaterEvent[]> {
-  return apiGet(`/skaters/${skaterId}/events`);
+  return apiGet(`/skaters/${skaterId}/events/`);
 }
 
 export async function createSkaterEvent(skaterId: string, data: Partial<SkaterEvent>): Promise<SkaterEvent> {
-  return apiPost(`/skaters/${skaterId}/events`, data);
+  return apiPost(`/skaters/${skaterId}/events/`, data);
+}
+
+export async function updateSkaterEvent(skaterId: string, eventId: string, data: Partial<SkaterEvent>): Promise<SkaterEvent> {
+  return apiPatch(`/skaters/${skaterId}/events/${eventId}/`, data);
+}
+
+export async function deleteSkaterEvent(skaterId: string, eventId: string): Promise<void> {
+  await apiDelete(`/skaters/${skaterId}/events/${eventId}/`);
 }

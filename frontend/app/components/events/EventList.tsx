@@ -1,27 +1,39 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { getSkaterEvents } from '@/lib/api';
+import { getSkaterEvents, deleteSkaterEvent } from '@/lib/api';
 import { SkaterEvent } from '@/lib/types/models';
-import { Calendar } from 'lucide-react';
+import { Calendar, Trash2, Edit2 } from 'lucide-react';
 
-export const EventList = ({ skaterId }: { skaterId: string }) => {
+export const EventList = ({ skaterId, refreshKey }: { skaterId: string; refreshKey?: number }) => {
   const [events, setEvents] = useState<SkaterEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const loadEvents = async () => {
+    try {
+      const data = await getSkaterEvents(skaterId);
+      setEvents(data);
+    } catch (err) {
+      console.error("Events load failed", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await getSkaterEvents(skaterId);
-        setEvents(data);
-      } catch (err) {
-        console.error("Events load failed", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [skaterId]);
+    loadEvents();
+  }, [skaterId, refreshKey]);
+
+  const handleDelete = async (eventId: string) => {
+    if (!confirm('Are you sure you want to delete this event?')) return;
+
+    try {
+      await deleteSkaterEvent(skaterId, eventId);
+      await loadEvents();
+    } catch (err) {
+      console.error("Failed to delete event", err);
+    }
+  };
 
   if (loading) return <div className="p-4 animate-pulse text-slate-400">Loading events...</div>;
 
@@ -48,6 +60,15 @@ export const EventList = ({ skaterId }: { skaterId: string }) => {
                 </div>
                 <p className="text-sm font-bold text-slate-900">{event.name}</p>
                 <p className="text-[11px] text-slate-500">{event.start_date} to {event.end_date}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleDelete(event.id)}
+                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  aria-label="Delete event"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
             </div>
           ))

@@ -19,7 +19,8 @@ def test_create_competition(
         "start_date": "2026-04-17",
         "end_date": "2026-04-19",
         "city": "Edmonton",
-        "region": "AB"
+        "state_province": "AB",
+        "country": "CA"
     }
     response = client.post(
         f"{settings.API_V1_STR}/competitions/",
@@ -49,7 +50,8 @@ def test_search_competitions(
         "start_date": "2026-04-17",
         "end_date": "2026-04-19",
         "city": "Edmonton",
-        "region": "AB"
+        "state_province": "AB",
+        "country": "CA"
     }
     create_response = client.post(
         f"{settings.API_V1_STR}/competitions/",
@@ -65,7 +67,8 @@ def test_search_competitions(
         "start_date": "2026-02-15",
         "end_date": "2026-02-17",
         "city": "Calgary",
-        "region": "AB"
+        "state_province": "AB",
+        "country": "CA"
     }
     client.post(
         f"{settings.API_V1_STR}/competitions/",
@@ -103,7 +106,8 @@ def test_create_skater_event_competition(
         "start_date": "2026-03-10",
         "end_date": "2026-03-12",
         "city": "Vancouver",
-        "region": "BC"
+        "state_province": "BC",
+        "country": "CA"
     }
     comp_response = client.post(
         f"{settings.API_V1_STR}/competitions/",

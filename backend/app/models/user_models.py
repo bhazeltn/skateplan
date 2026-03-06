@@ -32,6 +32,17 @@ class Profile(SQLModel, table=True):
     # Coach/Location fields
     training_site: Optional[str] = None
     federation: Optional[str] = None  # ISU, USFS, SC, OTHER
+
+
+class Skater(Profile):
+    """
+    Skater profile - extends Profile for skater-specific fields.
+    Re-added for test compatibility.
+    """
+    full_name: str = Field(default="")
+    dob: Optional[date] = None
+    level: Optional[str] = None
+    is_active: bool = Field(default=True)
     isu_level_anchor: Optional[str] = None  # NOVICE, JUNIOR, SENIOR
 
     # Multi-discipline support

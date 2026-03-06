@@ -171,9 +171,9 @@ export interface Competition {
   name: string;
   start_date: string;
   end_date: string;
-  location?: string;
+  country?: string;
+  state_province?: string;
   city?: string;
-  region?: string;
   is_verified: boolean;
   created_at: string;
 }
@@ -186,6 +186,9 @@ export interface SkaterEvent {
   name?: string;
   start_date: string;
   end_date: string;
+  country?: string;
+  state_province?: string;
+  city?: string;
   is_peak_event: boolean;
   created_at: string;
 }

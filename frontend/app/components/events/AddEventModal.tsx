@@ -7,6 +7,7 @@ import { Country, State, City } from 'country-state-city';
 export default function AddEventModal({ isOpen, onClose, onSuccess, skaterId }: any) {
   const [name, setName] = useState('');
   const [results, setResults] = useState<Competition[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     event_type: 'COMPETITION' as EventType,
     start_date: '',
@@ -42,6 +43,18 @@ export default function AddEventModal({ isOpen, onClose, onSuccess, skaterId }: 
     }
   }, [name]);
 
+  // Clear error when modal opens or user changes name
+  useEffect(() => {
+    if (isOpen) {
+      setError(null);
+    }
+  }, [isOpen]);
+
+  const handleNameChange = (value: string) => {
+    setName(value);
+    setError(null);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -55,9 +68,20 @@ export default function AddEventModal({ isOpen, onClose, onSuccess, skaterId }: 
         </div>
         <form onSubmit={async (e) => {
           e.preventDefault();
-          await createSkaterEvent(skaterId, { name, ...formData } as Partial<SkaterEvent>);
-          onSuccess();
-          onClose();
+          setError(null);
+          try {
+            await createSkaterEvent(skaterId, { name, ...formData } as Partial<SkaterEvent>);
+            onSuccess();
+            onClose();
+          } catch (err: any) {
+            // Parse status code from error message (format: "API request failed: 409 - Conflict")
+            const statusCode = err?.message?.match(/\b(409)\b/);
+            if (statusCode) {
+              setError('This event already exists on this skater\'s calendar.');
+            } else {
+              setError('Failed to create event. Please check details and try again.');
+            }
+          }
         }} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
           <div>
             <label htmlFor="event-name" className="block text-sm font-semibold text-slate-700 mb-1">Event Name</label>
@@ -65,7 +89,7 @@ export default function AddEventModal({ isOpen, onClose, onSuccess, skaterId }: 
               id="event-name"
               list="competition-results"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => handleNameChange(e.target.value)}
               placeholder="e.g. Sunsational 2026"
               className="w-full px-4 py-2 rounded-lg border border-slate-200"
               required
@@ -126,6 +150,15 @@ export default function AddEventModal({ isOpen, onClose, onSuccess, skaterId }: 
               </div>
             </div>
           </div>
+
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-600 text-sm animate-in fade-in slide-in-from-top-1">
+              <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {error}
+            </div>
+          )}
 
           <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors mt-4">Save Event</button>
         </form>

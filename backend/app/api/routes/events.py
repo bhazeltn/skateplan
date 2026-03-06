@@ -19,38 +19,35 @@ router = APIRouter()
 # ==================== Pydantic Schemas ====================
 
 class CompetitionCreate(BaseModel):
-    """Schema for creating a competition."""
     name: str = Field(max_length=200)
     start_date: date
     end_date: date
-    location: Optional[str] = Field(None, max_length=200)
-    city: Optional[str] = Field(None, max_length=100)
-    region: Optional[str] = Field(None, max_length=10)
-
+    country: Optional[str] = None
+    state_province: Optional[str] = None
+    city: Optional[str] = None
 
 class CompetitionRead(BaseModel):
-    """Schema for reading a competition."""
     model_config = ConfigDict(from_attributes=True)
     id: uuid.UUID
     name: str
     start_date: date
     end_date: date
-    location: Optional[str]
+    country: Optional[str]
+    state_province: Optional[str]
     city: Optional[str]
-    region: Optional[str]
     is_verified: bool
     created_at: datetime
 
-
 class SkaterEventCreate(BaseModel):
-    """Schema for creating a skater event."""
     event_type: EventType
     competition_id: Optional[uuid.UUID] = None
     name: Optional[str] = Field(None, max_length=200)
     start_date: date
     end_date: date
+    country: Optional[str] = None
+    state_province: Optional[str] = None
+    city: Optional[str] = None
     is_peak_event: bool = False
-
 
 class SkaterEventRead(BaseModel):
     """Schema for reading a skater event."""
@@ -62,6 +59,9 @@ class SkaterEventRead(BaseModel):
     name: Optional[str]
     start_date: date
     end_date: date
+    country: Optional[str]
+    state_province: Optional[str]
+    city: Optional[str]
     is_peak_event: bool
     created_at: datetime
 
@@ -151,17 +151,48 @@ def create_skater_event(
     session: Session = Depends(get_session),
     current_user: Profile = Depends(get_current_user)
 ):
-    """Create a new skater event."""
-    # Verify skater exists and user has permission
     _get_skater_or_404(skater_id, session, current_user)
+
+    # Check for existing duplicate event for this skater
+    existing_event = session.exec(
+        select(SkaterEvent).where(
+            SkaterEvent.skater_id == skater_id,
+            SkaterEvent.name == event.name,
+            SkaterEvent.start_date == event.start_date
+        )
+    ).first()
+
+    if existing_event:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This event is already on the skater's calendar."
+        )
+
+    # Logic to create competition if it's a competition event without an ID
+    comp_id = event.competition_id
+    if event.event_type == EventType.COMPETITION and not comp_id:
+        new_comp = Competition(
+            name=event.name or "New Competition",
+            start_date=event.start_date,
+            end_date=event.end_date,
+            country=event.country,
+            state_province=event.state_province,
+            city=event.city
+        )
+        session.add(new_comp)
+        session.flush() # Get the ID before commit
+        comp_id = new_comp.id
 
     db_event = SkaterEvent(
         skater_id=skater_id,
         event_type=event.event_type,
-        competition_id=event.competition_id,
+        competition_id=comp_id,
         name=event.name,
         start_date=event.start_date,
         end_date=event.end_date,
+        country=event.country,
+        state_province=event.state_province,
+        city=event.city,
         is_peak_event=event.is_peak_event
     )
     session.add(db_event)
@@ -187,3 +218,45 @@ def get_skater_events(
     ).all()
 
     return events
+
+
+@router.patch("/skaters/{skater_id}/events/{event_id}/", response_model=SkaterEventRead)
+def update_skater_event(
+    skater_id: uuid.UUID,
+    event_id: uuid.UUID,
+    event_update: SkaterEventCreate,
+    session: Session = Depends(get_session),
+    current_user: Profile = Depends(get_current_user)
+):
+    """Update a skater event."""
+    _get_skater_or_404(skater_id, session, current_user)
+    db_event = session.get(SkaterEvent, event_id)
+    if not db_event or db_event.skater_id != skater_id:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    event_data = event_update.model_dump(exclude_unset=True)
+    for key, value in event_data.items():
+        setattr(db_event, key, value)
+
+    session.add(db_event)
+    session.commit()
+    session.refresh(db_event)
+    return db_event
+
+
+@router.delete("/skaters/{skater_id}/events/{event_id}/", status_code=status.HTTP_204_NO_CONTENT)
+def delete_skater_event(
+    skater_id: uuid.UUID,
+    event_id: uuid.UUID,
+    session: Session = Depends(get_session),
+    current_user: Profile = Depends(get_current_user)
+):
+    """Delete a skater event."""
+    _get_skater_or_404(skater_id, session, current_user)
+    db_event = session.get(SkaterEvent, event_id)
+    if not db_event or db_event.skater_id != skater_id:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    session.delete(db_event)
+    session.commit()
+    return None

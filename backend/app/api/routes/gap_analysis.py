@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 from pydantic import BaseModel
 
 from app.api.deps import get_session, get_current_user
-from app.models.user_models import Profile
+from app.models.user_models import Profile, SkaterCoachLink
 from app.models.team_models import Team
 from app.models.benchmark_models import (
     MetricDefinition,
@@ -159,6 +159,22 @@ def _verify_skater_access(skater_id: uuid.UUID, coach_id: uuid.UUID, session: Se
     skater = session.exec(stmt).first()
     if not skater:
         raise HTTPException(status_code=404, detail="Skater not found")
+
+    # Check if current user (coach) has permission to access this skater
+    link = session.exec(
+        select(SkaterCoachLink).where(
+            SkaterCoachLink.skater_id == skater_id,
+            SkaterCoachLink.coach_id == coach_id,
+            SkaterCoachLink.status == "active"
+        )
+    ).first()
+
+    if not link:
+        raise HTTPException(
+            status_code=404,
+            detail="Skater not found or no permission"
+        )
+
     return skater
 
 
@@ -307,9 +323,40 @@ def add_gap_entry(
     existing = session.exec(dup_stmt).first()
     if existing:
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_409_CONFLICT,
             detail="This metric already exists in the gap analysis"
         )
+
+    # Validate SCALE type metrics are within range
+    if metric.data_type == MetricDataType.SCALE:
+        try:
+            current_val = float(entry_in.current_value)
+            target_val = float(entry_in.target_value)
+            if metric.scale_min is not None and current_val < metric.scale_min:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Current value must be at least {metric.scale_min}"
+                )
+            if metric.scale_max is not None and current_val > metric.scale_max:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Current value must be at most {metric.scale_max}"
+                )
+            if metric.scale_min is not None and target_val < metric.scale_min:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Target value must be at least {metric.scale_min}"
+                )
+            if metric.scale_max is not None and target_val > metric.scale_max:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Target value must be at most {metric.scale_max}"
+                )
+        except (ValueError, TypeError):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Values must be valid numbers for SCALE metrics"
+            )
 
     # Create entry
     entry = GapAnalysisEntry(
