@@ -43,6 +43,18 @@ class User(Base):
     skater_profile: Mapped["SkaterProfile"] = relationship(
         back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
+    # View-only convenience relationships for roster enrichment (selectinload).
+    # Both child tables carry an integer skater_id FK -> users.id.
+    programs: Mapped[list["Program"]] = relationship(
+        "Program",
+        primaryjoin="foreign(Program.skater_id) == User.id",
+        viewonly=True,
+    )
+    injury_records: Mapped[list["InjuryRecord"]] = relationship(
+        "InjuryRecord",
+        primaryjoin="foreign(InjuryRecord.skater_id) == User.id",
+        viewonly=True,
+    )
 
 
 class SkaterProfile(Base):

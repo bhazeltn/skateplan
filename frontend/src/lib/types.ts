@@ -57,6 +57,8 @@ export interface Skater {
   country_code?: string | null;
   weekly_ice_minutes?: number;
   has_active_restriction?: boolean;
+  programs?: SkaterProgram[];
+  restrictions?: SkaterRestriction[];
 }
 
 export interface SovElement {

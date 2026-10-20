@@ -3,12 +3,12 @@ import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { SkaterProfilePage } from "@/pages/SkaterProfilePage";
+import { SkatersPage } from "@/pages/SkatersPage";
 import { GapAnalysisPage } from "@/pages/GapAnalysisPage";
 import { PlaceholderPage } from "@/pages/PlaceholderPage";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 
 const PROTECTED: { path: string; title: string }[] = [
-  { path: "/skaters", title: "Skaters" },
   { path: "/programs", title: "Programs" },
   { path: "/sessions", title: "Sessions" },
   { path: "/competitions", title: "Competitions" },
@@ -32,6 +32,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/skaters"
+        element={
+          <ProtectedRoute>
+            <SkatersPage />
           </ProtectedRoute>
         }
       />

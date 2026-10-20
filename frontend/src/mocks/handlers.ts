@@ -30,6 +30,18 @@ export const mockSkaters: Skater[] = [
     country_code: "ph",
     weekly_ice_minutes: 540,
     has_active_restriction: true,
+    programs: [
+      { id: "p1", program_type: "SP", title: "Short Program 2026", season: "2025-26" },
+      { id: "p2", program_type: "FS", title: "Free Skate 2026", season: "2025-26" },
+    ],
+    restrictions: [
+      {
+        id: "r1",
+        title: "Jump Impact Limit",
+        restrictions: "No impact landing",
+        status: "active",
+      },
+    ],
   },
   {
     skater_id: 2,
@@ -42,6 +54,10 @@ export const mockSkaters: Skater[] = [
     country_code: "ca",
     weekly_ice_minutes: 420,
     has_active_restriction: false,
+    programs: [
+      { id: "p3", program_type: "SP", title: "Short Program 2026", season: "2025-26" },
+    ],
+    restrictions: [],
   },
 ];
 

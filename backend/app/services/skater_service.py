@@ -5,11 +5,12 @@ Reuses the dashboard service's roster membership query so the roster list and
 the dashboard stay consistent.
 """
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.models.federation import Federation
 from app.models.injury import InjuryRecord
 from app.models.program import Program
+from app.models.training import CoachAssignment, TrainingUnitRoster
 from app.models.user import SkaterProfile, User
 from app.schemas.skater_detail import (
     SkaterDetailOut,
@@ -17,7 +18,7 @@ from app.schemas.skater_detail import (
     SkaterRestrictionOut,
     SkaterSummaryOut,
 )
-from app.services.dashboard_service import _rostered_skaters
+from app.services.dashboard_service import _rostered_skaters  # noqa: F401
 
 
 def _fed_info(
@@ -56,16 +57,66 @@ def _summary(user: User, profile: SkaterProfile | None, db: Session) -> dict:
     }
 
 
+def _rostered_with_relations(coach_id: int, db: Session) -> list[User]:
+    """Rostered skaters with programs + injuries eager-loaded (no N+1)."""
+    stmt = (
+        select(User)
+        .join(TrainingUnitRoster, TrainingUnitRoster.skater_id == User.id)
+        .join(
+            CoachAssignment,
+            CoachAssignment.training_unit_id == TrainingUnitRoster.training_unit_id,
+        )
+        .where(CoachAssignment.coach_user_id == coach_id)
+        .distinct()
+        .options(selectinload(User.programs), selectinload(User.injury_records))
+    )
+    return list(db.execute(stmt).scalars().all())
+
+
+def _loaded_programs(user: User) -> list[SkaterProgramOut]:
+    return [
+        SkaterProgramOut(
+            id=str(p.id), program_type=p.program_type, title=p.title, season=p.season
+        )
+        for p in user.programs
+    ]
+
+
+def _loaded_restrictions(user: User) -> list[SkaterRestrictionOut]:
+    return [
+        SkaterRestrictionOut(
+            id=str(i.id), title=i.title, restrictions=i.restrictions, status=i.status
+        )
+        for i in user.injury_records
+        if i.status == "active"
+    ]
+
+
 def list_coach_skaters(coach_id: int, db: Session) -> list[SkaterSummaryOut]:
-    """Return summaries for every skater on the coach's training units."""
+    """Return summaries (incl. programs + active restrictions) for the roster."""
     skaters = sorted(
-        _rostered_skaters(coach_id, db),
+        _rostered_with_relations(coach_id, db),
         key=lambda u: (u.last_name or "", u.first_name or ""),
     )
     out: list[SkaterSummaryOut] = []
     for user in skaters:
         profile = db.get(SkaterProfile, user.id)
-        out.append(SkaterSummaryOut(**_summary(user, profile, db)))
+        fed_name, country_code = _fed_info(profile, db)
+        restrictions = _loaded_restrictions(user)
+        out.append(
+            SkaterSummaryOut(
+                skater_id=user.id,
+                first_name=user.first_name,
+                last_name=user.last_name,
+                home_club=profile.home_club if profile else None,
+                competitive_level=profile.competitive_level if profile else None,
+                federation_name=fed_name,
+                country_code=country_code,
+                has_active_restriction=bool(restrictions),
+                programs=_loaded_programs(user),
+                restrictions=restrictions,
+            )
+        )
     return out
 
 

@@ -2,19 +2,6 @@
 from pydantic import BaseModel, ConfigDict
 
 
-class SkaterSummaryOut(BaseModel):
-    """Identity summary shared by the roster list and the profile header."""
-
-    skater_id: int
-    first_name: str
-    last_name: str
-    home_club: str | None = None
-    competitive_level: str | None = None
-    federation_name: str | None = None
-    country_code: str | None = None
-    has_active_restriction: bool
-
-
 class SkaterProgramOut(BaseModel):
     """A saved program layout shown on the Programs tab."""
 
@@ -33,6 +20,26 @@ class SkaterRestrictionOut(BaseModel):
     title: str
     restrictions: str | None = None
     status: str
+
+
+class SkaterSummaryOut(BaseModel):
+    """Identity summary shared by the roster list and the profile header.
+
+    ``programs`` and ``restrictions`` default to empty lists so the schema stays
+    backward compatible; the roster list now populates them to avoid a frontend
+    N+1, while callers that build only the identity fields still validate.
+    """
+
+    skater_id: int
+    first_name: str
+    last_name: str
+    home_club: str | None = None
+    competitive_level: str | None = None
+    federation_name: str | None = None
+    country_code: str | None = None
+    has_active_restriction: bool
+    programs: list[SkaterProgramOut] = []
+    restrictions: list[SkaterRestrictionOut] = []
 
 
 class SkaterDetailOut(SkaterSummaryOut):

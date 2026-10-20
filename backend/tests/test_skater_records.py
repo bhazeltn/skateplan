@@ -80,6 +80,33 @@ def test_roster_list_includes_federation_enrichment(client, make_user, db):
     assert row["home_club"] == "Glacier FSC"
 
 
+def test_roster_list_includes_programs_and_active_restrictions(client, make_user, db):
+    skater, _ = _roster(client, make_user, db, "rps@ex.com", "rpc@ex.com")
+    token = _login(client, "rpc@ex.com", "Coach123!")
+    db.add(Program(skater_id=skater.id, program_type="FS", title="Free Skate 2026"))
+    db.commit()
+    client.post(
+        "/api/injuries",
+        headers=_hdr(token),
+        json={
+            "skater_id": skater.id,
+            "title": "Ankle sprain",
+            "onset_date": "2026-01-10",
+            "status": "active",
+            "restrictions": "No impact landing",
+        },
+    )
+    resp = client.get("/api/skaters", headers=_hdr(token))
+    assert resp.status_code == 200, resp.text
+    row = {s["skater_id"]: s for s in resp.json()}[skater.id]
+    prog_titles = {p["title"] for p in row["programs"]}
+    assert "Free Skate 2026" in prog_titles
+    assert {p["program_type"] for p in row["programs"]} == {"FS"}
+    assert len(row["restrictions"]) == 1
+    assert row["restrictions"][0]["status"] == "active"
+    assert row["has_active_restriction"] is True
+
+
 def test_skater_detail_returns_full_profile(client, make_user, db):
     skater, _ = _roster(client, make_user, db, "sds@ex.com", "sdc@ex.com")
     token = _login(client, "sdc@ex.com", "Coach123!")
