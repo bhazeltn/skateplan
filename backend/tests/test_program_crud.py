@@ -65,6 +65,42 @@ def test_get_program_returns_elements_in_order(client, make_user, db):
     assert elems[0]["transition_notes"] == "opening pass"
 
 
+def test_patch_program_updates_title_and_archives(client, make_user, db):
+    token = _coach_token(client, make_user)
+    skater_id = _skater_id(make_user)
+    hdr = {"Authorization": f"Bearer {token}"}
+    created = client.post(
+        "/api/programs", headers=hdr, json=_program_payload(skater_id)
+    ).json()
+    pid = created["id"]
+    assert created["is_archived"] is False
+
+    resp = client.patch(
+        f"/api/programs/{pid}",
+        headers=hdr,
+        json={"title": "Free Skate 2027", "is_archived": True},
+    )
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["title"] == "Free Skate 2027"
+    assert body["is_archived"] is True
+
+    fetched = client.get(f"/api/programs/{pid}", headers=hdr).json()
+    assert fetched["title"] == "Free Skate 2027"
+    assert fetched["is_archived"] is True
+
+
+def test_patch_missing_program_returns_404(client, make_user, db):
+    token = _coach_token(client, make_user)
+    hdr = {"Authorization": f"Bearer {token}"}
+    resp = client.patch(
+        f"/api/programs/{'0' * 8}-0000-0000-0000-000000000000",
+        headers=hdr,
+        json={"title": "Nope"},
+    )
+    assert resp.status_code == 404, resp.text
+
+
 def test_put_elements_reorders_and_updates(client, make_user, db):
     token = _coach_token(client, make_user)
     skater_id = _skater_id(make_user)

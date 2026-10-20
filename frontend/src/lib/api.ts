@@ -235,6 +235,7 @@ export interface ProgramDetailResponse {
   program_type: string;
   title: string;
   season?: string | null;
+  is_archived?: boolean;
   music_duration_seconds?: number | null;
   segment_bonus?: number | null;
   program_elements: {
@@ -265,6 +266,19 @@ export function updateProgramElements(
       method: "PUT",
       body: JSON.stringify({ program_elements: elements }),
     },
+    token
+  );
+}
+
+// Update program metadata (title and/or archive state): PATCH /api/programs/{id}.
+export function updateProgramMeta(
+  programId: string,
+  payload: { title?: string; is_archived?: boolean },
+  token?: string | null
+): Promise<ProgramDetailResponse> {
+  return request<ProgramDetailResponse>(
+    `/api/programs/${programId}`,
+    { method: "PATCH", body: JSON.stringify(payload) },
     token
   );
 }

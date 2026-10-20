@@ -76,7 +76,11 @@ def _rostered_with_relations(coach_id: int, db: Session) -> list[User]:
 def _loaded_programs(user: User) -> list[SkaterProgramOut]:
     return [
         SkaterProgramOut(
-            id=str(p.id), program_type=p.program_type, title=p.title, season=p.season
+            id=str(p.id),
+            program_type=p.program_type,
+            title=p.title,
+            season=p.season,
+            is_archived=p.is_archived,
         )
         for p in user.programs
     ]
@@ -132,6 +136,7 @@ def _programs(skater_id: int, db: Session) -> list[SkaterProgramOut]:
             program_type=p.program_type,
             title=p.title,
             season=p.season,
+            is_archived=p.is_archived,
         )
         for p in rows
     ]

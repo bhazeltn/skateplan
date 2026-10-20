@@ -40,8 +40,16 @@ class ProgramOut(BaseModel):
     season: Optional[str] = None
     music_duration_seconds: Optional[int] = None
     segment_bonus: Decimal
+    is_archived: bool = False
     program_elements: list[ProgramElementOut] = []
 
 
 class ProgramElementsUpdate(BaseModel):
     program_elements: list[ProgramElementIn]
+
+
+class ProgramUpdate(BaseModel):
+    """Partial update of a program's title and/or archived state."""
+
+    title: Optional[str] = None
+    is_archived: Optional[bool] = None

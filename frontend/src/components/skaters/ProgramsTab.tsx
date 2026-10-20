@@ -1,14 +1,14 @@
 import { useState } from "react";
 import type { SkaterProgram } from "@/lib/types";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   ProgramBuilder,
   type InitialProgramData,
 } from "@/components/programs/ProgramBuilder";
-import { getProgram, deleteProgram } from "@/lib/api";
+import { ProgramCard } from "@/components/skaters/ProgramCard";
+import { getProgram, deleteProgram, updateProgramMeta } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
-const TYPE_LABELS: Record<string, string> = { SP: "Short Program", FS: "Free Skate" };
+type LoadedElement = { element_code: string; is_second_half_bonus: boolean };
 
 export function ProgramsTab({
   skaterId,
@@ -23,10 +23,15 @@ export function ProgramsTab({
   const [building, setBuilding] = useState(false);
   const [editingProgram, setEditingProgram] = useState<InitialProgramData | null>(null);
   const [expandedProgramId, setExpandedProgramId] = useState<string | null>(null);
-  const [loadedElements, setLoadedElements] = useState<
-    Record<string, { element_code: string; is_second_half_bonus: boolean }[]>
-  >({});
+  const [loadedElements, setLoadedElements] = useState<Record<string, LoadedElement[]>>({});
   const [loadingId, setLoadingId] = useState<string | null>(null);
+
+  async function loadElements(programId: string): Promise<LoadedElement[]> {
+    const detail = await getProgram(programId, token);
+    return [...(detail.program_elements || [])].sort(
+      (a, b) => a.segment_order - b.segment_order
+    );
+  }
 
   async function handleToggleExpand(programId: string) {
     if (expandedProgramId === programId) {
@@ -37,10 +42,7 @@ export function ProgramsTab({
     if (!loadedElements[programId]) {
       setLoadingId(programId);
       try {
-        const detail = await getProgram(programId, token);
-        const sorted = [...(detail.program_elements || [])].sort(
-          (a, b) => a.segment_order - b.segment_order
-        );
+        const sorted = await loadElements(programId);
         setLoadedElements((prev) => ({ ...prev, [programId]: sorted }));
       } finally {
         setLoadingId(null);
@@ -51,10 +53,7 @@ export function ProgramsTab({
   async function handleEdit(p: SkaterProgram) {
     setLoadingId(p.id);
     try {
-      const detail = await getProgram(p.id, token);
-      const sorted = [...(detail.program_elements || [])].sort(
-        (a, b) => a.segment_order - b.segment_order
-      );
+      const sorted = await loadElements(p.id);
       setEditingProgram({
         id: p.id,
         program_type: (p.program_type as "SP" | "FS") || "SP",
@@ -76,11 +75,36 @@ export function ProgramsTab({
     onProgramSaved();
   }
 
+  async function handleArchiveToggle(p: SkaterProgram) {
+    await updateProgramMeta(p.id, { is_archived: !p.is_archived }, token);
+    onProgramSaved();
+  }
+
+  function renderCard(p: SkaterProgram) {
+    return (
+      <ProgramCard
+        key={p.id}
+        program={p}
+        isExpanded={expandedProgramId === p.id}
+        elements={loadedElements[p.id]}
+        isLoading={loadingId === p.id}
+        onToggleExpand={() => handleToggleExpand(p.id)}
+        onEdit={() => handleEdit(p)}
+        onDelete={() => handleDelete(p.id)}
+        onArchiveToggle={() => handleArchiveToggle(p)}
+      />
+    );
+  }
+
+  const active = programs.filter((p) => !p.is_archived);
+  const archived = programs.filter((p) => p.is_archived);
+  const showList = !building && !editingProgram;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-slate-700">Program layouts</h2>
-        {!building && !editingProgram && (
+        {showList && (
           <button
             type="button"
             onClick={() => {
@@ -118,88 +142,31 @@ export function ProgramsTab({
         />
       )}
 
-      {!building && !editingProgram && programs.length === 0 && (
+      {showList && programs.length === 0 && (
         <p className="text-sm text-slate-400">No programs planned yet.</p>
       )}
 
-      {!building && !editingProgram && programs.length > 0 && (
-        <div className="space-y-3">
-          {programs.map((p) => {
-            const isExpanded = expandedProgramId === p.id;
-            const elements = loadedElements[p.id];
-            const isLoading = loadingId === p.id;
+      {showList && programs.length > 0 && (
+        <div className="space-y-6">
+          <section className="space-y-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Active
+            </h3>
+            {active.length > 0 ? (
+              <div className="space-y-3">{active.map(renderCard)}</div>
+            ) : (
+              <p className="text-sm text-slate-400">No active programs.</p>
+            )}
+          </section>
 
-            return (
-              <Card key={p.id} className="overflow-hidden">
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                        {TYPE_LABELS[p.program_type] ?? p.program_type}
-                      </p>
-                      <h3 className="text-base font-semibold text-slate-900">{p.title}</h3>
-                      {p.season && (
-                        <p className="text-xs text-slate-500 tabular-nums">{p.season}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleExpand(p.id)}
-                        className="rounded border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50"
-                      >
-                        {isExpanded ? "Hide Layout" : "View Layout"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleEdit(p)}
-                        disabled={isLoading}
-                        className="rounded bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(p.id)}
-                        className="rounded px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-
-                  {isExpanded && (
-                    <div className="border-t border-slate-100 pt-3">
-                      {isLoading ? (
-                        <p className="text-xs text-slate-400">Loading elements…</p>
-                      ) : elements && elements.length > 0 ? (
-                        <ol className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                          {elements.map((el, idx) => (
-                            <li
-                              key={idx}
-                              className="flex items-center gap-1.5 rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs"
-                            >
-                              <span className="font-bold text-slate-400">{idx + 1}.</span>
-                              <span className="font-semibold text-slate-800">
-                                {el.element_code}
-                              </span>
-                              {el.is_second_half_bonus && (
-                                <span className="rounded bg-amber-100 px-1 text-[10px] font-semibold text-amber-700">
-                                  +1.1x
-                                </span>
-                              )}
-                            </li>
-                          ))}
-                        </ol>
-                      ) : (
-                        <p className="text-xs text-slate-400">No elements saved in this layout.</p>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
+          {archived.length > 0 && (
+            <section className="space-y-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Archived
+              </h3>
+              <div className="space-y-3">{archived.map(renderCard)}</div>
+            </section>
+          )}
         </div>
       )}
     </div>

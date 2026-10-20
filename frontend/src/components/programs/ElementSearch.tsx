@@ -48,6 +48,11 @@ export function ElementSearch({
         className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm
           text-slate-900 focus:border-slate-500 focus:outline-none"
       />
+      {query.includes("+") && (
+        <p className="mt-1 text-xs text-slate-500">
+          Press Enter to add combination (e.g., 3T+3T)
+        </p>
+      )}
       {matches.length > 0 && (
         <ul
           id="element-options"

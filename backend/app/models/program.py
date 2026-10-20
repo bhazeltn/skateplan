@@ -38,6 +38,9 @@ class Program(Base):
     segment_bonus: Mapped[float] = mapped_column(
         Numeric(4, 2), default=0, nullable=False
     )
+    is_archived: Mapped[bool] = mapped_column(
+        Boolean, server_default="false", nullable=False
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

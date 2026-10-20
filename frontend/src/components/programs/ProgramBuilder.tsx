@@ -40,6 +40,7 @@ export function ProgramBuilder({
   const [elements, setElements] = useState<PlannedElement[]>(
     initialProgram?.elements ?? []
   );
+  const [title, setTitle] = useState(initialProgram?.title ?? "");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -56,6 +57,7 @@ export function ProgramBuilder({
     if (initialProgram) {
       setSegment(initialProgram.program_type);
       setElements(initialProgram.elements);
+      setTitle(initialProgram.title);
     }
   }, [initialProgram]);
 
@@ -75,6 +77,15 @@ export function ProgramBuilder({
   function remove(index: number) {
     setElements((prev) => prev.filter((_, i) => i !== index));
   }
+  function move(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    setElements((prev) => {
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  }
 
   async function save() {
     setSaving(true);
@@ -92,7 +103,7 @@ export function ProgramBuilder({
           {
             skater_id: skaterId,
             program_type: segment,
-            title: TITLES[segment],
+            title: title.trim() || TITLES[segment],
             program_elements: payloadElements,
           },
           token
@@ -125,12 +136,31 @@ export function ProgramBuilder({
         <SegmentSelector segment={segment} onChange={setSegment} />
       )}
 
+      <div className="space-y-1">
+        <label
+          htmlFor="program-title"
+          className="text-sm font-medium text-slate-600"
+        >
+          Program title
+        </label>
+        <input
+          id="program-title"
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder={TITLES[segment]}
+          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm
+            text-slate-900 focus:border-slate-500 focus:outline-none"
+        />
+      </div>
+
       <ElementSearch elements={sov} onAdd={addElement} />
       <ElementSlots
         elements={elements}
         catalog={catalog}
         onToggle={toggle}
         onRemove={remove}
+        onMove={move}
       />
       <TotalBar total={total} />
       <button

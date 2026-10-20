@@ -31,8 +31,8 @@ export const mockSkaters: Skater[] = [
     weekly_ice_minutes: 540,
     has_active_restriction: true,
     programs: [
-      { id: "p1", program_type: "SP", title: "Short Program 2026", season: "2025-26" },
-      { id: "p2", program_type: "FS", title: "Free Skate 2026", season: "2025-26" },
+      { id: "p1", program_type: "SP", title: "Short Program 2026", season: "2025-26", is_archived: false },
+      { id: "p2", program_type: "FS", title: "Free Skate 2026", season: "2025-26", is_archived: false },
     ],
     restrictions: [
       {
@@ -55,7 +55,7 @@ export const mockSkaters: Skater[] = [
     weekly_ice_minutes: 420,
     has_active_restriction: false,
     programs: [
-      { id: "p3", program_type: "SP", title: "Short Program 2026", season: "2025-26" },
+      { id: "p3", program_type: "SP", title: "Short Program 2026", season: "2025-26", is_archived: false },
     ],
     restrictions: [],
   },
@@ -212,7 +212,7 @@ export const mockSkaterDetail = {
     },
   ],
   programs: [
-    { id: "p-fs", program_type: "FS", title: "Free Skate 2026", season: "2025-26" },
+    { id: "p-fs", program_type: "FS", title: "Free Skate 2026", season: "2025-26", is_archived: false },
   ],
 };
 
@@ -380,6 +380,19 @@ export const handlers = [
   http.post("*/api/programs", async ({ request }) => {
     const body = (await request.json()) as Record<string, unknown>;
     return HttpResponse.json({ id: "new-prog", ...body }, { status: 201 });
+  }),
+  http.patch("*/api/programs/:id", async ({ request, params }) => {
+    const body = (await request.json()) as Record<string, unknown>;
+    return HttpResponse.json({
+      id: params.id,
+      skater_id: 2,
+      program_type: "SP",
+      title: "Short Program 2026",
+      season: "2025-26",
+      is_archived: false,
+      program_elements: [],
+      ...body,
+    });
   }),
   http.get("*/api/dashboard", () => HttpResponse.json(mockDashboard)),
 ];

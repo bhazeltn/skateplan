@@ -11,6 +11,7 @@ class SkaterProgramOut(BaseModel):
     program_type: str
     title: str
     season: str | None = None
+    is_archived: bool = False
 
 
 class SkaterRestrictionOut(BaseModel):

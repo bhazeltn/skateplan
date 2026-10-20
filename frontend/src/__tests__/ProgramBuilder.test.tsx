@@ -117,6 +117,63 @@ describe("Program sandbox builder", () => {
   });
 
 
+  it("moves an element up and down to reorder the layout", async () => {
+    seedSession();
+    const user = userEvent.setup();
+    renderBuilder();
+    await addElement(user, "3Lz");
+    await addElement(user, "3T");
+
+    let slots = await screen.findAllByTestId("element-slot");
+    expect(slots[0]).toHaveTextContent("3Lz");
+    expect(slots[1]).toHaveTextContent("3T");
+
+    // Move the second element (3T) up -> it becomes first.
+    await user.click(screen.getByRole("button", { name: /move 3T up/i }));
+    slots = screen.getAllByTestId("element-slot");
+    expect(slots[0]).toHaveTextContent("3T");
+    expect(slots[1]).toHaveTextContent("3Lz");
+
+    // Move it back down -> original order restored.
+    await user.click(screen.getByRole("button", { name: /move 3T down/i }));
+    slots = screen.getAllByTestId("element-slot");
+    expect(slots[0]).toHaveTextContent("3Lz");
+    expect(slots[1]).toHaveTextContent("3T");
+  });
+
+  it("lets the coach edit the program title and saves it", async () => {
+    seedSession();
+    const user = userEvent.setup();
+    let captured: Record<string, unknown> | null = null;
+    server.use(
+      http.post("*/api/programs", async ({ request }) => {
+        captured = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json({ id: "new-prog" }, { status: 201 });
+      })
+    );
+    renderBuilder();
+    const titleInput = await screen.findByRole("textbox", { name: /title/i });
+    await user.clear(titleInput);
+    await user.type(titleInput, "Carmen 2026");
+    expect(titleInput).toHaveValue("Carmen 2026");
+
+    await addElement(user, "3Lz");
+    await user.click(screen.getByRole("button", { name: /save program/i }));
+    await waitFor(() => expect(captured).not.toBeNull());
+    expect((captured as unknown as Record<string, unknown>).title).toBe("Carmen 2026");
+  });
+
+  it("shows a combination helper when the search contains a plus sign", async () => {
+    seedSession();
+    const user = userEvent.setup();
+    renderBuilder();
+    const input = await screen.findByRole("combobox", { name: /element/i });
+    await user.type(input, "3T+");
+    expect(
+      await screen.findByText(/Press Enter to add combination/i)
+    ).toBeInTheDocument();
+  });
+
   it("saves a valid payload with ordered elements and per-element flags", async () => {
     seedSession();
     const user = userEvent.setup();

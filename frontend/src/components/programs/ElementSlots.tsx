@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { ArrowDown, ArrowUp, X } from "lucide-react";
 import { elementTotal, formatBV, isJumpElement, type PlannedElement } from "@/lib/sov";
 
 /** Ordered, editable list of planned program elements. */
@@ -7,11 +7,13 @@ export function ElementSlots({
   catalog,
   onToggle,
   onRemove,
+  onMove,
 }: {
   elements: PlannedElement[];
   catalog: Map<string, number>;
   onToggle: (index: number) => void;
   onRemove: (index: number) => void;
+  onMove: (index: number, direction: -1 | 1) => void;
 }) {
   if (elements.length === 0) {
     return (
@@ -57,6 +59,24 @@ export function ElementSlots({
             <span className="w-14 text-right tabular-nums text-sm text-slate-700">
               {formatBV(elementTotal(el, catalog))}
             </span>
+            <button
+              type="button"
+              aria-label={`Move ${el.element_code} up`}
+              disabled={index === 0}
+              onClick={() => onMove(index, -1)}
+              className="text-slate-400 hover:text-slate-700 disabled:opacity-30"
+            >
+              <ArrowUp className="h-4 w-4" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              aria-label={`Move ${el.element_code} down`}
+              disabled={index === elements.length - 1}
+              onClick={() => onMove(index, 1)}
+              className="text-slate-400 hover:text-slate-700 disabled:opacity-30"
+            >
+              <ArrowDown className="h-4 w-4" aria-hidden="true" />
+            </button>
             <button
               type="button"
               aria-label={`Remove ${el.element_code}`}

@@ -72,6 +72,7 @@ export interface SkaterProgram {
   program_type: string;
   title: string;
   season?: string | null;
+  is_archived: boolean;
 }
 
 export interface SkaterRestriction {

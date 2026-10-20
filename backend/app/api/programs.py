@@ -15,6 +15,7 @@ from app.schemas.program import (
     ProgramElementOut,
     ProgramElementsUpdate,
     ProgramOut,
+    ProgramUpdate,
 )
 
 router = APIRouter(prefix="/programs", tags=["programs"])
@@ -38,6 +39,7 @@ def _to_out(program: Program) -> ProgramOut:
         season=program.season,
         music_duration_seconds=program.music_duration_seconds,
         segment_bonus=program.segment_bonus,
+        is_archived=program.is_archived,
         program_elements=elements,
     )
 
@@ -88,6 +90,23 @@ def get_program(
     db: Session = Depends(get_db),
 ) -> ProgramOut:
     return _to_out(_get_or_404(program_id, db))
+
+
+@router.patch("/{program_id}", response_model=ProgramOut)
+def update_program_meta(
+    program_id: uuid.UUID,
+    payload: ProgramUpdate,
+    _coach: User = Depends(require_coach),
+    db: Session = Depends(get_db),
+) -> ProgramOut:
+    program = _get_or_404(program_id, db)
+    if payload.title is not None:
+        program.title = payload.title
+    if payload.is_archived is not None:
+        program.is_archived = payload.is_archived
+    db.commit()
+    db.refresh(program)
+    return _to_out(program)
 
 
 @router.put("/{program_id}/elements", response_model=ProgramOut)
