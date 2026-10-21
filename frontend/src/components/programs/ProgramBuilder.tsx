@@ -4,6 +4,7 @@ import {
   createProgram,
   listSovElements,
   updateProgramElements,
+  updateProgramMeta,
 } from "@/lib/api";
 import type { SovElement } from "@/lib/types";
 import { toCatalog, totalBaseValue, type PlannedElement } from "@/lib/sov";
@@ -97,7 +98,14 @@ export function ProgramBuilder({
       }));
 
       if (initialProgram?.id) {
+        // 1. Update the layout
         await updateProgramElements(initialProgram.id, payloadElements, token);
+        
+        // 2. Update the title if it was changed
+        const trimmedTitle = title.trim();
+        if (trimmedTitle && trimmedTitle !== initialProgram.title) {
+          await updateProgramMeta(initialProgram.id, { title: trimmedTitle }, token);
+        }
       } else {
         await createProgram(
           {
@@ -114,7 +122,6 @@ export function ProgramBuilder({
       setSaving(false);
     }
   }
-
   return (
     <section className="space-y-4 rounded-lg border border-slate-200 bg-white p-4">
       <div className="flex items-center justify-between">
