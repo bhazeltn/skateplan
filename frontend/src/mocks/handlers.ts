@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import type { Skater } from "@/lib/types";
+import type { CompetitionOut, LevelListItem, Skater } from "@/lib/types";
 
 // A minimal JWT-looking token (header.payload.signature) with role claim so the
 // client can decode role locally. Not cryptographically valid — tests only.
@@ -191,7 +191,18 @@ function buildAssessment(id: number, body: Record<string, unknown>) {
 // Sprint 6 coach-driven custom benchmarks served by
 // GET /api/skaters/:id/benchmarks. Empty by default so views render the
 // empty state; CRUD-flow tests override with server.use().
-export const mockBenchmarks: unknown[] = [];
+export const mockBenchmarks: unknown[] = [
+  {
+    id: "gm-1",
+    category: "Jump",
+    name: "Consistent 2A",
+    status: "DEVELOPING",
+    target_date: "2026-11-30",
+    action_plan: "Daily take-off drills and harness reps",
+    success_criteria: "5/6 clean in two run-throughs",
+    notes: "Rotation improving; still early on some landings",
+  },
+];
 
 // Full skater profile served by GET /api/skaters/:id.
 export const mockSkaterDetail = {
@@ -287,6 +298,55 @@ export const mockDashboard = {
   ],
 };
 
+// Sprint 3: global competitions served by GET /api/competitions. One clearly
+// past and two future so upcoming/past branches of the Competitions tab render.
+export const mockCompetitions: CompetitionOut[] = [
+  {
+    id: "comp-autumn",
+    name: "Autumn Classic 2026",
+    start_date: "2026-01-10",
+    end_date: "2026-01-12",
+    city: "Montreal",
+    country: "Canada",
+    season: "2025-26",
+  },
+  {
+    id: "comp-winter",
+    name: "Winter Open 2027",
+    start_date: "2027-06-01",
+    end_date: "2027-06-03",
+    city: "Boston",
+    country: "United States",
+    season: "2026-27",
+  },
+  {
+    id: "comp-nationals",
+    name: "National Championships 2027",
+    start_date: "2027-01-15",
+    end_date: "2027-01-20",
+    city: "Manila",
+    country: "Philippines",
+    season: "2026-27",
+  },
+];
+
+// Sprint 3: Singles competitive levels served by GET /api/levels.
+export const mockLevels: LevelListItem[] = [
+  { level_id: 201, level_name: "Novice", federation_code: "ISU",
+    federation_name: "ISU", discipline: "Singles" },
+  { level_id: 202, level_name: "Junior", federation_code: "ISU",
+    federation_name: "ISU", discipline: "Singles" },
+  { level_id: 203, level_name: "Senior", federation_code: "ISU",
+    federation_name: "ISU", discipline: "Singles" },
+];
+
+// Deterministic Total Segment Score mirroring the backend contract:
+// (TES + PCS + Bonus) - Deductions. No ISU rule verification, no LLM.
+function mockTss(body: Record<string, unknown>): number {
+  const n = (k: string) => Number(body[k] ?? 0);
+  return (n("tes") + n("pcs") + n("segment_bonus")) - n("deductions");
+}
+
 // Both the real client and the mock use /api/auth/login. A /api/auth/token
 // alias is also provided for compatibility with the sprint spec text.
 const loginResolver = async ({ request }: { request: Request }) => {
@@ -366,7 +426,10 @@ export const handlers = [
   ),
   http.post("*/api/skaters/:id/benchmarks", async ({ request }) => {
     const body = (await request.json()) as Record<string, unknown>;
-    return HttpResponse.json({ id: "bench-new", ...body }, { status: 201 });
+    return HttpResponse.json(
+      { id: "bench-new", action_plan: null, success_criteria: null, ...body },
+      { status: 201 }
+    );
   }),
   http.patch("*/api/skaters/:id/benchmarks/:bid", async ({ request, params }) => {
     const body = (await request.json()) as Record<string, unknown>;
@@ -395,4 +458,33 @@ export const handlers = [
     });
   }),
   http.get("*/api/dashboard", () => HttpResponse.json(mockDashboard)),
+  // Sprint 3: competitions, entries, results. Default handlers keep views from
+  // hitting unhandled requests; CRUD-flow tests override via server.use().
+  http.get("*/api/competitions", () => HttpResponse.json(mockCompetitions)),
+  http.get("*/api/levels", () => HttpResponse.json(mockLevels)),
+  http.post("*/api/competitions", async ({ request }) => {
+    const body = (await request.json()) as Record<string, unknown>;
+    return HttpResponse.json({ id: "comp-new", ...body }, { status: 201 });
+  }),
+  http.post("*/api/competitions/:cid/entries", async ({ request, params }) => {
+    const body = (await request.json()) as Record<string, unknown>;
+    return HttpResponse.json(
+      { id: "entry-new", competition_id: params.cid, status: "prospective", ...body },
+      { status: 201 }
+    );
+  }),
+  http.post(
+    "*/api/competitions/entries/:eid/results",
+    async ({ request, params }) => {
+      const body = (await request.json()) as Record<string, unknown>;
+      return HttpResponse.json(
+        { id: "result-new", entry_id: params.eid, tss: mockTss(body), ...body },
+        { status: 201 }
+      );
+    }
+  ),
+  http.get("*/api/competitions/entries/:eid/protocol", ({ params }) =>
+    HttpResponse.json({ entry_id: params.eid, segments: [] })
+  ),
+  http.get("*/api/skaters/:id/competitions", () => HttpResponse.json([])),
 ];

@@ -163,6 +163,45 @@ describe("Program sandbox builder", () => {
     expect((captured as unknown as Record<string, unknown>).title).toBe("Carmen 2026");
   });
 
+  it("saves title changes when editing an existing program", async () => {
+    seedSession();
+    const user = userEvent.setup();
+    let patchBody: Record<string, unknown> | null = null;
+    let patchId: string | null = null;
+    let putCalled = false;
+    server.use(
+      http.patch("*/api/programs/:id", async ({ request, params }) => {
+        patchId = params.id as string;
+        patchBody = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json({ id: params.id, ...patchBody });
+      }),
+      http.put("*/api/programs/:id/elements", async () => {
+        putCalled = true;
+        return HttpResponse.json({ id: "prog-1", program_elements: [] });
+      })
+    );
+    renderBuilder({
+      initialProgram: {
+        id: "prog-1",
+        program_type: "SP",
+        title: "Old Title",
+        elements: [{ element_code: "3Lz", is_second_half_bonus: false }],
+      },
+    });
+    const titleInput = await screen.findByRole("textbox", { name: /title/i });
+    await user.clear(titleInput);
+    await user.type(titleInput, "Carmen 2026");
+
+    await user.click(screen.getByRole("button", { name: /update program/i }));
+
+    await waitFor(() => expect(patchBody).not.toBeNull());
+    expect(patchId).toBe("prog-1");
+    expect((patchBody as unknown as Record<string, unknown>).title).toBe(
+      "Carmen 2026"
+    );
+    expect(putCalled).toBe(true);
+  });
+
   it("shows a combination helper when the search contains a plus sign", async () => {
     seedSession();
     const user = userEvent.setup();

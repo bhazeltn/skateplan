@@ -138,6 +138,8 @@ class SkaterBenchmarkIn(BaseModel):
     status: BenchmarkStatus = "NOT_STARTED"
     notes: Optional[str] = None
     target_date: Optional[date] = None
+    action_plan: Optional[str] = None
+    success_criteria: Optional[str] = None
 
 
 class SkaterBenchmarkUpdate(BaseModel):
@@ -146,6 +148,8 @@ class SkaterBenchmarkUpdate(BaseModel):
     status: Optional[BenchmarkStatus] = None
     notes: Optional[str] = None
     target_date: Optional[date] = None
+    action_plan: Optional[str] = None
+    success_criteria: Optional[str] = None
 
 
 class SkaterBenchmarkOut(BaseModel):
@@ -158,3 +162,5 @@ class SkaterBenchmarkOut(BaseModel):
     status: BenchmarkStatus
     notes: Optional[str] = None
     target_date: Optional[date] = None
+    action_plan: Optional[str] = None
+    success_criteria: Optional[str] = None

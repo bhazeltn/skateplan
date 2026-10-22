@@ -9,7 +9,6 @@ import { PlaceholderPage } from "@/pages/PlaceholderPage";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 
 const PROTECTED: { path: string; title: string }[] = [
-  { path: "/programs", title: "Programs" },
   { path: "/sessions", title: "Sessions" },
   { path: "/competitions", title: "Competitions" },
 ];

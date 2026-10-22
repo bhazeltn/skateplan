@@ -176,6 +176,8 @@ export interface SkaterBenchmark {
   status: BenchmarkStatus;
   notes?: string | null;
   target_date?: string | null;
+  action_plan?: string | null;
+  success_criteria?: string | null;
 }
 
 export interface SkaterBenchmarkPayload {
@@ -184,6 +186,8 @@ export interface SkaterBenchmarkPayload {
   status: BenchmarkStatus;
   notes?: string | null;
   target_date?: string | null;
+  action_plan?: string | null;
+  success_criteria?: string | null;
 }
 
 export interface ProgramElementPayload {
@@ -240,4 +244,82 @@ export interface DashboardSummary {
   alerts: DashboardAlert[];
   restrictions: DashboardRestriction[];
   upcoming_competitions: DashboardCompetition[];
+}
+
+
+// --- Sprint 3 (frontend): Competitions, entries, results -----------------
+export type SegmentType = "SP" | "FS";
+
+export interface LevelListItem {
+  level_id: number;
+  level_name: string;
+  federation_code: string;
+  federation_name: string;
+  discipline?: string | null;
+}
+
+export interface CompetitionOut {
+  id: string;
+  name: string;
+  start_date?: string | null;
+  end_date?: string | null;
+  city?: string | null;
+  country?: string | null;
+  federation_id?: number | null;
+  season?: string | null;
+}
+
+export interface CompetitionPayload {
+  name: string;
+  start_date?: string | null;
+  end_date?: string | null;
+  city?: string | null;
+  country?: string | null;
+  season?: string | null;
+}
+
+export interface EntryOut {
+  id: string;
+  competition_id: string;
+  skater_id: number;
+  level_id?: number | null;
+  sp_program_id?: string | null;
+  fs_program_id?: string | null;
+  status: string;
+}
+
+export interface EntryPayload {
+  competition_id: string;
+  skater_id: number;
+  level_id?: number | null;
+  sp_program_id?: string | null;
+  fs_program_id?: string | null;
+}
+
+export interface SegmentResultOut {
+  id: string;
+  segment: string;
+  tes?: number | null;
+  pcs?: number | null;
+  deductions?: number | null;
+  segment_bonus: number;
+  tss?: number | null;
+  segment_rank?: number | null;
+  overall_rank?: number | null;
+}
+
+export interface ResultPayload {
+  segment: string;
+  tes?: number;
+  pcs?: number;
+  deductions?: number;
+  segment_bonus?: number;
+  segment_rank?: number | null;
+  overall_rank?: number | null;
+  protocol_notes?: string | null;
+}
+
+export interface ProtocolOut {
+  entry_id: string;
+  segments: SegmentResultOut[];
 }

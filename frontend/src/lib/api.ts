@@ -1,7 +1,15 @@
 import type {
   BenchmarkTemplate,
+  CompetitionOut,
+  CompetitionPayload,
+  LevelListItem,
   DashboardSummary,
+  EntryOut,
+  EntryPayload,
   Federation,
+  ProtocolOut,
+  ResultPayload,
+  SegmentResultOut,
   GapAssessmentPayload,
   GapReport,
   LoginResponse,
@@ -298,4 +306,93 @@ export async function deleteProgram(
     const detail = await res.json().catch(() => ({}));
     throw new ApiError(res.status, detail?.detail ?? "Delete failed");
   }
+}
+
+
+// --- Sprint 3 (frontend): Competitions, entries, results -----------------
+// Singles competitive levels for the entry level picker: GET /api/levels.
+export function listLevels(
+  token?: string | null
+): Promise<LevelListItem[]> {
+  return request<LevelListItem[]>("/api/levels?discipline=Singles", {}, token);
+}
+
+// Backend list endpoint has no text query, so fetch all and filter by name
+// substring client-side: GET /api/competitions.
+export async function searchCompetitions(
+  query: string,
+  token?: string | null
+): Promise<CompetitionOut[]> {
+  const all = await request<CompetitionOut[]>("/api/competitions", {}, token);
+  const q = query.trim().toLowerCase();
+  if (!q) return all;
+  return all.filter((c) => c.name.toLowerCase().includes(q));
+}
+
+// Create a global competition (coach only): POST /api/competitions.
+export function createCompetition(
+  payload: CompetitionPayload,
+  token?: string | null
+): Promise<CompetitionOut> {
+  return request<CompetitionOut>(
+    "/api/competitions",
+    { method: "POST", body: JSON.stringify(payload) },
+    token
+  );
+}
+
+// A skater's competition entries: GET /api/skaters/{id}/competitions.
+export function listSkaterEntries(
+  skaterId: number | string,
+  token?: string | null
+): Promise<EntryOut[]> {
+  return request<EntryOut[]>(
+    `/api/skaters/${skaterId}/competitions`,
+    {},
+    token
+  );
+}
+
+// Register the skater into a competition: POST /api/competitions/{cid}/entries.
+export function createEntry(
+  skaterId: number,
+  payload: EntryPayload,
+  token?: string | null
+): Promise<EntryOut> {
+  const body = {
+    skater_id: skaterId,
+    level_id: payload.level_id,
+    sp_program_id: payload.sp_program_id,
+    fs_program_id: payload.fs_program_id,
+  };
+  return request<EntryOut>(
+    `/api/competitions/${payload.competition_id}/entries`,
+    { method: "POST", body: JSON.stringify(body) },
+    token
+  );
+}
+
+// Record a segment result: POST /api/competitions/entries/{eid}/results.
+export function createSegmentResult(
+  entryId: string,
+  payload: ResultPayload,
+  token?: string | null
+): Promise<SegmentResultOut> {
+  return request<SegmentResultOut>(
+    `/api/competitions/entries/${entryId}/results`,
+    { method: "POST", body: JSON.stringify(payload) },
+    token
+  );
+}
+
+// Recorded segments for an entry: GET /api/competitions/entries/{eid}/protocol.
+export function getEntryProtocol(
+  entryId: string,
+  token?: string | null
+): Promise<ProtocolOut> {
+  return request<ProtocolOut>(
+    `/api/competitions/entries/${entryId}/protocol`,
+    {},
+    token
+  );
 }

@@ -9,10 +9,7 @@ import { ProgramsTab } from "@/components/skaters/ProgramsTab";
 import { RestrictionsTab } from "@/components/skaters/RestrictionsTab";
 import { GoalsTab } from "@/components/skaters/GoalsTab";
 import { GapAnalysisTab } from "@/components/skaters/GapAnalysisTab";
-
-function EmptyTab({ label }: { label: string }) {
-  return <p className="text-sm text-slate-400">{label}</p>;
-}
+import { CompetitionsTab } from "@/components/skaters/CompetitionsTab";
 
 function buildTabs(skater: SkaterDetail, onChanged: () => void): ProfileTab[] {
   return [
@@ -46,7 +43,12 @@ function buildTabs(skater: SkaterDetail, onChanged: () => void): ProfileTab[] {
     },
     {
       label: "Competitions",
-      content: <EmptyTab label="Competition entries coming soon." />,
+      content: (
+        <CompetitionsTab
+          skaterId={skater.skater_id}
+          programs={skater.programs}
+        />
+      ),
     },
   ];
 }

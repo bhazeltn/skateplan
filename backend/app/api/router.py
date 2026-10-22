@@ -10,6 +10,7 @@ from app.api import (
     external,
     federations,
     injuries,
+    levels,
     meetings,
     programs,
     schedule,
@@ -30,6 +31,7 @@ api_router.include_router(sov.router)
 api_router.include_router(schedule.router)
 api_router.include_router(admin.router)
 api_router.include_router(federations.router)
+api_router.include_router(levels.router)
 api_router.include_router(external.router)
 api_router.include_router(programs.router)
 api_router.include_router(scoring.router)

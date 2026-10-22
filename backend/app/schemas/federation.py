@@ -18,6 +18,16 @@ class LevelOut(BaseModel):
     isu_anchor: Optional[str] = None
 
 
+class LevelListItemOut(BaseModel):
+    """A single selectable competition level, flattened across streams."""
+
+    level_id: int
+    level_name: str
+    federation_code: str
+    federation_name: str
+    discipline: Optional[str] = None
+
+
 class StreamOut(BaseModel):
     stream_name: str
     stream_display: Optional[str] = None

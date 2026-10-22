@@ -174,6 +174,8 @@ def _benchmark_payload(**overrides):
         "status": "DEVELOPING",
         "notes": "Building consistency",
         "target_date": "2026-06-01",
+        "action_plan": "Drill back-half take-off 3x/week",
+        "success_criteria": "5/6 clean in two consecutive run-throughs",
     }
     payload.update(overrides)
     return payload
@@ -205,6 +207,8 @@ def test_create_custom_benchmark_returns_record_with_id(client, make_user):
     assert body["status"] == "DEVELOPING"
     assert body["notes"] == "Building consistency"
     assert body["target_date"] == "2026-06-01"
+    assert body["action_plan"] == "Drill back-half take-off 3x/week"
+    assert body["success_criteria"] == "5/6 clean in two consecutive run-throughs"
 
 
 def test_list_custom_benchmarks_supports_grouping_by_category(client, make_user):
@@ -230,9 +234,13 @@ def test_update_custom_benchmark_persists_status_change(client, make_user):
     bid = created["id"]
     upd = client.patch(
         f"/api/skaters/{skater.id}/benchmarks/{bid}",
-        headers=_hdr(token), json={"status": "MET", "notes": "Landed clean"})
+        headers=_hdr(token), json={"status": "MET", "notes": "Landed clean",
+                                   "action_plan": "Maintain with weekly run-throughs",
+                                   "success_criteria": "Clean in competition"})
     assert upd.status_code in (200, 201), upd.text
     assert upd.json()["status"] == "MET"
+    assert upd.json()["action_plan"] == "Maintain with weekly run-throughs"
+    assert upd.json()["success_criteria"] == "Clean in competition"
     listed = _flatten(
         client.get(f"/api/skaters/{skater.id}/benchmarks", headers=_hdr(token)).json())
     match = next(i for i in listed if i["id"] == bid)

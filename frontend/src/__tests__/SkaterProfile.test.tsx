@@ -65,13 +65,15 @@ describe("Skater profile hub", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows skater-driven milestone targets on the Goals tab", async () => {
+  it("shows the standalone goals manager on the Goals tab", async () => {
     seedSession();
     renderProfile();
     await screen.findByText(/Ava Nguyen/);
     await userEvent.click(screen.getByRole("tab", { name: /^goals$/i }));
-    expect(await screen.findByText(/milestone targets/i)).toBeInTheDocument();
-    expect(screen.getByText(/Land 2A clean/i)).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: /add goal/i })
+    ).toBeInTheDocument();
+    expect(screen.getByText(/active goals/i)).toBeInTheDocument();
   });
 
   it("shows the benchmark assessment empty state on the Gap Analysis tab", async () => {

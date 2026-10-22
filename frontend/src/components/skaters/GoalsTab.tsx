@@ -1,57 +1,94 @@
-import { useGapReport } from "@/components/skaters/gapData";
-import type { GapEntry } from "@/lib/types";
+import { useState } from "react";
+import { GoalForm } from "@/components/skaters/GoalForm";
+import { GoalList } from "@/components/skaters/GoalCard";
+import { useGoals } from "@/components/skaters/useGoals";
+import type { SkaterBenchmarkPayload } from "@/lib/types";
 
-function targetText(entry: GapEntry): string {
-  if (entry.target === null || entry.target === undefined) return "Achieve";
-  if (entry.evaluation_mode === "binary") return "Land clean";
-  if (entry.evaluation_mode === "level") return `Reach level ${entry.target}`;
-  return `Target ${Number(entry.target).toFixed(2)}`;
-}
-
-/** Skater-driven view: the milestone targets pulled from the benchmark standard. */
+/** Standalone goals manager: create, edit, and track discrete goals independently
+ *  from the heavier Gap Analysis benchmark-standard workflow. */
 export function GoalsTab({ skaterId }: { skaterId: number | string }) {
-  const { report, loading, error } = useGapReport(skaterId);
+  const { goals, loading, saving, create, update } = useGoals(skaterId);
+  const [adding, setAdding] = useState(false);
+  const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
 
-  if (loading) {
-    return <p className="text-sm text-slate-400">Loading goals…</p>;
-  }
-  if (error || !report) {
-    return (
-      <p className="text-sm text-slate-400">
-        No milestone targets set yet. Assign a benchmark standard to see goals.
-      </p>
-    );
+  const active = goals.filter((g) => g.status !== "MET");
+  const completed = goals.filter((g) => g.status === "MET");
+
+  async function handleCreate(payload: SkaterBenchmarkPayload) {
+    await create(payload);
+    setAdding(false);
   }
 
-  const goals = Object.values(report.pillars).flat();
+  async function handleUpdate(payload: SkaterBenchmarkPayload) {
+    if (!editingGoalId) return;
+    await update(editingGoalId, payload);
+    setEditingGoalId(null);
+  }
+
+  function handleStatus(id: string, status: SkaterBenchmarkPayload["status"]) {
+    update(id, { status });
+  }
+
+  function startAdding() {
+    setEditingGoalId(null);
+    setAdding(true);
+  }
+
+  const listProps = {
+    editingGoalId,
+    saving,
+    onEdit: setEditingGoalId,
+    onStatusChange: handleStatus,
+    onSave: handleUpdate,
+    onCancel: () => setEditingGoalId(null),
+  };
 
   return (
     <section className="space-y-4">
-      <div>
-        <h3 className="text-sm font-semibold text-slate-900">Milestone Targets</h3>
-        <p className="text-xs text-slate-500">
-          What you are working toward for your benchmark standard.
-        </p>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-900">Goals</h3>
+          <p className="text-xs text-slate-500">
+            Track discrete standalone goals for this athlete.
+          </p>
+        </div>
+        {!adding && (
+          <button
+            type="button"
+            onClick={startAdding}
+            className="shrink-0 rounded-md bg-slate-900 px-3 py-2 text-sm
+              font-semibold text-white hover:bg-slate-800"
+          >
+            + Add Goal
+          </button>
+        )}
       </div>
-      {goals.length === 0 ? (
-        <p className="text-sm text-slate-400">No milestone targets set yet.</p>
+
+      {adding && (
+        <GoalForm
+          onSave={handleCreate}
+          onCancel={() => setAdding(false)}
+          saving={saving}
+        />
+      )}
+
+      {loading ? (
+        <p className="text-sm text-slate-400">Loading goals…</p>
       ) : (
-        <ul className="space-y-2">
-          {goals.map((goal) => (
-            <li
-              key={goal.benchmark_id}
-              className="flex items-center justify-between gap-3 rounded-md border
-                border-slate-200 bg-white px-3 py-2"
-            >
-              <span className="text-sm font-medium text-slate-900">
-                {goal.title}
-              </span>
-              <span className="tabular-nums text-xs font-medium text-slate-600">
-                {targetText(goal)}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <div className="space-y-4">
+          <GoalList
+            testId="active-goals"
+            heading="Active Goals"
+            goals={active}
+            {...listProps}
+          />
+          <GoalList
+            testId="completed-goals"
+            heading="Completed"
+            goals={completed}
+            {...listProps}
+          />
+        </div>
       )}
     </section>
   );

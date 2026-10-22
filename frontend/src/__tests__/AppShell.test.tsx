@@ -12,7 +12,6 @@ function seedSession() {
 const LINKS = [
   "Dashboard",
   "Skaters",
-  "Programs",
   "Sessions",
   "Competitions",
   "Gap Analysis",

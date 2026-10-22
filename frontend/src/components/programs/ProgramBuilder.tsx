@@ -88,34 +88,42 @@ export function ProgramBuilder({
     });
   }
 
+  function buildPayloadElements() {
+    return elements.map((el, i) => ({
+      segment_order: i + 1,
+      element_code: el.element_code,
+      is_second_half_bonus: el.is_second_half_bonus,
+    }));
+  }
+
+  async function persistExisting(programId: string) {
+    const payloadElements = buildPayloadElements();
+    await updateProgramElements(programId, payloadElements, token);
+    const trimmedTitle = title.trim();
+    if (trimmedTitle && trimmedTitle !== initialProgram?.title) {
+      await updateProgramMeta(programId, { title: trimmedTitle }, token);
+    }
+  }
+
+  async function persistNew() {
+    await createProgram(
+      {
+        skater_id: skaterId,
+        program_type: segment,
+        title: title.trim() || TITLES[segment],
+        program_elements: buildPayloadElements(),
+      },
+      token
+    );
+  }
+
   async function save() {
     setSaving(true);
     try {
-      const payloadElements = elements.map((el, i) => ({
-        segment_order: i + 1,
-        element_code: el.element_code,
-        is_second_half_bonus: el.is_second_half_bonus,
-      }));
-
       if (initialProgram?.id) {
-        // 1. Update the layout
-        await updateProgramElements(initialProgram.id, payloadElements, token);
-        
-        // 2. Update the title if it was changed
-        const trimmedTitle = title.trim();
-        if (trimmedTitle && trimmedTitle !== initialProgram.title) {
-          await updateProgramMeta(initialProgram.id, { title: trimmedTitle }, token);
-        }
+        await persistExisting(initialProgram.id);
       } else {
-        await createProgram(
-          {
-            skater_id: skaterId,
-            program_type: segment,
-            title: title.trim() || TITLES[segment],
-            program_elements: payloadElements,
-          },
-          token
-        );
+        await persistNew();
       }
       onSaved();
     } finally {
@@ -177,7 +185,7 @@ export function ProgramBuilder({
         className="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold
           text-white hover:bg-slate-800 disabled:opacity-50"
       >
-        {saving ? "Saving…" : initialProgram ? "Update Elements" : "Save Program"}
+        {saving ? "Saving…" : initialProgram ? "Update Program" : "Save Program"}
       </button>
     </section>
   );
