@@ -460,11 +460,22 @@ export const handlers = [
   http.get("*/api/dashboard", () => HttpResponse.json(mockDashboard)),
   // Sprint 3: competitions, entries, results. Default handlers keep views from
   // hitting unhandled requests; CRUD-flow tests override via server.use().
-  http.get("*/api/competitions", () => HttpResponse.json(mockCompetitions)),
+  http.get("*/api/competitions", ({ request }) => {
+    const q = new URL(request.url).searchParams.get("q")?.trim().toLowerCase();
+    const rows = q
+      ? mockCompetitions.filter((c) => c.name.toLowerCase().includes(q))
+      : mockCompetitions;
+    return HttpResponse.json(rows);
+  }),
   http.get("*/api/levels", () => HttpResponse.json(mockLevels)),
   http.post("*/api/competitions", async ({ request }) => {
     const body = (await request.json()) as Record<string, unknown>;
-    return HttpResponse.json({ id: "comp-new", ...body }, { status: 201 });
+    const created = {
+      id: `comp-${mockCompetitions.length + 1}`,
+      ...body,
+    } as CompetitionOut;
+    mockCompetitions.push(created);
+    return HttpResponse.json(created, { status: 201 });
   }),
   http.post("*/api/competitions/:cid/entries", async ({ request, params }) => {
     const body = (await request.json()) as Record<string, unknown>;

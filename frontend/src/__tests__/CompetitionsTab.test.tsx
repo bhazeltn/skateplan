@@ -5,6 +5,7 @@ import { http, HttpResponse } from "msw";
 import { MemoryRouter } from "react-router-dom";
 import { AuthProvider, TOKEN_KEY } from "@/context/AuthContext";
 import { CompetitionsTab } from "@/components/skaters/CompetitionsTab";
+import { createCompetition, searchCompetitions } from "@/lib/api";
 import { mockCompetitions } from "@/mocks/handlers";
 import { server } from "@/mocks/server";
 import type { SkaterProgram } from "@/lib/types";
@@ -311,5 +312,28 @@ describe("Competitions tab", () => {
     const row = await screen.findByTestId("entry-e1");
     expect(within(row).getByText(/TSS 88.00/)).toBeInTheDocument();
     expect(within(row).getByText(/Overall 3/)).toBeInTheDocument();
+  });
+});
+
+
+// Phase 2: the DEFAULT dev mock must persist a created competition and honor the
+// `q` filter so create -> search round-trips (mirrors the backend ilike).
+describe("dev mock competitions persistence", () => {
+  it("persists a created competition and finds it via case-insensitive q", async () => {
+    const created = await createCompetition(
+      { name: "Maple Leaf Invitational", start_date: "2026-03-01" },
+      null
+    );
+    expect(created.id).toBeTruthy();
+
+    const found = await searchCompetitions("maple leaf", null);
+    expect(found.some((c) => c.id === created.id)).toBe(true);
+    expect(found.every((c) => /maple leaf/i.test(c.name))).toBe(true);
+
+    // The mock GET itself must honor `q` (server-side), mirroring backend ilike.
+    const res = await fetch("/api/competitions?q=maple%20leaf");
+    const filtered = (await res.json()) as { id: string; name: string }[];
+    expect(filtered.some((c) => c.id === created.id)).toBe(true);
+    expect(filtered.every((c) => /maple leaf/i.test(c.name))).toBe(true);
   });
 });
