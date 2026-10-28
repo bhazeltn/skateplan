@@ -5,6 +5,7 @@ import { http, HttpResponse } from "msw";
 import { MemoryRouter } from "react-router-dom";
 import { AuthProvider, TOKEN_KEY } from "@/context/AuthContext";
 import { ProgramBuilder } from "@/components/programs/ProgramBuilder";
+import { calculateElementBaseValue } from "@/lib/sov";
 import { server } from "@/mocks/server";
 
 function seedSession() {
@@ -235,5 +236,31 @@ describe("Program sandbox builder", () => {
     expect(elements[0].element_code).toBe("3Lz");
     expect(elements[0].segment_order).toBe(1);
     expect(elements[0].is_second_half_bonus).toBe(true);
+  });
+});
+
+// Quick Patch: spec-named helper calculateElementBaseValue (pure unit tests).
+describe("calculateElementBaseValue", () => {
+  const catalog = new Map<string, number>([
+    ["3Lz", 5.9],
+    ["3T", 4.2],
+    ["3S", 4.3],
+    ["2A", 3.3],
+  ]);
+
+  it("sums the constituents of a jump combination", () => {
+    expect(calculateElementBaseValue("3Lz+3T", false, catalog)).toBe(10.1);
+  });
+
+  it("applies the 1.1x second-half bonus, rounded to 2 decimals", () => {
+    expect(calculateElementBaseValue("3Lz+3T", true, catalog)).toBe(11.11);
+  });
+
+  it("returns the base value of a single element", () => {
+    expect(calculateElementBaseValue("3Lz", false, catalog)).toBe(5.9);
+  });
+
+  it("ignores a SEQ sequence marker", () => {
+    expect(calculateElementBaseValue("3S+2A+SEQ", false, catalog)).toBe(7.6);
   });
 });

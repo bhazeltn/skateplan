@@ -47,6 +47,18 @@ export function elementTotal(
   return element.is_second_half_bonus && eligible ? base * SECOND_HALF_MULTIPLIER : base;
 }
 
+/** Spec-named helper: rounded base value for an element code, applying the
+ *  second-half 1.1x bonus when requested. Thin wrapper over baseValueOf; combos
+ *  are summed across "+" tokens and the SEQ marker is ignored by baseValueOf. */
+export function calculateElementBaseValue(
+  elementCode: string,
+  isSecondHalf: boolean,
+  catalog: Map<string, number>
+): number {
+  const base = baseValueOf(elementCode, catalog);
+  return round2(isSecondHalf ? base * SECOND_HALF_MULTIPLIER : base);
+}
+
 /** Rounded total planned base value across all elements. */
 export function totalBaseValue(
   elements: PlannedElement[],
