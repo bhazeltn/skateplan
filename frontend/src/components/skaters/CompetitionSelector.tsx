@@ -3,6 +3,7 @@ import { searchCompetitions, createCompetition } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import type { CompetitionOut, CompetitionPayload } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/input";
 import { LocationPicker } from "@/components/skaters/LocationPicker";
@@ -47,17 +48,26 @@ function CreateCompetitionForm({
 }) {
   const { token } = useAuth();
   const [form, setForm] = useState<CompetitionPayload>({ ...EMPTY, name });
+  const [error, setError] = useState<string | null>(null);
   const set = (k: keyof CompetitionPayload, v: string) =>
     setForm((prev) => ({ ...prev, [k]: v }));
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
-    onCreated(await createCompetition({ ...form, name }, token));
+    setError(null);
+    try {
+      onCreated(await createCompetition({ ...form, name }, token));
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Could not create competition."
+      );
+    }
   }
 
   return (
     <form onSubmit={submit} className="space-y-3 rounded-md bg-slate-50 p-3">
+      {error && <Alert variant="danger">{error}</Alert>}
       <div>
         <Label htmlFor="comp-name">Name</Label>
         <p id="comp-name" className="rounded-md border border-slate-200 bg-white

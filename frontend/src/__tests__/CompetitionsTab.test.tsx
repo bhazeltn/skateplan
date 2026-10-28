@@ -212,6 +212,44 @@ describe("Competitions tab", () => {
     ).toBe("");
   });
 
+  it("shows the helper note about logging split events separately", async () => {
+    seedSession();
+    const user = userEvent.setup();
+    installCompApi([]);
+    renderTab();
+    await user.click(await screen.findByRole("button", { name: /add entry/i }));
+    expect(
+      await screen.findByText(
+        /judged as separate events with their own podiums/i
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("shows an error and stays in create mode when competition create fails", async () => {
+    seedSession();
+    const user = userEvent.setup();
+    installCompApi([]);
+    server.use(
+      http.post("*/api/competitions", () =>
+        HttpResponse.json({ detail: "Name already exists" }, { status: 400 })
+      )
+    );
+    renderTab();
+    await user.click(await screen.findByRole("button", { name: /add entry/i }));
+    await user.type(await screen.findByLabelText(/competition/i), "Dup Cup");
+    await user.click(
+      await screen.findByRole("button", { name: /create new competition/i })
+    );
+    await user.click(screen.getByRole("button", { name: /save competition/i }));
+
+    expect(
+      await screen.findByText(/name already exists/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /save competition/i })
+    ).toBeInTheDocument();
+  });
+
   it("marks a future entry Upcoming and lists its assigned programs", async () => {
     seedSession();
     installCompApi([FUTURE_ENTRY]);

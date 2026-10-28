@@ -181,6 +181,10 @@ export function AddEntryModal({ skaterId, open, onClose, onSubmit }: Props) {
             <ProgramCheckbox id="entry-fs" label="Entering Free Skate"
               checked={fs} onChange={setFs} />
           </fieldset>
+          <p className="text-xs text-slate-500 mb-4">
+            Note: If the Short and Free are judged as separate events with their
+            own podiums, please log them as two separate entries.
+          </p>
           <EntryFooter error={error} saving={saving} onCancel={onClose}
             onAddAnother={() => void save(true)} />
         </form>

@@ -89,6 +89,7 @@ def create_competition(
 
 @router.get("", response_model=list[CompetitionOut])
 def list_competitions(
+    q: Optional[str] = Query(None),
     season: Optional[str] = Query(None),
     date_from: Optional[date] = Query(None),
     date_to: Optional[date] = Query(None),
@@ -96,6 +97,8 @@ def list_competitions(
     db: Session = Depends(get_db),
 ) -> list[CompetitionOut]:
     stmt = select(Competition)
+    if q:
+        stmt = stmt.where(Competition.name.ilike(f"%{q}%"))
     if season is not None:
         stmt = stmt.where(Competition.season == season)
     if date_from is not None:

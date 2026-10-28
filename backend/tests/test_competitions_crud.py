@@ -61,6 +61,19 @@ def test_athlete_cannot_create_competition(client, make_user, db):
     assert resp.status_code == 403, resp.text
 
 
+def test_name_search_is_case_insensitive(client, make_user, db):
+    token = _coach_token(client, make_user)
+    client.post("/api/competitions", headers=_hdr(token),
+                json=_payload("Autumn Classic", "2025-10-10", "2025-10-12", "2025-26", None))
+    client.post("/api/competitions", headers=_hdr(token),
+                json=_payload("Spring Open", "2026-04-01", "2026-04-03", "2026-27", None))
+
+    resp = client.get("/api/competitions?q=autumn", headers=_hdr(token))
+    assert resp.status_code == 200, resp.text
+    names = {c["name"] for c in resp.json()}
+    assert names == {"Autumn Classic"}
+
+
 def test_filter_by_season_and_date_range(client, make_user, db):
     token = _coach_token(client, make_user)
     client.post("/api/competitions", headers=_hdr(token),
