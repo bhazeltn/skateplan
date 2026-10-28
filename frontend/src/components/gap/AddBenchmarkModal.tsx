@@ -41,7 +41,7 @@ export function AddBenchmarkModal({ onSave, onCancel }: Props) {
   };
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+    <div className="max-h-[90vh] overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-4">
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="text-sm font-medium text-slate-700">
           Category

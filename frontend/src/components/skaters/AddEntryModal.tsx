@@ -161,10 +161,10 @@ export function AddEntryModal({ skaterId, open, onClose, onSubmit }: Props) {
 
   return (
     <div role="presentation" onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/40 p-4">
       <div role="dialog" aria-modal="true" aria-labelledby="add-entry-title"
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
+        className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
         <h2 id="add-entry-title" className="mb-4 text-lg font-semibold text-slate-900">
           Add Entry
         </h2>
