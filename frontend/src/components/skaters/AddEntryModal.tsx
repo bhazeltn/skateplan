@@ -3,6 +3,7 @@ import { CompetitionSelector } from "@/components/skaters/CompetitionSelector";
 import { useAuth } from "@/context/AuthContext";
 import { listLevels } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 import { Label } from "@/components/ui/input";
 import type {
   CompetitionOut,
@@ -90,26 +91,72 @@ function ProgramCheckbox({
   );
 }
 
+function EntryFooter({
+  error,
+  saving,
+  onCancel,
+  onAddAnother,
+}: {
+  error: string | null;
+  saving: boolean;
+  onCancel: () => void;
+  onAddAnother: () => void;
+}) {
+  return (
+    <div className="space-y-3 pt-2">
+      {error && <Alert variant="danger">{error}</Alert>}
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+        <Button type="button" variant="outline" disabled={saving}
+          onClick={onAddAnother}>Save &amp; Add Another</Button>
+        <Button type="submit" disabled={saving}>Save &amp; Close</Button>
+      </div>
+    </div>
+  );
+}
+
 export function AddEntryModal({ skaterId, open, onClose, onSubmit }: Props) {
   const levels = useLevels();
   const [competition, setCompetition] = useState<CompetitionOut | null>(null);
   const [level, setLevel] = useState("");
   const [sp, setSp] = useState(false);
   const [fs, setFs] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   if (!open) return null;
 
-  async function submit(e: FormEvent) {
-    e.preventDefault();
+  // Keep the competition; clear only the per-event fields for the next entry.
+  function resetEvent() {
+    setLevel("");
+    setSp(false);
+    setFs(false);
+  }
+
+  async function save(keepOpen: boolean) {
     if (!competition) return;
-    await onSubmit({
-      competition_id: competition.id,
-      skater_id: skaterId,
-      level_id: level === "" ? null : Number(level),
-      sp_program_id: null,
-      fs_program_id: null,
-    });
-    onClose();
+    setError(null);
+    setSaving(true);
+    try {
+      await onSubmit({
+        competition_id: competition.id,
+        skater_id: skaterId,
+        level_id: level === "" ? null : Number(level),
+        sp_program_id: null,
+        fs_program_id: null,
+      });
+      if (keepOpen) resetEvent();
+      else onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not save entry.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    void save(false);
   }
 
   return (
@@ -134,10 +181,8 @@ export function AddEntryModal({ skaterId, open, onClose, onSubmit }: Props) {
             <ProgramCheckbox id="entry-fs" label="Entering Free Skate"
               checked={fs} onChange={setFs} />
           </fieldset>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit">Save Entry</Button>
-          </div>
+          <EntryFooter error={error} saving={saving} onCancel={onClose}
+            onAddAnother={() => void save(true)} />
         </form>
       </div>
     </div>

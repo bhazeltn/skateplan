@@ -86,6 +86,15 @@ function renderTab() {
   );
 }
 
+/** Open the Add Entry modal and pick the seeded Autumn competition. */
+async function openWithAutumn(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(await screen.findByRole("button", { name: /add entry/i }));
+  await user.type(await screen.findByLabelText(/competition/i), "Autumn");
+  await user.click(
+    await screen.findByRole("button", { name: /autumn classic 2026/i })
+  );
+}
+
 const PAST_ENTRY: Entry = {
   id: "e1",
   competition_id: "comp-autumn",
@@ -136,18 +145,14 @@ describe("Competitions tab", () => {
     const { posted } = installCompApi([]);
     renderTab();
 
-    await user.click(await screen.findByRole("button", { name: /add entry/i }));
-    await user.type(await screen.findByLabelText(/competition/i), "Autumn");
-    await user.click(
-      await screen.findByRole("button", { name: /autumn classic 2026/i })
-    );
+    await openWithAutumn(user);
     await user.selectOptions(
       await screen.findByLabelText(/level/i),
       await screen.findByRole("option", { name: /junior/i })
     );
     await user.click(screen.getByLabelText(/entering short program/i));
     await user.click(screen.getByLabelText(/entering free skate/i));
-    await user.click(screen.getByRole("button", { name: /save entry/i }));
+    await user.click(screen.getByRole("button", { name: /save & close/i }));
 
     await waitFor(() => expect(posted).toHaveLength(1));
     expect(posted[0].competition_id).toBe("comp-autumn");
@@ -157,6 +162,54 @@ describe("Competitions tab", () => {
     expect(
       await screen.findByText(/Autumn Classic 2026/)
     ).toBeInTheDocument();
+  });
+
+  it("renders an error and keeps the modal open when the save fails", async () => {
+    seedSession();
+    const user = userEvent.setup();
+    installCompApi([]);
+    server.use(
+      http.post("*/api/competitions/:cid/entries", () =>
+        HttpResponse.json(
+          { detail: "level_id must be an integer" },
+          { status: 422 }
+        )
+      )
+    );
+    renderTab();
+
+    await openWithAutumn(user);
+    await user.click(screen.getByRole("button", { name: /save & close/i }));
+
+    expect(
+      await screen.findByText(/level_id must be an integer/i)
+    ).toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("keeps competition and clears level for Save & Add Another", async () => {
+    seedSession();
+    const user = userEvent.setup();
+    const { posted } = installCompApi([]);
+    renderTab();
+
+    await openWithAutumn(user);
+    await user.selectOptions(
+      await screen.findByLabelText(/level/i),
+      await screen.findByRole("option", { name: /junior/i })
+    );
+    await user.click(
+      screen.getByRole("button", { name: /save & add another/i })
+    );
+
+    await waitFor(() => expect(posted).toHaveLength(1));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /change/i })
+    ).toBeInTheDocument();
+    expect(
+      (screen.getByLabelText(/level/i) as HTMLSelectElement).value
+    ).toBe("");
   });
 
   it("marks a future entry Upcoming and lists its assigned programs", async () => {

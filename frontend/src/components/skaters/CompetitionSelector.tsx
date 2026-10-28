@@ -111,6 +111,13 @@ export function CompetitionSelector({ value, onSelect, onClear }: Props) {
   const [creating, setCreating] = useState(false);
   const results = useCompetitionSearch(query);
 
+  // On a successful create, pass the record up AND exit creation mode so the
+  // parent immediately shows the newly selected competition.
+  const handleCreated = (comp: CompetitionOut) => {
+    setCreating(false);
+    onSelect(comp);
+  };
+
   if (value) {
     return (
       <div className="flex items-center justify-between rounded-md border
@@ -134,7 +141,7 @@ export function CompetitionSelector({ value, onSelect, onClear }: Props) {
           focus-visible:ring-ring" />
       {!creating && <ResultList results={results} onSelect={onSelect} />}
       {creating ? (
-        <CreateCompetitionForm name={query} onCreated={onSelect}
+        <CreateCompetitionForm name={query} onCreated={handleCreated}
           onCancel={() => setCreating(false)} />
       ) : (
         <button type="button" onClick={() => setCreating(true)}
