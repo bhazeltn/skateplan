@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { searchCompetitions, createCompetition } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import type { CompetitionOut, CompetitionPayload } from "@/lib/types";
@@ -52,8 +52,9 @@ function CreateCompetitionForm({
   const set = (k: keyof CompetitionPayload, v: string) =>
     setForm((prev) => ({ ...prev, [k]: v }));
 
-  async function submit(e: FormEvent) {
+  async function submit(e: MouseEvent) {
     e.preventDefault();
+    e.stopPropagation();
     if (!name.trim()) return;
     setError(null);
     try {
@@ -66,7 +67,7 @@ function CreateCompetitionForm({
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3 rounded-md bg-slate-50 p-3">
+    <div className="space-y-3 rounded-md bg-slate-50 p-3">
       {error && <Alert variant="danger">{error}</Alert>}
       <div>
         <Label htmlFor="comp-name">Name</Label>
@@ -83,9 +84,9 @@ function CreateCompetitionForm({
         onCountry={(v) => set("country", v)} onCity={(v) => set("city", v)} />
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
-        <Button type="submit">Save Competition</Button>
+        <Button type="button" onClick={submit}>Save Competition</Button>
       </div>
-    </form>
+    </div>
   );
 }
 
