@@ -1,7 +1,4 @@
-"""Competition CRUD, entries, results and protocol routes (Sprint 3).
-
-Deterministic arithmetic only — no ISU rule verification, no LLM, no exports.
-"""
+"""Competition CRUD/entries/results/protocol routes (Sprint 3); deterministic arithmetic only."""
 import uuid
 from datetime import date
 from typing import Optional
@@ -26,6 +23,7 @@ from app.schemas.competition import (
     CompetitionOut,
     EntryCreate,
     EntryOut,
+    EntryUpdate,
     ProtocolOut,
     ResultCreate,
     SegmentResultOut,
@@ -137,6 +135,32 @@ def register_entry(
     db.commit()
     db.refresh(entry)
     return EntryOut.model_validate(entry)
+
+
+@router.patch("/entries/{entry_id}", response_model=EntryOut)
+def update_entry(
+    entry_id: uuid.UUID,
+    payload: EntryUpdate,
+    _coach: User = Depends(require_coach),
+    db: Session = Depends(get_db),
+) -> EntryOut:
+    entry = _get_entry(entry_id, db)
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(entry, field, value)
+    db.commit()
+    db.refresh(entry)
+    return EntryOut.model_validate(entry)
+
+
+@router.delete("/entries/{entry_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_entry(
+    entry_id: uuid.UUID,
+    _coach: User = Depends(require_coach),
+    db: Session = Depends(get_db),
+) -> None:
+    entry = _get_entry(entry_id, db)
+    db.delete(entry)
+    db.commit()
 
 
 def _build_result(entry_id: uuid.UUID, payload: ResultCreate) -> CompetitionSegmentResult:

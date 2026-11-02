@@ -49,6 +49,13 @@ class EntryOut(BaseModel):
     status: str
 
 
+class EntryUpdate(BaseModel):
+    level_id: Optional[int] = None
+    sp_program_id: Optional[uuid.UUID] = None
+    fs_program_id: Optional[uuid.UUID] = None
+    status: Optional[str] = None
+
+
 class ExecutedElementIn(BaseModel):
     segment_order: int
     called_code: str
