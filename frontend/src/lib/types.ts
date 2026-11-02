@@ -296,6 +296,13 @@ export interface EntryPayload {
   fs_program_id?: string | null;
 }
 
+export interface EntryUpdate {
+  level_id?: number | null;
+  sp_program_id?: string | null;
+  fs_program_id?: string | null;
+  status?: string;
+}
+
 export interface SegmentResultOut {
   id: string;
   segment: string;

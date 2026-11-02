@@ -6,6 +6,8 @@ interface Props {
   item: JoinedEntry;
   programs: SkaterProgram[];
   onLogResults: (entryId: string) => void;
+  onEdit: (item: JoinedEntry) => void;
+  onDelete: (entryId: string) => void;
 }
 
 function Chip({ children }: { children: React.ReactNode }) {
@@ -16,7 +18,33 @@ function Chip({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function CompetitionEntryRow({ item, programs, onLogResults }: Props) {
+function RowActions({
+  onEdit,
+  onDelete,
+}: {
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const cls =
+    "text-xs font-semibold text-slate-500 hover:text-slate-900";
+  return (
+    <div className="flex items-center gap-3">
+      <button type="button" onClick={onEdit} className={cls}>Edit Entry</button>
+      <button type="button" onClick={onDelete}
+        className="text-xs font-semibold text-red-500 hover:text-red-700">
+        Delete Entry
+      </button>
+    </div>
+  );
+}
+
+export function CompetitionEntryRow({
+  item,
+  programs,
+  onLogResults,
+  onEdit,
+  onDelete,
+}: Props) {
   const { entry, competition, results } = item;
   const name = competition?.name ?? "Unknown competition";
   const start = competition?.start_date ?? "";
@@ -27,6 +55,12 @@ export function CompetitionEntryRow({ item, programs, onLogResults }: Props) {
     programs.find((p) => p.id === id)?.title;
   const sp = titleOf(entry.sp_program_id);
   const fs = titleOf(entry.fs_program_id);
+
+  const handleDelete = () => {
+    if (window.confirm("Are you sure you want to delete this entry?")) {
+      onDelete(entry.id);
+    }
+  };
 
   return (
     <li data-testid={`entry-${entry.id}`}
@@ -52,7 +86,7 @@ export function CompetitionEntryRow({ item, programs, onLogResults }: Props) {
           </div>
         )}
       </div>
-      <div className="shrink-0 text-right">
+      <div className="flex shrink-0 flex-col items-end gap-2 text-right">
         {result ? (
           <div className="space-y-0.5">
             <p className="tabular-nums text-sm font-semibold text-slate-900">
@@ -72,6 +106,7 @@ export function CompetitionEntryRow({ item, programs, onLogResults }: Props) {
             </Button>
           )
         )}
+        <RowActions onEdit={() => onEdit(item)} onDelete={handleDelete} />
       </div>
     </li>
   );

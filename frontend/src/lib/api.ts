@@ -6,6 +6,7 @@ import type {
   DashboardSummary,
   EntryOut,
   EntryPayload,
+  EntryUpdate,
   Federation,
   ProtocolOut,
   ResultPayload,
@@ -370,6 +371,36 @@ export function createEntry(
     { method: "POST", body: JSON.stringify(body) },
     token
   );
+}
+
+// Edit an entry's level, programs or status: PATCH /api/competitions/entries/{eid}.
+export function updateEntry(
+  entryId: string,
+  payload: EntryUpdate,
+  token?: string | null
+): Promise<EntryOut> {
+  return request<EntryOut>(
+    `/api/competitions/entries/${entryId}`,
+    { method: "PATCH", body: JSON.stringify(payload) },
+    token
+  );
+}
+
+// Remove an entry: DELETE /api/competitions/entries/{eid} (204 No Content).
+export async function deleteEntry(
+  entryId: string,
+  token?: string | null
+): Promise<void> {
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(`${BASE_URL}/api/competitions/entries/${entryId}`, {
+    method: "DELETE",
+    headers,
+  });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    throw new ApiError(res.status, detail?.detail ?? "Delete failed");
+  }
 }
 
 // Record a segment result: POST /api/competitions/entries/{eid}/results.

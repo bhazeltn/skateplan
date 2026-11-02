@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   createEntry,
   createSegmentResult,
+  deleteEntry,
   getEntryProtocol,
   listSkaterEntries,
   searchCompetitions,
@@ -78,5 +79,13 @@ export function useSkaterEntries(skaterId: number) {
     [token, load]
   );
 
-  return { items, loading, addEntry, logResult };
+  const removeEntry = useCallback(
+    async (entryId: string) => {
+      await deleteEntry(entryId, token);
+      await load();
+    },
+    [token, load]
+  );
+
+  return { items, loading, addEntry, logResult, removeEntry, refresh: load };
 }

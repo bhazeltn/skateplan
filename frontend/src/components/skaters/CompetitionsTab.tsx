@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { AddEntryModal } from "@/components/skaters/AddEntryModal";
 import { CompetitionEntryRow } from "@/components/skaters/CompetitionEntryRow";
+import { EditEntryModal } from "@/components/skaters/EditEntryModal";
 import { LogResultModal } from "@/components/skaters/LogResultModal";
-import { useSkaterEntries } from "@/components/skaters/useSkaterEntries";
+import {
+  useSkaterEntries,
+  type JoinedEntry,
+} from "@/components/skaters/useSkaterEntries";
 import type { SkaterProgram } from "@/lib/types";
 
 interface Props {
@@ -13,9 +17,11 @@ interface Props {
 /** Skater profile → Competitions tab: lists entries, registers new ones, and
  *  records deterministic segment results (TSS = TES + PCS + Bonus − Deductions). */
 export function CompetitionsTab({ skaterId, programs }: Props) {
-  const { items, loading, addEntry, logResult } = useSkaterEntries(skaterId);
+  const { items, loading, addEntry, logResult, removeEntry, refresh } =
+    useSkaterEntries(skaterId);
   const [adding, setAdding] = useState(false);
   const [logFor, setLogFor] = useState<string | null>(null);
+  const [editFor, setEditFor] = useState<JoinedEntry | null>(null);
 
   return (
     <section className="space-y-4">
@@ -44,7 +50,8 @@ export function CompetitionsTab({ skaterId, programs }: Props) {
         <ul className="space-y-3">
           {items.map((item) => (
             <CompetitionEntryRow key={item.entry.id} item={item}
-              programs={programs} onLogResults={setLogFor} />
+              programs={programs} onLogResults={setLogFor}
+              onEdit={setEditFor} onDelete={removeEntry} />
           ))}
         </ul>
       )}
@@ -53,6 +60,11 @@ export function CompetitionsTab({ skaterId, programs }: Props) {
         onClose={() => setAdding(false)} onSubmit={addEntry} />
       <LogResultModal open={logFor !== null} entryId={logFor ?? ""}
         onClose={() => setLogFor(null)} onSubmit={logResult} />
+      {editFor && (
+        <EditEntryModal open initialEntry={editFor.entry}
+          competition={editFor.competition} onClose={() => setEditFor(null)}
+          onSaved={refresh} />
+      )}
     </section>
   );
 }

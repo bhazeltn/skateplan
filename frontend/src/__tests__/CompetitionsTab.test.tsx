@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
@@ -39,9 +39,25 @@ function installCompApi(
   const results = { ...protocols };
   const posted: Record<string, unknown>[] = [];
   const postedResults: Record<string, unknown>[] = [];
+  const patched: Record<string, unknown>[] = [];
+  const deleted: string[] = [];
   server.use(
     http.get("*/api/competitions", () => HttpResponse.json(mockCompetitions)),
     http.get("*/api/skaters/:id/competitions", () => HttpResponse.json(store)),
+    http.patch("*/api/competitions/entries/:id", async ({ request, params }) => {
+      const body = (await request.json()) as Record<string, unknown>;
+      patched.push({ id: params.id, ...body });
+      const idx = store.findIndex((e) => e.id === params.id);
+      const updated = { ...(store[idx] ?? {}), ...body, id: params.id } as Entry;
+      if (idx >= 0) store[idx] = updated;
+      return HttpResponse.json(updated, { status: 200 });
+    }),
+    http.delete("*/api/competitions/entries/:id", ({ params }) => {
+      deleted.push(params.id as string);
+      const idx = store.findIndex((e) => e.id === params.id);
+      if (idx >= 0) store.splice(idx, 1);
+      return new HttpResponse(null, { status: 204 });
+    }),
     http.post("*/api/competitions/:cid/entries", async ({ request, params }) => {
       const body = (await request.json()) as Record<string, unknown>;
       posted.push({ competition_id: params.cid, ...body });
@@ -74,7 +90,7 @@ function installCompApi(
       }
     )
   );
-  return { posted, postedResults };
+  return { posted, postedResults, patched, deleted };
 }
 
 function renderTab() {
@@ -269,6 +285,48 @@ describe("Competitions tab", () => {
     expect(
       screen.getByRole("button", { name: /save competition/i })
     ).toBeInTheDocument();
+  });
+
+  it("opens the edit modal pre-populated with the entry's level and status", async () => {
+    seedSession();
+    const user = userEvent.setup();
+    const LEVELED: Entry = {
+      id: "e3",
+      competition_id: "comp-autumn",
+      skater_id: 1,
+      level_id: 202,
+      sp_program_id: "p-sp",
+      fs_program_id: null,
+      status: "registered",
+    };
+    installCompApi([LEVELED]);
+    renderTab();
+    const row = await screen.findByTestId("entry-e3");
+    await user.click(within(row).getByRole("button", { name: /edit entry/i }));
+    const dialog = await screen.findByRole("dialog");
+    expect(
+      within(dialog).getByText(/autumn classic 2026/i)
+    ).toBeInTheDocument();
+    await screen.findByRole("option", { name: /junior/i });
+    expect((screen.getByLabelText(/level/i) as HTMLSelectElement).value).toBe(
+      "202"
+    );
+    expect((screen.getByLabelText(/status/i) as HTMLSelectElement).value).toBe(
+      "registered"
+    );
+  });
+
+  it("confirms and calls the delete API when deleting an entry", async () => {
+    seedSession();
+    const user = userEvent.setup();
+    const { deleted } = installCompApi([PAST_ENTRY]);
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+    renderTab();
+    const row = await screen.findByTestId("entry-e1");
+    await user.click(within(row).getByRole("button", { name: /delete entry/i }));
+    expect(confirm).toHaveBeenCalled();
+    await waitFor(() => expect(deleted).toContain("e1"));
+    confirm.mockRestore();
   });
 
   it("marks a future entry Upcoming and lists its assigned programs", async () => {
