@@ -213,6 +213,26 @@ describe("Competitions tab", () => {
     ).toBe("");
   });
 
+  it("does not search until at least 2 characters and shows a placeholder", async () => {
+    seedSession();
+    const user = userEvent.setup();
+    installCompApi([]);
+    renderTab();
+    await user.click(await screen.findByRole("button", { name: /add entry/i }));
+    expect(
+      await screen.findByText(/type at least 2 characters/i)
+    ).toBeInTheDocument();
+    await user.type(await screen.findByLabelText(/competition/i), "A");
+    expect(screen.getByText(/type at least 2 characters/i)).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("competition-results")
+    ).not.toBeInTheDocument();
+    await user.type(screen.getByLabelText(/competition/i), "utumn");
+    expect(
+      await screen.findByRole("button", { name: /autumn classic 2026/i })
+    ).toBeInTheDocument();
+  });
+
   it("shows the helper note about logging split events separately", async () => {
     seedSession();
     const user = userEvent.setup();

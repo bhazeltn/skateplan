@@ -26,6 +26,11 @@ function useCompetitionSearch(query: string): CompetitionOut[] {
   const { token } = useAuth();
   const [results, setResults] = useState<CompetitionOut[]>([]);
   useEffect(() => {
+    // Avoid dumping the whole table on an empty/one-char query.
+    if (query.trim().length < 2) {
+      setResults([]);
+      return;
+    }
     let active = true;
     searchCompetitions(query, token)
       .then((r) => active && setResults(r))
@@ -150,7 +155,14 @@ export function CompetitionSelector({ value, onSelect, onClear }: Props) {
         className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3
           py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2
           focus-visible:ring-ring" />
-      {!creating && <ResultList results={results} onSelect={onSelect} />}
+      {!creating &&
+        (query.trim().length < 2 ? (
+          <div className="p-2 text-sm text-slate-500">
+            Type at least 2 characters to search…
+          </div>
+        ) : (
+          <ResultList results={results} onSelect={onSelect} />
+        ))}
       {creating ? (
         <CreateCompetitionForm name={query} onCreated={handleCreated}
           onCancel={() => setCreating(false)} />
