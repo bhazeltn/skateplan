@@ -35,6 +35,8 @@ class EntryCreate(BaseModel):
     level_id: Optional[int] = None
     sp_program_id: Optional[uuid.UUID] = None
     fs_program_id: Optional[uuid.UUID] = None
+    entered_sp: bool = False
+    entered_fs: bool = False
 
 
 class EntryOut(BaseModel):
@@ -46,6 +48,8 @@ class EntryOut(BaseModel):
     level_id: Optional[int] = None
     sp_program_id: Optional[uuid.UUID] = None
     fs_program_id: Optional[uuid.UUID] = None
+    entered_sp: bool
+    entered_fs: bool
     status: str
 
 
@@ -53,6 +57,8 @@ class EntryUpdate(BaseModel):
     level_id: Optional[int] = None
     sp_program_id: Optional[uuid.UUID] = None
     fs_program_id: Optional[uuid.UUID] = None
+    entered_sp: Optional[bool] = None
+    entered_fs: Optional[bool] = None
     status: Optional[str] = None
 
 

@@ -120,8 +120,8 @@ export function EditEntryModal({
   const [level, setLevel] = useState(
     initialEntry.level_id != null ? String(initialEntry.level_id) : ""
   );
-  const [sp, setSp] = useState(initialEntry.sp_program_id != null);
-  const [fs, setFs] = useState(initialEntry.fs_program_id != null);
+  const [sp, setSp] = useState(initialEntry.entered_sp);
+  const [fs, setFs] = useState(initialEntry.entered_fs);
   const [status, setStatus] = useState(initialEntry.status);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -131,8 +131,10 @@ export function EditEntryModal({
   function buildPayload(): EntryUpdate {
     return {
       level_id: level === "" ? null : Number(level),
-      sp_program_id: sp ? initialEntry.sp_program_id ?? null : null,
-      fs_program_id: fs ? initialEntry.fs_program_id ?? null : null,
+      sp_program_id: null,
+      fs_program_id: null,
+      entered_sp: sp,
+      entered_fs: fs,
       status,
     };
   }

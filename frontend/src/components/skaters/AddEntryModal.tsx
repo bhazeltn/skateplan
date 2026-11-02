@@ -144,6 +144,8 @@ export function AddEntryModal({ skaterId, open, onClose, onSubmit }: Props) {
         level_id: level === "" ? null : Number(level),
         sp_program_id: null,
         fs_program_id: null,
+        entered_sp: sp,
+        entered_fs: fs,
       });
       if (keepOpen) resetEvent();
       else onClose();

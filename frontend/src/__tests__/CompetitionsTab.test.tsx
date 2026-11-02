@@ -17,6 +17,8 @@ interface Entry {
   level_id?: number | null;
   sp_program_id?: string | null;
   fs_program_id?: string | null;
+  entered_sp?: boolean;
+  entered_fs?: boolean;
   status: string;
 }
 
@@ -176,6 +178,8 @@ describe("Competitions tab", () => {
     expect(posted[0].level_id).toBe(202);
     expect(posted[0].sp_program_id).toBeNull();
     expect(posted[0].fs_program_id).toBeNull();
+    expect(posted[0].entered_sp).toBe(true);
+    expect(posted[0].entered_fs).toBe(true);
     expect(
       await screen.findByText(/Autumn Classic 2026/)
     ).toBeInTheDocument();
@@ -314,6 +318,38 @@ describe("Competitions tab", () => {
     expect((screen.getByLabelText(/status/i) as HTMLSelectElement).value).toBe(
       "registered"
     );
+  });
+
+  it("edit modal initializes SP/FS checkboxes from entered flags and patches toggles", async () => {
+    seedSession();
+    const user = userEvent.setup();
+    const FLAGGED: Entry = {
+      id: "e4",
+      competition_id: "comp-autumn",
+      skater_id: 1,
+      level_id: 202,
+      entered_sp: true,
+      entered_fs: false,
+      status: "registered",
+    };
+    const { patched } = installCompApi([FLAGGED]);
+    renderTab();
+    const row = await screen.findByTestId("entry-e4");
+    await user.click(within(row).getByRole("button", { name: /edit entry/i }));
+    await screen.findByRole("dialog");
+
+    const spBox = screen.getByLabelText(/entering short program/i) as HTMLInputElement;
+    const fsBox = screen.getByLabelText(/entering free skate/i) as HTMLInputElement;
+    expect(spBox.checked).toBe(true);
+    expect(fsBox.checked).toBe(false);
+
+    await user.click(spBox); // SP -> false
+    await user.click(fsBox); // FS -> true
+    await user.click(screen.getByRole("button", { name: /save changes/i }));
+
+    await waitFor(() => expect(patched).toHaveLength(1));
+    expect(patched[0].entered_sp).toBe(false);
+    expect(patched[0].entered_fs).toBe(true);
   });
 
   it("confirms and calls the delete API when deleting an entry", async () => {

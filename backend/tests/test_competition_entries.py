@@ -4,14 +4,24 @@ from app.models.federation import CompetitionLevel, Federation, FederationStream
 
 
 def _seed_level(db):
-    fed = Federation(name="Test Fed", code="TFED")
-    db.add(fed)
-    db.flush()
-    stream = FederationStream(federation_code="TFED", stream_name="Singles")
-    db.add(stream)
-    db.flush()
-    level = CompetitionLevel(stream_id=stream.stream_id, level_name="Senior")
-    db.add(level)
+    # get-or-create: federations/streams/levels are reference data, never
+    # truncated between tests, so reuse rows to stay idempotent across runs.
+    if db.query(Federation).filter_by(code="TFED").first() is None:
+        db.add(Federation(name="Test Fed", code="TFED"))
+        db.flush()
+    stream = db.query(FederationStream).filter_by(
+        federation_code="TFED", stream_name="Singles"
+    ).first()
+    if stream is None:
+        stream = FederationStream(federation_code="TFED", stream_name="Singles")
+        db.add(stream)
+        db.flush()
+    level = db.query(CompetitionLevel).filter_by(
+        stream_id=stream.stream_id, level_name="Senior"
+    ).first()
+    if level is None:
+        level = CompetitionLevel(stream_id=stream.stream_id, level_name="Senior")
+        db.add(level)
     db.commit()
     return level.level_id
 
@@ -154,3 +164,53 @@ def test_entry_rejects_program_of_other_skater(client, make_user, db):
         json={"skater_id": skater_a.id, "fs_program_id": other_pid},
     )
     assert resp.status_code == 400, resp.text
+
+
+def test_register_entry_with_entered_flags(client, make_user, db):
+    token = _coach_token(client, make_user)
+    skater = make_user("flagskater@ex.com", role=SystemRole.athlete)
+    comp_id = _make_competition(client, token)
+
+    resp = client.post(
+        f"/api/competitions/{comp_id}/entries",
+        headers=_hdr(token),
+        json={"skater_id": skater.id, "entered_sp": True, "entered_fs": True},
+    )
+    assert resp.status_code in (200, 201), resp.text
+    body = resp.json()
+    assert body["entered_sp"] is True
+    assert body["entered_fs"] is True
+
+
+def test_register_entry_entered_flags_default_false(client, make_user, db):
+    token = _coach_token(client, make_user)
+    skater = make_user("flagskater2@ex.com", role=SystemRole.athlete)
+    comp_id = _make_competition(client, token)
+
+    resp = client.post(
+        f"/api/competitions/{comp_id}/entries",
+        headers=_hdr(token),
+        json={"skater_id": skater.id},
+    )
+    assert resp.status_code in (200, 201), resp.text
+    body = resp.json()
+    assert body["entered_sp"] is False
+    assert body["entered_fs"] is False
+
+
+def test_update_entry_entered_flags(client, make_user, db):
+    token = _coach_token(client, make_user)
+    skater = make_user("flagupd@ex.com", role=SystemRole.athlete)
+    comp_id = _make_competition(client, token)
+    fs_pid = _make_program(client, token, skater.id)
+    entry_id = _register_entry(client, token, comp_id, skater.id, fs_pid)
+
+    resp = client.patch(
+        f"/api/competitions/entries/{entry_id}",
+        headers=_hdr(token),
+        json={"entered_sp": True, "entered_fs": True},
+    )
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["entered_sp"] is True
+    assert body["entered_fs"] is True

@@ -480,14 +480,29 @@ export const handlers = [
   http.post("*/api/competitions/:cid/entries", async ({ request, params }) => {
     const body = (await request.json()) as Record<string, unknown>;
     return HttpResponse.json(
-      { id: "entry-new", competition_id: params.cid, status: "prospective", ...body },
+      {
+        id: "entry-new",
+        competition_id: params.cid,
+        status: "prospective",
+        entered_sp: false,
+        entered_fs: false,
+        ...body,
+      },
       { status: 201 }
     );
   }),
   http.patch("*/api/competitions/entries/:id", async ({ request, params }) => {
     const body = (await request.json()) as Record<string, unknown>;
     return HttpResponse.json(
-      { id: params.id, competition_id: "comp-autumn", skater_id: 1, status: "registered", ...body },
+      {
+        id: params.id,
+        competition_id: "comp-autumn",
+        skater_id: 1,
+        status: "registered",
+        entered_sp: false,
+        entered_fs: false,
+        ...body,
+      },
       { status: 200 }
     );
   }),

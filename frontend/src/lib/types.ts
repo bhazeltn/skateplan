@@ -285,6 +285,8 @@ export interface EntryOut {
   level_id?: number | null;
   sp_program_id?: string | null;
   fs_program_id?: string | null;
+  entered_sp: boolean;
+  entered_fs: boolean;
   status: string;
 }
 
@@ -294,12 +296,16 @@ export interface EntryPayload {
   level_id?: number | null;
   sp_program_id?: string | null;
   fs_program_id?: string | null;
+  entered_sp: boolean;
+  entered_fs: boolean;
 }
 
 export interface EntryUpdate {
   level_id?: number | null;
   sp_program_id?: string | null;
   fs_program_id?: string | null;
+  entered_sp?: boolean;
+  entered_fs?: boolean;
   status?: string;
 }
 

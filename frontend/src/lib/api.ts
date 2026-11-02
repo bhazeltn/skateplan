@@ -365,6 +365,8 @@ export function createEntry(
     level_id: payload.level_id,
     sp_program_id: payload.sp_program_id,
     fs_program_id: payload.fs_program_id,
+    entered_sp: payload.entered_sp,
+    entered_fs: payload.entered_fs,
   };
   return request<EntryOut>(
     `/api/competitions/${payload.competition_id}/entries`,
