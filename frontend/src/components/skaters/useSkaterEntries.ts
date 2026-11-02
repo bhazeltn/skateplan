@@ -3,9 +3,11 @@ import {
   createEntry,
   createSegmentResult,
   deleteEntry,
+  deleteSegmentResult,
   getEntryProtocol,
   listSkaterEntries,
   searchCompetitions,
+  updateSegmentResult,
 } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import type {
@@ -13,6 +15,7 @@ import type {
   EntryOut,
   EntryPayload,
   ResultPayload,
+  ResultUpdate,
   SegmentResultOut,
 } from "@/lib/types";
 
@@ -79,6 +82,22 @@ export function useSkaterEntries(skaterId: number) {
     [token, load]
   );
 
+  const updateResult = useCallback(
+    async (resultId: string, payload: ResultUpdate) => {
+      await updateSegmentResult(resultId, payload, token);
+      await load();
+    },
+    [token, load]
+  );
+
+  const deleteResult = useCallback(
+    async (resultId: string) => {
+      await deleteSegmentResult(resultId, token);
+      await load();
+    },
+    [token, load]
+  );
+
   const removeEntry = useCallback(
     async (entryId: string) => {
       await deleteEntry(entryId, token);
@@ -87,5 +106,14 @@ export function useSkaterEntries(skaterId: number) {
     [token, load]
   );
 
-  return { items, loading, addEntry, logResult, removeEntry, refresh: load };
+  return {
+    items,
+    loading,
+    addEntry,
+    logResult,
+    updateResult,
+    deleteResult,
+    removeEntry,
+    refresh: load,
+  };
 }

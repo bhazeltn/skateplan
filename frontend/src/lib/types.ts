@@ -332,6 +332,16 @@ export interface ResultPayload {
   protocol_notes?: string | null;
 }
 
+export interface ResultUpdate {
+  tes?: number | null;
+  pcs?: number | null;
+  deductions?: number | null;
+  segment_bonus?: number | null;
+  segment_rank?: number | null;
+  overall_rank?: number | null;
+  protocol_notes?: string | null;
+}
+
 export interface ProtocolOut {
   entry_id: string;
   segments: SegmentResultOut[];

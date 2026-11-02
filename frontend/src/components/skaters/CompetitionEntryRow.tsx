@@ -1,11 +1,18 @@
 import { Button } from "@/components/ui/button";
+import { SegmentResultDisplay } from "@/components/skaters/SegmentResultDisplay";
 import type { JoinedEntry } from "@/components/skaters/useSkaterEntries";
-import type { SkaterProgram } from "@/lib/types";
+import type { SegmentResultOut, SkaterProgram } from "@/lib/types";
+
+export interface ResultModalRequest {
+  entryId: string;
+  segment?: "SP" | "FS";
+  initialResult?: SegmentResultOut;
+}
 
 interface Props {
   item: JoinedEntry;
   programs: SkaterProgram[];
-  onLogResults: (entryId: string) => void;
+  onResult: (req: ResultModalRequest) => void;
   onEdit: (item: JoinedEntry) => void;
   onDelete: (entryId: string) => void;
 }
@@ -25,8 +32,7 @@ function RowActions({
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const cls =
-    "text-xs font-semibold text-slate-500 hover:text-slate-900";
+  const cls = "text-xs font-semibold text-slate-500 hover:text-slate-900";
   return (
     <div className="flex items-center gap-3">
       <button type="button" onClick={onEdit} className={cls}>Edit Entry</button>
@@ -38,19 +44,76 @@ function RowActions({
   );
 }
 
+/** Right-hand results column: explicit SP/FS blocks when the entry declares
+ *  which segments it is competing, else a legacy single Log Results control. */
+function ResultColumn({
+  item,
+  upcoming,
+  onResult,
+}: {
+  item: JoinedEntry;
+  upcoming: boolean;
+  onResult: (req: ResultModalRequest) => void;
+}) {
+  const { entry, results } = item;
+  const bySegment = (seg: "SP" | "FS") => results.find((r) => r.segment === seg);
+  const hasFlags = Boolean(entry.entered_sp || entry.entered_fs);
+  const segments = (["SP", "FS"] as const).filter((s) =>
+    s === "SP" ? entry.entered_sp : entry.entered_fs
+  );
+
+  if (hasFlags) {
+    return (
+      <div className="space-y-2">
+        {segments.map((seg) => (
+          <SegmentResultDisplay key={seg} segment={seg} result={bySegment(seg)}
+            canLog={!upcoming}
+            onLog={() => onResult({ entryId: entry.id, segment: seg })}
+            onEdit={() =>
+              onResult({ entryId: entry.id, initialResult: bySegment(seg) })
+            } />
+        ))}
+      </div>
+    );
+  }
+
+  const result = results[0];
+  if (result) {
+    return (
+      <div className="space-y-0.5">
+        <p className="tabular-nums text-sm font-semibold text-slate-900">
+          TSS {result.tss?.toFixed(2)}
+        </p>
+        {result.overall_rank != null && (
+          <p className="tabular-nums text-xs text-slate-500">
+            Overall {result.overall_rank}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  if (upcoming) return null;
+  return (
+    <Button type="button" variant="outline"
+      onClick={() => onResult({ entryId: entry.id })}>
+      Log Results
+    </Button>
+  );
+}
+
 export function CompetitionEntryRow({
   item,
   programs,
-  onLogResults,
+  onResult,
   onEdit,
   onDelete,
 }: Props) {
-  const { entry, competition, results } = item;
+  const { entry, competition } = item;
   const name = competition?.name ?? "Unknown competition";
   const start = competition?.start_date ?? "";
   const today = new Date().toISOString().slice(0, 10);
   const upcoming = Boolean(start) && start > today;
-  const result = results[0];
   const titleOf = (id?: string | null) =>
     programs.find((p) => p.id === id)?.title;
   const sp = titleOf(entry.sp_program_id);
@@ -87,25 +150,7 @@ export function CompetitionEntryRow({
         )}
       </div>
       <div className="flex shrink-0 flex-col items-end gap-2 text-right">
-        {result ? (
-          <div className="space-y-0.5">
-            <p className="tabular-nums text-sm font-semibold text-slate-900">
-              TSS {result.tss?.toFixed(2)}
-            </p>
-            {result.overall_rank != null && (
-              <p className="tabular-nums text-xs text-slate-500">
-                Overall {result.overall_rank}
-              </p>
-            )}
-          </div>
-        ) : (
-          !upcoming && (
-            <Button type="button" variant="outline"
-              onClick={() => onLogResults(entry.id)}>
-              Log Results
-            </Button>
-          )
-        )}
+        <ResultColumn item={item} upcoming={upcoming} onResult={onResult} />
         <RowActions onEdit={() => onEdit(item)} onDelete={handleDelete} />
       </div>
     </li>

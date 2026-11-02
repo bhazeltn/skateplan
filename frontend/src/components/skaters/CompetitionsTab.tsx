@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { AddEntryModal } from "@/components/skaters/AddEntryModal";
-import { CompetitionEntryRow } from "@/components/skaters/CompetitionEntryRow";
+import {
+  CompetitionEntryRow,
+  type ResultModalRequest,
+} from "@/components/skaters/CompetitionEntryRow";
 import { EditEntryModal } from "@/components/skaters/EditEntryModal";
 import { LogResultModal } from "@/components/skaters/LogResultModal";
 import {
@@ -17,10 +20,18 @@ interface Props {
 /** Skater profile → Competitions tab: lists entries, registers new ones, and
  *  records deterministic segment results (TSS = TES + PCS + Bonus − Deductions). */
 export function CompetitionsTab({ skaterId, programs }: Props) {
-  const { items, loading, addEntry, logResult, removeEntry, refresh } =
-    useSkaterEntries(skaterId);
+  const {
+    items,
+    loading,
+    addEntry,
+    logResult,
+    updateResult,
+    deleteResult,
+    removeEntry,
+    refresh,
+  } = useSkaterEntries(skaterId);
   const [adding, setAdding] = useState(false);
-  const [logFor, setLogFor] = useState<string | null>(null);
+  const [resultModal, setResultModal] = useState<ResultModalRequest | null>(null);
   const [editFor, setEditFor] = useState<JoinedEntry | null>(null);
 
   return (
@@ -50,7 +61,7 @@ export function CompetitionsTab({ skaterId, programs }: Props) {
         <ul className="space-y-3">
           {items.map((item) => (
             <CompetitionEntryRow key={item.entry.id} item={item}
-              programs={programs} onLogResults={setLogFor}
+              programs={programs} onResult={setResultModal}
               onEdit={setEditFor} onDelete={removeEntry} />
           ))}
         </ul>
@@ -58,8 +69,12 @@ export function CompetitionsTab({ skaterId, programs }: Props) {
 
       <AddEntryModal open={adding} skaterId={skaterId} programs={programs}
         onClose={() => setAdding(false)} onSubmit={addEntry} />
-      <LogResultModal open={logFor !== null} entryId={logFor ?? ""}
-        onClose={() => setLogFor(null)} onSubmit={logResult} />
+      <LogResultModal open={resultModal !== null}
+        entryId={resultModal?.entryId ?? ""}
+        fixedSegment={resultModal?.segment}
+        initialResult={resultModal?.initialResult}
+        onClose={() => setResultModal(null)} onSubmit={logResult}
+        onUpdate={updateResult} onDelete={deleteResult} />
       {editFor && (
         <EditEntryModal open initialEntry={editFor.entry}
           competition={editFor.competition} onClose={() => setEditFor(null)}

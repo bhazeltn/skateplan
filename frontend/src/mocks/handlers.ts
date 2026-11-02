@@ -519,6 +519,21 @@ export const handlers = [
       );
     }
   ),
+  http.patch(
+    "*/api/competitions/results/:resultId",
+    async ({ request, params }) => {
+      const body = (await request.json()) as Record<string, unknown>;
+      return HttpResponse.json({
+        id: params.resultId,
+        segment: "SP",
+        tss: mockTss(body),
+        ...body,
+      });
+    }
+  ),
+  http.delete("*/api/competitions/results/:resultId", () =>
+    new HttpResponse(null, { status: 204 })
+  ),
   http.get("*/api/competitions/entries/:eid/protocol", ({ params }) =>
     HttpResponse.json({ entry_id: params.eid, segments: [] })
   ),

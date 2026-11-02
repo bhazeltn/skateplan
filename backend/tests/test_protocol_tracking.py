@@ -95,6 +95,67 @@ def test_get_protocol_returns_full_record(client, make_user, db):
     assert seg["executed_elements"][1]["info_flags"] == "<"
 
 
+def _post_result(client, token, entry_id):
+    return client.post(
+        f"/api/competitions/entries/{entry_id}/results",
+        headers=_hdr(token), json=_result_payload(),
+    ).json()
+
+
+def test_update_result_recomputes_tss(client, make_user, db):
+    token = _coach_token(client, make_user)
+    entry_id = _make_entry(client, token, make_user)
+    result = _post_result(client, token, entry_id)
+
+    resp = client.patch(
+        f"/api/competitions/results/{result['id']}",
+        headers=_hdr(token),
+        json={"tes": 60.0, "pcs": 50.0, "overall_rank": 1},
+    )
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["tes"] == 60.0
+    assert body["pcs"] == 50.0
+    assert body["overall_rank"] == 1
+    # TSS = TES + PCS - deductions + segment_bonus = 60.0 + 50.0 - 1.0 + 0.0
+    assert body["tss"] == 109.0
+
+
+def test_update_missing_result_returns_404(client, make_user, db):
+    token = _coach_token(client, make_user)
+    resp = client.patch(
+        "/api/competitions/results/00000000-0000-0000-0000-000000000000",
+        headers=_hdr(token), json={"tes": 10.0},
+    )
+    assert resp.status_code == 404, resp.text
+
+
+def test_delete_result_removes_it_from_protocol(client, make_user, db):
+    token = _coach_token(client, make_user)
+    entry_id = _make_entry(client, token, make_user)
+    result = _post_result(client, token, entry_id)
+
+    resp = client.delete(
+        f"/api/competitions/results/{result['id']}", headers=_hdr(token)
+    )
+    assert resp.status_code == 204, resp.text
+
+    protocol = client.get(
+        f"/api/competitions/entries/{entry_id}/protocol", headers=_hdr(token)
+    ).json()
+    assert all(s["id"] != result["id"] for s in protocol["segments"])
+    assert protocol["segments"] == []
+
+
+def test_delete_missing_result_returns_404(client, make_user, db):
+    token = _coach_token(client, make_user)
+    resp = client.delete(
+        "/api/competitions/results/00000000-0000-0000-0000-000000000000",
+        headers=_hdr(token),
+    )
+    assert resp.status_code == 404, resp.text
+
+
 def test_comparison_planned_vs_executed(client, make_user, db):
     token = _coach_token(client, make_user)
     entry_id = _make_entry(client, token, make_user)

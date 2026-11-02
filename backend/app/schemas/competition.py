@@ -82,6 +82,16 @@ class ResultCreate(BaseModel):
     executed_elements: list[ExecutedElementIn] = []
 
 
+class ResultUpdate(BaseModel):
+    tes: Optional[Decimal] = None
+    pcs: Optional[Decimal] = None
+    deductions: Optional[Decimal] = None
+    segment_bonus: Optional[Decimal] = None
+    segment_rank: Optional[int] = None
+    overall_rank: Optional[int] = None
+    protocol_notes: Optional[str] = None
+
+
 class ExecutedElementOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

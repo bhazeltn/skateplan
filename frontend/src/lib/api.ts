@@ -10,6 +10,7 @@ import type {
   Federation,
   ProtocolOut,
   ResultPayload,
+  ResultUpdate,
   SegmentResultOut,
   GapAssessmentPayload,
   GapReport,
@@ -416,6 +417,36 @@ export function createSegmentResult(
     { method: "POST", body: JSON.stringify(payload) },
     token
   );
+}
+
+// Edit a recorded result: PATCH /api/competitions/results/{result_id}.
+export function updateSegmentResult(
+  resultId: string,
+  payload: ResultUpdate,
+  token?: string | null
+): Promise<SegmentResultOut> {
+  return request<SegmentResultOut>(
+    `/api/competitions/results/${resultId}`,
+    { method: "PATCH", body: JSON.stringify(payload) },
+    token
+  );
+}
+
+// Remove a recorded result: DELETE /api/competitions/results/{rid} (204).
+export async function deleteSegmentResult(
+  resultId: string,
+  token?: string | null
+): Promise<void> {
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(`${BASE_URL}/api/competitions/results/${resultId}`, {
+    method: "DELETE",
+    headers,
+  });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    throw new ApiError(res.status, detail?.detail ?? "Delete failed");
+  }
 }
 
 // Recorded segments for an entry: GET /api/competitions/entries/{eid}/protocol.

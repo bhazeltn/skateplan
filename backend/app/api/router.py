@@ -5,6 +5,7 @@ from app.api import (
     admin,
     auth,
     benchmarks,
+    competition_results,
     competitions,
     dashboard,
     external,
@@ -36,6 +37,7 @@ api_router.include_router(external.router)
 api_router.include_router(programs.router)
 api_router.include_router(scoring.router)
 api_router.include_router(competitions.router)
+api_router.include_router(competition_results.router)
 api_router.include_router(competitions.skater_router)
 api_router.include_router(training.session_router)
 api_router.include_router(training.skater_router)
