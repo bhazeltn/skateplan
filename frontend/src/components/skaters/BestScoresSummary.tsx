@@ -25,11 +25,32 @@ function MarkValue({
   );
 }
 
-function HeadlineBest({ label, mark }: { label: string; mark: BestMark | null }) {
+interface CellProps {
+  label: string;
+  mark: BestMark | null;
+  align?: "left" | "right";
+  emphasized?: boolean;
+}
+
+/** One headline PB/SB value with its label and (when present) a visible
+ *  competition / date provenance block. */
+function BestMarkCell({ label, mark, align = "left", emphasized = false }: CellProps) {
+  const right = align === "right";
+  const score = emphasized
+    ? "text-lg font-semibold tabular-nums"
+    : "text-lg font-medium text-slate-700 tabular-nums";
   return (
-    <div>
-      <p className="text-[10px] uppercase tracking-wide text-slate-400">{label}</p>
-      <MarkValue mark={mark} className="text-xl font-semibold text-slate-900" />
+    <div className={`min-w-0 ${right ? "text-right" : ""}`}>
+      <p className={`text-xs text-slate-500 ${right ? "text-right" : ""}`}>{label}</p>
+      <p className={score}>{mark ? mark.value.toFixed(2) : "—"}</p>
+      {mark && (
+        <div title={`${mark.competitionName} (${mark.date})`}>
+          <p className="truncate text-[11px] text-slate-500 mt-0.5">
+            {mark.competitionName}
+          </p>
+          <p className="text-[11px] text-slate-400 tabular-nums">{mark.date}</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -54,12 +75,9 @@ function TotalCard({ field }: { field: FieldBest }) {
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
         Combined Total
       </p>
-      <div className="mt-2 flex items-end justify-between gap-2">
-        <HeadlineBest label="PB" mark={field.pb} />
-        <div className="text-right">
-          <p className="text-[10px] uppercase tracking-wide text-slate-400">SB</p>
-          <MarkValue mark={field.sb} className="text-lg font-medium text-slate-600" />
-        </div>
+      <div className="mt-2 grid grid-cols-2 gap-3">
+        <BestMarkCell label="PB" mark={field.pb} emphasized />
+        <BestMarkCell label="SB" mark={field.sb} align="right" />
       </div>
     </div>
   );
@@ -79,14 +97,9 @@ function SegmentBestsCard({
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
         {title}
       </p>
-      <div className="mt-2 flex items-end justify-between gap-2">
-        <HeadlineBest label="TSS PB" mark={seg.tss.pb} />
-        <div className="text-right">
-          <p className="text-[10px] uppercase tracking-wide text-slate-400">
-            TSS SB
-          </p>
-          <MarkValue mark={seg.tss.sb} className="text-lg font-medium text-slate-600" />
-        </div>
+      <div className="mt-2 grid grid-cols-2 gap-3">
+        <BestMarkCell label="TSS PB" mark={seg.tss.pb} emphasized />
+        <BestMarkCell label="TSS SB" mark={seg.tss.sb} align="right" />
       </div>
       <div className="mt-2 space-y-1 border-t border-slate-100 pt-2">
         <PbSbRow label="TES" field={seg.tes} />
