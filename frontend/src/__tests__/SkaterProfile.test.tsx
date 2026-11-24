@@ -76,20 +76,21 @@ describe("Skater profile hub", () => {
     expect(screen.getByText(/active goals/i)).toBeInTheDocument();
   });
 
-  it("shows the benchmark assessment empty state on the Gap Analysis tab", async () => {
+  it("shows the custom benchmark panel on the Gap Analysis tab", async () => {
     seedSession();
     renderProfile();
     await screen.findByText(/Ava Nguyen/);
     await userEvent.click(screen.getByRole("tab", { name: /gap analysis/i }));
     expect(
-      await screen.findByText(/No benchmark assessment on record/i)
+      await screen.findByRole("heading", { name: /Custom Benchmark Targets/i })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", {
-        name: /New Benchmark Assessment|New Assessment|Conduct Benchmark Assessment/i,
-      })
+      screen.getByRole("button", { name: /\+ Add Benchmark/i })
     ).toBeInTheDocument();
-    // Legacy "exit standard" copy must no longer appear.
+    // Retired four-pillar assessment copy must no longer appear.
+    expect(
+      screen.queryByText(/No benchmark assessment on record/i)
+    ).toBeNull();
     expect(screen.queryAllByText(/exit standard/i)).toHaveLength(0);
   });
 

@@ -1,6 +1,7 @@
 """Model registry — import all models so Alembic autogenerate sees them."""
 from app.core.database import Base
 from app.models.audit import SafeSportTextHistoryLedger
+from app.models.benchmark_set import BenchmarkSet, BenchmarkSetItem
 from app.models.competition import (
     Competition,
     CompetitionEntry,
@@ -27,6 +28,8 @@ from app.models.user import AccountProxyLink, SkaterProfile, User
 
 __all__ = [
     "Base",
+    "BenchmarkSet",
+    "BenchmarkSetItem",
     "User",
     "SkaterProfile",
     "AccountProxyLink",

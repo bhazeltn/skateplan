@@ -1,11 +1,11 @@
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { CustomBenchmarksPanel } from "@/components/gap/CustomBenchmarksPanel";
-import { GapAssessmentForm } from "@/components/gap/GapAssessmentForm";
-import { GapSummaryCard } from "@/components/gap/GapSummaryCard";
-import { useGapAssessment } from "@/components/gap/useGapAssessment";
+import { listSkaters } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 import type { Skater } from "@/lib/types";
 
-/** Clickable roster: selecting an athlete opens the interactive assessment. */
+/** Clickable roster: selecting an athlete opens their custom benchmark matrix. */
 function RosterList({
   skaters,
   activeId,
@@ -40,13 +40,21 @@ function RosterList({
   );
 }
 
-/** Interactive coaching assessment: score a skater's four development pillars
- *  against a federation-neutral competitive benchmark standard and surface the
- *  biggest gaps as prioritized focus areas. Supports a ?skater= deep link from
- *  the profile Gap Analysis tab. */
+/** Coach-driven benchmark management: pick an athlete from the roster and manage
+ *  their coach-defined custom benchmark targets and development-gap tracking.
+ *  Supports a ?skater= deep link from the profile Gap Analysis tab. The retired
+ *  four-pillar competitive standard assessment has been removed. */
 export function GapAnalysisPage() {
+  const { token } = useAuth();
   const [params] = useSearchParams();
-  const gap = useGapAssessment(params.get("skater") ?? undefined);
+  const [skaters, setSkaters] = useState<Skater[]>([]);
+  const [skaterId, setSkaterId] = useState(params.get("skater") ?? "");
+
+  useEffect(() => {
+    listSkaters(token)
+      .then(setSkaters)
+      .catch(() => setSkaters([]));
+  }, [token]);
 
   return (
     <div className="space-y-4">
@@ -55,48 +63,25 @@ export function GapAnalysisPage() {
           Competitive Development &amp; Benchmark Assessment
         </h1>
         <p className="text-sm text-slate-500">
-          Score each development pillar against a competitive benchmark standard
-          to reveal the highest-priority focus areas.
+          Select an athlete to manage their coach-defined custom benchmark
+          targets and track development gaps.
         </p>
       </div>
 
       <div>
         <p className="mb-2 block text-sm font-medium text-slate-700">Skater</p>
         <RosterList
-          skaters={gap.skaters}
-          activeId={gap.skaterId}
-          onSelect={gap.setSkaterId}
+          skaters={skaters}
+          activeId={skaterId}
+          onSelect={setSkaterId}
         />
       </div>
 
-      {gap.skaterId ? (
-        <CustomBenchmarksPanel skaterId={gap.skaterId} />
-      ) : null}
-
-      {gap.skaterId ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          <GapAssessmentForm
-            templates={gap.templates}
-            framework={gap.framework}
-            scores={gap.scores}
-            notes={gap.notes}
-            onFramework={gap.setFramework}
-            onScore={gap.setScore}
-            onNotes={gap.setNotes}
-            onSubmit={gap.submit}
-            disabled={gap.saving || !gap.framework}
-          />
-          {gap.result ? (
-            <GapSummaryCard assessment={gap.result} />
-          ) : (
-            <p className="text-sm text-slate-400">
-              Save an assessment to see gap status and priority focus areas.
-            </p>
-          )}
-        </div>
+      {skaterId ? (
+        <CustomBenchmarksPanel skaterId={skaterId} />
       ) : (
         <p className="text-sm text-slate-400">
-          Select an athlete to begin a benchmark assessment.
+          Select an athlete to manage their benchmark targets.
         </p>
       )}
     </div>

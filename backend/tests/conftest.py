@@ -41,6 +41,8 @@ engine.dispose()
 
 # Tables cleaned between tests (children first for FK order).
 _CLEAN_TABLES = [
+    "benchmark_set_items",
+    "benchmark_sets",
     "skater_benchmarks",
     "gap_assessments",
     "skater_benchmark_assessments",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { AuthProvider, TOKEN_KEY } from "@/context/AuthContext";
@@ -31,62 +31,39 @@ describe("Competitive Development & Benchmark Assessment", () => {
     ).toBeInTheDocument();
   });
 
-  it("lets the coach select a benchmark template and score four pillars", async () => {
+  it("prompts to select an athlete before one is chosen", async () => {
     seedSession();
     renderPage();
-    const user = userEvent.setup();
-
-    // Roster populated from GET /api/skaters; clicking a card opens the form.
-    await user.click(await screen.findByRole("button", { name: /Ava Nguyen/i }));
-
-    // Benchmark template from GET /api/standards/templates (federation-neutral).
-    const templateSelect = await screen.findByLabelText(/benchmark template/i);
-    await user.selectOptions(
-      templateSelect,
-      "Junior Level Benchmark Standard - International Track"
-    );
-
-    // Four editable pillars must be present.
-    expect(screen.getByLabelText(/technical/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/skating skills/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/physical/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/performance/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        /Select an athlete to manage their benchmark targets/i
+      )
+    ).toBeInTheDocument();
   });
 
-  it("submits scores and updates the gap status summary", async () => {
+  it("opens the custom benchmark panel for the athlete whose card is clicked", async () => {
     seedSession();
     renderPage();
     const user = userEvent.setup();
 
+    // Roster populated from GET /api/skaters; clicking a card opens the panel.
     await user.click(await screen.findByRole("button", { name: /Ava Nguyen/i }));
-    await user.selectOptions(
-      await screen.findByLabelText(/benchmark template/i),
-      "Junior Level Benchmark Standard - International Track"
-    );
 
-    await user.selectOptions(screen.getByLabelText(/technical/i), "Acquiring");
-    await user.selectOptions(
-      screen.getByLabelText(/skating skills/i),
-      "Meeting Standard"
-    );
-    await user.selectOptions(
-      screen.getByLabelText(/physical/i),
-      "Not Introduced"
-    );
-    await user.selectOptions(
-      screen.getByLabelText(/performance/i),
-      "Exceeding"
-    );
+    expect(
+      await screen.findByRole("heading", { name: /Custom Benchmark Targets/i })
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("benchmark-summary")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /\+ Add Benchmark/i })
+    ).toBeInTheDocument();
+  });
 
-    await user.click(screen.getByRole("button", { name: /save assessment/i }));
-
-    const summary = await screen.findByTestId("gap-summary");
-    await waitFor(() => {
-      expect(within(summary).getByText(/Gaps Identified/i)).toBeInTheDocument();
-    });
-    expect(within(summary).getByText(/Benchmarks Met/i)).toBeInTheDocument();
-    // Two pillars below Meeting Standard => 2 gaps, 2 met.
-    expect(within(summary).getByTestId("gaps-count")).toHaveTextContent("2");
-    expect(within(summary).getByTestId("met-count")).toHaveTextContent("2");
+  it("does not surface the retired four-pillar assessment form", async () => {
+    seedSession();
+    renderPage();
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: /Ava Nguyen/i }));
+    await screen.findByRole("heading", { name: /Custom Benchmark Targets/i });
+    expect(screen.queryByLabelText(/benchmark template/i)).toBeNull();
   });
 });
