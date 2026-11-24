@@ -56,5 +56,5 @@ export function useSkaterBenchmarks(skaterId: number | string) {
     [skaterId, token]
   );
 
-  return { items, loading, create, setStatus, remove };
+  return { items, loading, refresh, create, setStatus, remove };
 }

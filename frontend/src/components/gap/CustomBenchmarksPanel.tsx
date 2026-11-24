@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { AddBenchmarkModal } from "@/components/gap/AddBenchmarkModal";
 import { BenchmarkItemRow } from "@/components/gap/BenchmarkItemRow";
+import { BenchmarkSetActions } from "@/components/gap/BenchmarkSetActions";
 import {
   groupByCategory,
   summarizeBenchmarks,
   type BenchmarkSummary,
 } from "@/components/gap/gapScoring";
 import { useSkaterBenchmarks } from "@/components/gap/useSkaterBenchmarks";
+import { Alert } from "@/components/ui/alert";
+import type { ApplySetResult } from "@/lib/benchmarkSetsApi";
 
 function Stat({ testid, label, value }: { testid: string; label: string; value: number }) {
   return (
@@ -44,8 +47,10 @@ function GapDeltaSummary({ summary }: { summary: BenchmarkSummary }) {
  *  targets across flexible categories, toggle status inline and delete items; a
  *  gap-delta summary rolls up Total / Met / Developing / Gaps deterministically. */
 export function CustomBenchmarksPanel({ skaterId }: { skaterId: number | string }) {
-  const { items, create, setStatus, remove } = useSkaterBenchmarks(skaterId);
+  const { items, refresh, create, setStatus, remove } =
+    useSkaterBenchmarks(skaterId);
   const [adding, setAdding] = useState(false);
+  const [applied, setApplied] = useState<ApplySetResult | null>(null);
   const summary = summarizeBenchmarks(items);
 
   const handleSave = async (payload: Parameters<typeof create>[0]) => {
@@ -53,21 +58,50 @@ export function CustomBenchmarksPanel({ skaterId }: { skaterId: number | string 
     setAdding(false);
   };
 
+  const handleApplied = (result: ApplySetResult) => {
+    setApplied(result);
+    refresh();
+  };
+
   return (
     <section className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-sm font-semibold text-slate-900">
           Custom Benchmark Targets
         </h2>
-        <button
-          type="button"
-          onClick={() => setAdding((v) => !v)}
-          className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium
-            text-white hover:bg-slate-700"
-        >
-          + Add Benchmark
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <BenchmarkSetActions
+            skaterId={skaterId}
+            benchmarks={items}
+            onApplied={handleApplied}
+          />
+          <button
+            type="button"
+            onClick={() => setAdding((v) => !v)}
+            className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium
+              text-white hover:bg-slate-700"
+          >
+            + Add Benchmark
+          </button>
+        </div>
       </div>
+
+      {applied ? (
+        <Alert variant="success" className="items-center justify-between">
+          <span>
+            Added {applied.created_count} benchmark
+            {applied.created_count === 1 ? "" : "s"} ({applied.skipped_count}{" "}
+            skipped as duplicates).
+          </span>
+          <button
+            type="button"
+            onClick={() => setApplied(null)}
+            className="text-sm font-medium underline"
+          >
+            Dismiss
+          </button>
+        </Alert>
+      ) : null}
 
       <GapDeltaSummary summary={summary} />
 
