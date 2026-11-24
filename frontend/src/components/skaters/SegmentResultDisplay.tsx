@@ -36,9 +36,9 @@ export function SegmentResultDisplay({
             <p className="tabular-nums text-sm font-semibold text-slate-900">
               TSS {result.tss?.toFixed(2)}
             </p>
-            {result.overall_rank != null && (
+            {result.segment_rank != null && (
               <p className="tabular-nums text-xs text-slate-500">
-                Overall {result.overall_rank}
+                Rank {result.segment_rank}
               </p>
             )}
           </div>

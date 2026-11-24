@@ -97,3 +97,53 @@ describe("CompetitionEntryRow explicit SP/FS segments", () => {
     });
   });
 });
+
+function podiumItem(overallRank: number): JoinedEntry {
+  const sp: SegmentResultOut = {
+    id: "r-sp", segment: "SP", tss: 30.37, segment_bonus: 0,
+  };
+  const fs: SegmentResultOut = {
+    id: "r-fs", segment: "FS", tss: 66.74, overall_rank: overallRank,
+    segment_bonus: 0,
+  };
+  return makeItem(makeEntry({ entered_sp: true, entered_fs: true }), [sp, fs]);
+}
+
+describe("CompetitionEntryRow placement summary", () => {
+  it("renders combined total, Gold 1st badge, and gold accent", () => {
+    renderRow(podiumItem(1));
+    const row = screen.getByTestId("entry-e1");
+    expect(within(row).getByText("97.11")).toBeInTheDocument();
+    const badge = within(row).getByTestId("entry-result-badge");
+    expect(badge).toHaveTextContent("1st");
+    expect(row.className).toContain("border-l-amber-400");
+  });
+
+  it("renders Silver 2nd styling for overall_rank 2", () => {
+    renderRow(podiumItem(2));
+    const row = screen.getByTestId("entry-e1");
+    expect(within(row).getByTestId("entry-result-badge")).toHaveTextContent("2nd");
+    expect(row.className).toContain("border-l-slate-400");
+  });
+
+  it("renders Bronze 3rd styling for overall_rank 3", () => {
+    renderRow(podiumItem(3));
+    const row = screen.getByTestId("entry-e1");
+    expect(within(row).getByTestId("entry-result-badge")).toHaveTextContent("3rd");
+    expect(row.className).toContain("border-l-orange-400");
+  });
+
+  it("renders neutral 5th badge and no podium accent for overall_rank 5", () => {
+    renderRow(podiumItem(5));
+    const row = screen.getByTestId("entry-e1");
+    expect(within(row).getByTestId("entry-result-badge")).toHaveTextContent("5th");
+    expect(row.className).not.toContain("border-l-4");
+  });
+
+  it("renders no total block and no badge when there are no results", () => {
+    renderRow(makeItem(makeEntry({ entered_sp: true, entered_fs: true })));
+    const row = screen.getByTestId("entry-e1");
+    expect(within(row).queryByTestId("entry-result-badge")).not.toBeInTheDocument();
+    expect(within(row).queryByText(/^Total$/)).not.toBeInTheDocument();
+  });
+});

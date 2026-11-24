@@ -1,4 +1,8 @@
 import { Button } from "@/components/ui/button";
+import EntryResultBadge, {
+  computeEntrySummary,
+  getPodiumAccentClass,
+} from "@/components/skaters/EntryResultBadge";
 import { SegmentResultDisplay } from "@/components/skaters/SegmentResultDisplay";
 import type { JoinedEntry } from "@/components/skaters/useSkaterEntries";
 import type { SegmentResultOut, SkaterProgram } from "@/lib/types";
@@ -22,6 +26,53 @@ function Chip({ children }: { children: React.ReactNode }) {
     <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
       {children}
     </span>
+  );
+}
+
+function EntryHeader({
+  name,
+  start,
+  upcoming,
+  overallRank,
+  totalScore,
+  chips,
+}: {
+  name: string;
+  start: string;
+  upcoming: boolean;
+  overallRank: number | null;
+  totalScore: number | null;
+  chips: (string | undefined)[];
+}) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center gap-2">
+        <p className="text-sm font-semibold text-slate-900">{name}</p>
+        <EntryResultBadge rank={overallRank} />
+        {upcoming && (
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs
+            font-semibold text-amber-700">
+            Upcoming
+          </span>
+        )}
+      </div>
+      {start && <p className="tabular-nums text-xs text-slate-500">{start}</p>}
+      {totalScore !== null && (
+        <div className="flex items-baseline gap-2">
+          <span className="text-xs uppercase tracking-wide text-slate-500">
+            Total
+          </span>
+          <span className="text-base font-semibold text-slate-900 tabular-nums">
+            {totalScore.toFixed(2)}
+          </span>
+        </div>
+      )}
+      {chips.some(Boolean) && (
+        <div className="flex flex-wrap gap-2 pt-1">
+          {chips.map((c, i) => c && <Chip key={i}>{c}</Chip>)}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -109,15 +160,15 @@ export function CompetitionEntryRow({
   onEdit,
   onDelete,
 }: Props) {
-  const { entry, competition } = item;
+  const { entry, competition, results } = item;
   const name = competition?.name ?? "Unknown competition";
   const start = competition?.start_date ?? "";
   const today = new Date().toISOString().slice(0, 10);
   const upcoming = Boolean(start) && start > today;
   const titleOf = (id?: string | null) =>
     programs.find((p) => p.id === id)?.title;
-  const sp = titleOf(entry.sp_program_id);
-  const fs = titleOf(entry.fs_program_id);
+  const { totalScore, overallRank } = computeEntrySummary(results);
+  const accent = getPodiumAccentClass(overallRank);
 
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this entry?")) {
@@ -127,28 +178,11 @@ export function CompetitionEntryRow({
 
   return (
     <li data-testid={`entry-${entry.id}`}
-      className="flex items-start justify-between gap-3 rounded-md border
-        border-slate-200 bg-white p-4">
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold text-slate-900">{name}</p>
-          {upcoming && (
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs
-              font-semibold text-amber-700">
-              Upcoming
-            </span>
-          )}
-        </div>
-        {start && (
-          <p className="tabular-nums text-xs text-slate-500">{start}</p>
-        )}
-        {(sp || fs) && (
-          <div className="flex flex-wrap gap-2 pt-1">
-            {sp && <Chip>{sp}</Chip>}
-            {fs && <Chip>{fs}</Chip>}
-          </div>
-        )}
-      </div>
+      className={`flex items-start justify-between gap-3 rounded-md border
+        border-slate-200 bg-white p-4 ${accent}`}>
+      <EntryHeader name={name} start={start} upcoming={upcoming}
+        overallRank={overallRank} totalScore={totalScore}
+        chips={[titleOf(entry.sp_program_id), titleOf(entry.fs_program_id)]} />
       <div className="flex shrink-0 flex-col items-end gap-2 text-right">
         <ResultColumn item={item} upcoming={upcoming} onResult={onResult} />
         <RowActions onEdit={() => onEdit(item)} onDelete={handleDelete} />
