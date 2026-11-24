@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AddEntryModal } from "@/components/skaters/AddEntryModal";
 import {
   CompetitionEntryRow,
@@ -6,10 +6,12 @@ import {
 } from "@/components/skaters/CompetitionEntryRow";
 import { EditEntryModal } from "@/components/skaters/EditEntryModal";
 import { LogResultModal } from "@/components/skaters/LogResultModal";
+import { BestScoresSummary } from "@/components/skaters/BestScoresSummary";
 import {
   useSkaterEntries,
   type JoinedEntry,
 } from "@/components/skaters/useSkaterEntries";
+import { computeSkaterBests } from "@/lib/competitionBests";
 import type { SkaterProgram } from "@/lib/types";
 
 interface Props {
@@ -33,6 +35,7 @@ export function CompetitionsTab({ skaterId, programs }: Props) {
   const [adding, setAdding] = useState(false);
   const [resultModal, setResultModal] = useState<ResultModalRequest | null>(null);
   const [editFor, setEditFor] = useState<JoinedEntry | null>(null);
+  const bests = useMemo(() => computeSkaterBests(items), [items]);
 
   return (
     <section className="space-y-4">
@@ -58,13 +61,16 @@ export function CompetitionsTab({ skaterId, programs }: Props) {
           No competition entries yet.
         </p>
       ) : (
-        <ul className="space-y-3">
-          {items.map((item) => (
-            <CompetitionEntryRow key={item.entry.id} item={item}
-              programs={programs} onResult={setResultModal}
-              onEdit={setEditFor} onDelete={removeEntry} />
-          ))}
-        </ul>
+        <>
+          <BestScoresSummary bests={bests} seasonLabel={bests.season} />
+          <ul className="space-y-3">
+            {items.map((item) => (
+              <CompetitionEntryRow key={item.entry.id} item={item}
+                programs={programs} bests={bests} onResult={setResultModal}
+                onEdit={setEditFor} onDelete={removeEntry} />
+            ))}
+          </ul>
+        </>
       )}
 
       <AddEntryModal open={adding} skaterId={skaterId} programs={programs}

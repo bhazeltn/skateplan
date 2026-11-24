@@ -4,7 +4,9 @@ import EntryResultBadge, {
   getPodiumAccentClass,
 } from "@/components/skaters/EntryResultBadge";
 import { SegmentResultDisplay } from "@/components/skaters/SegmentResultDisplay";
+import { BestPill } from "@/components/skaters/BestPill";
 import type { JoinedEntry } from "@/components/skaters/useSkaterEntries";
+import { getBadgeKind, type SkaterBests } from "@/lib/competitionBests";
 import type { SegmentResultOut, SkaterProgram } from "@/lib/types";
 
 export interface ResultModalRequest {
@@ -16,6 +18,7 @@ export interface ResultModalRequest {
 interface Props {
   item: JoinedEntry;
   programs: SkaterProgram[];
+  bests: SkaterBests;
   onResult: (req: ResultModalRequest) => void;
   onEdit: (item: JoinedEntry) => void;
   onDelete: (entryId: string) => void;
@@ -35,6 +38,7 @@ function EntryHeader({
   upcoming,
   overallRank,
   totalScore,
+  totalBadge,
   chips,
 }: {
   name: string;
@@ -42,6 +46,7 @@ function EntryHeader({
   upcoming: boolean;
   overallRank: number | null;
   totalScore: number | null;
+  totalBadge: "PB" | "SB" | null;
   chips: (string | undefined)[];
 }) {
   return (
@@ -65,6 +70,7 @@ function EntryHeader({
           <span className="text-base font-semibold text-slate-900 tabular-nums">
             {totalScore.toFixed(2)}
           </span>
+          <BestPill kind={totalBadge} />
         </div>
       )}
       {chips.some(Boolean) && (
@@ -99,10 +105,12 @@ function RowActions({
  *  which segments it is competing, else a legacy single Log Results control. */
 function ResultColumn({
   item,
+  bests,
   upcoming,
   onResult,
 }: {
   item: JoinedEntry;
+  bests: SkaterBests;
   upcoming: boolean;
   onResult: (req: ResultModalRequest) => void;
 }) {
@@ -112,13 +120,17 @@ function ResultColumn({
   const segments = (["SP", "FS"] as const).filter((s) =>
     s === "SP" ? entry.entered_sp : entry.entered_fs
   );
+  const segBadge = (seg: "SP" | "FS") => {
+    const field = (seg === "SP" ? bests.sp : bests.fs).tss;
+    return getBadgeKind(entry.id, field.pb, field.sb);
+  };
 
   if (hasFlags) {
     return (
       <div className="space-y-2">
         {segments.map((seg) => (
           <SegmentResultDisplay key={seg} segment={seg} result={bySegment(seg)}
-            canLog={!upcoming}
+            canLog={!upcoming} badgeKind={segBadge(seg)}
             onLog={() => onResult({ entryId: entry.id, segment: seg })}
             onEdit={() =>
               onResult({ entryId: entry.id, initialResult: bySegment(seg) })
@@ -156,6 +168,7 @@ function ResultColumn({
 export function CompetitionEntryRow({
   item,
   programs,
+  bests,
   onResult,
   onEdit,
   onDelete,
@@ -169,6 +182,7 @@ export function CompetitionEntryRow({
     programs.find((p) => p.id === id)?.title;
   const { totalScore, overallRank } = computeEntrySummary(results);
   const accent = getPodiumAccentClass(overallRank);
+  const totalBadge = getBadgeKind(entry.id, bests.total.pb, bests.total.sb);
 
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this entry?")) {
@@ -181,10 +195,11 @@ export function CompetitionEntryRow({
       className={`flex items-start justify-between gap-3 rounded-md border
         border-slate-200 bg-white p-4 ${accent}`}>
       <EntryHeader name={name} start={start} upcoming={upcoming}
-        overallRank={overallRank} totalScore={totalScore}
+        overallRank={overallRank} totalScore={totalScore} totalBadge={totalBadge}
         chips={[titleOf(entry.sp_program_id), titleOf(entry.fs_program_id)]} />
       <div className="flex shrink-0 flex-col items-end gap-2 text-right">
-        <ResultColumn item={item} upcoming={upcoming} onResult={onResult} />
+        <ResultColumn item={item} bests={bests} upcoming={upcoming}
+          onResult={onResult} />
         <RowActions onEdit={() => onEdit(item)} onDelete={handleDelete} />
       </div>
     </li>

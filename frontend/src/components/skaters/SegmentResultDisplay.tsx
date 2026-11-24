@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { BestPill } from "@/components/skaters/BestPill";
 import type { SegmentResultOut } from "@/lib/types";
 
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
   canLog: boolean;
   onLog: () => void;
   onEdit: () => void;
+  badgeKind?: "PB" | "SB" | null;
 }
 
 const LABEL: Record<"SP" | "FS", string> = {
@@ -22,6 +24,7 @@ export function SegmentResultDisplay({
   canLog,
   onLog,
   onEdit,
+  badgeKind,
 }: Props) {
   return (
     <div data-testid={`segment-${segment}`}
@@ -33,8 +36,10 @@ export function SegmentResultDisplay({
       {result ? (
         <div className="flex items-center gap-3">
           <div className="space-y-0.5">
-            <p className="tabular-nums text-sm font-semibold text-slate-900">
-              TSS {result.tss?.toFixed(2)}
+            <p className="flex items-center justify-end gap-1.5 tabular-nums
+              text-sm font-semibold text-slate-900">
+              <span>TSS {result.tss?.toFixed(2)}</span>
+              <BestPill kind={badgeKind ?? null} />
             </p>
             {result.segment_rank != null && (
               <p className="tabular-nums text-xs text-slate-500">

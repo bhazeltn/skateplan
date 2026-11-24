@@ -6,6 +6,10 @@ import {
   type ResultModalRequest,
 } from "@/components/skaters/CompetitionEntryRow";
 import type { JoinedEntry } from "@/components/skaters/useSkaterEntries";
+import {
+  computeSkaterBests,
+  type SkaterBests,
+} from "@/lib/competitionBests";
 import type { EntryOut, SegmentResultOut, SkaterProgram } from "@/lib/types";
 
 const PROGRAMS: SkaterProgram[] = [
@@ -37,11 +41,17 @@ function makeItem(
   };
 }
 
-function renderRow(item: JoinedEntry, onResult = vi.fn()) {
+const EMPTY_BESTS: SkaterBests = computeSkaterBests([], "2025-26");
+
+function renderRow(
+  item: JoinedEntry,
+  onResult = vi.fn(),
+  bests: SkaterBests = EMPTY_BESTS
+) {
   render(
     <ul>
-      <CompetitionEntryRow item={item} programs={PROGRAMS} onResult={onResult}
-        onEdit={vi.fn()} onDelete={vi.fn()} />
+      <CompetitionEntryRow item={item} programs={PROGRAMS} bests={bests}
+        onResult={onResult} onEdit={vi.fn()} onDelete={vi.fn()} />
     </ul>
   );
   return { onResult };
@@ -145,5 +155,45 @@ describe("CompetitionEntryRow placement summary", () => {
     const row = screen.getByTestId("entry-e1");
     expect(within(row).queryByTestId("entry-result-badge")).not.toBeInTheDocument();
     expect(within(row).queryByText(/^Total$/)).not.toBeInTheDocument();
+  });
+});
+
+function datedItem(
+  id: string,
+  date: string,
+  spTss: number,
+  fsTss: number
+): JoinedEntry {
+  return {
+    entry: makeEntry({ id, entered_sp: true, entered_fs: true }),
+    competition: { id: "c", name: "Meet", start_date: date } as
+      JoinedEntry["competition"],
+    results: [
+      { id: `${id}-sp`, segment: "SP", tss: spTss, segment_bonus: 0 },
+      { id: `${id}-fs`, segment: "FS", tss: fsTss, overall_rank: 1,
+        segment_bonus: 0 },
+    ],
+  };
+}
+
+describe("CompetitionEntryRow inline PB/SB pills", () => {
+  it("shows a PB pill on the total and SP when the entry holds the career best", () => {
+    const item = datedItem("e1", "2025-11-06", 40, 70);
+    const bests = computeSkaterBests([item], "2025-26");
+    renderRow(item, vi.fn(), bests);
+    const row = screen.getByTestId("entry-e1");
+    expect(within(row).getAllByTestId("best-pill-pb").length).toBeGreaterThan(0);
+    expect(within(screen.getByTestId("segment-SP"))
+      .getByTestId("best-pill-pb")).toBeInTheDocument();
+  });
+
+  it("shows an SB pill when the entry holds only the season best (older entry holds PB)", () => {
+    const older = datedItem("e-old", "2020-01-01", 60, 90); // higher → career PB
+    const current = datedItem("e1", "2025-11-06", 40, 70); // lower, in-season → SB
+    const bests = computeSkaterBests([older, current], "2025-26");
+    renderRow(current, vi.fn(), bests);
+    const row = screen.getByTestId("entry-e1");
+    expect(within(row).getAllByTestId("best-pill-sb").length).toBeGreaterThan(0);
+    expect(within(row).queryByTestId("best-pill-pb")).not.toBeInTheDocument();
   });
 });
