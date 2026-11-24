@@ -12,6 +12,7 @@ import {
   type JoinedEntry,
 } from "@/components/skaters/useSkaterEntries";
 import { computeSkaterBests } from "@/lib/competitionBests";
+import { sortCompetitionEntries } from "@/lib/sortEntries";
 import type { SkaterProgram } from "@/lib/types";
 
 interface Props {
@@ -36,6 +37,7 @@ export function CompetitionsTab({ skaterId, programs }: Props) {
   const [resultModal, setResultModal] = useState<ResultModalRequest | null>(null);
   const [editFor, setEditFor] = useState<JoinedEntry | null>(null);
   const bests = useMemo(() => computeSkaterBests(items), [items]);
+  const sortedItems = useMemo(() => sortCompetitionEntries(items), [items]);
 
   return (
     <section className="space-y-4">
@@ -64,7 +66,7 @@ export function CompetitionsTab({ skaterId, programs }: Props) {
         <>
           <BestScoresSummary bests={bests} seasonLabel={bests.season} />
           <ul className="space-y-3">
-            {items.map((item) => (
+            {sortedItems.map((item) => (
               <CompetitionEntryRow key={item.entry.id} item={item}
                 programs={programs} bests={bests} onResult={setResultModal}
                 onEdit={setEditFor} onDelete={removeEntry} />
