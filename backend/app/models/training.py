@@ -46,3 +46,8 @@ class CoachAssignment(Base):
         default=RoleInUnit.primary,
         nullable=False,
     )
+    # Additive access-control dimension (distinct from role_in_unit, which is a
+    # coaching-function label). Values: "primary" | "collaborator" | "viewer".
+    permission_level: Mapped[str] = mapped_column(
+        String(30), nullable=False, server_default="viewer"
+    )

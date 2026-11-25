@@ -1,9 +1,10 @@
 """Yearly Training Plan (YTP) routes (backend-only).
 
 Season macrocycle CRUD for a skater, split into ordered phases that may link
-existing custom benchmarks. Reads use ``authorize_skater_access``; writes also
-require ``require_coach``. Plan/phase-scoped routes resolve the owning skater from
-the loaded row, then authorize. ``skater_id`` is the athlete's ``users.id``.
+existing custom benchmarks. Reads use ``authorize_skater_access``; writes use
+``require_skater_editor`` (primary/collaborator coach or admin). Plan/phase-scoped
+routes resolve the owning skater from the loaded row, then authorize.
+``skater_id`` is the athlete's ``users.id``.
 """
 import uuid
 
@@ -12,8 +13,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.deps import authorize_skater_access, get_current_user
-from app.api.standards import require_coach
 from app.core.database import get_db
+from app.core.skater_permissions import require_skater_editor
 from app.models.standard import SkaterBenchmark
 from app.models.user import User
 from app.models.ytp import YearlyPlan, YtpPhase, YtpPhaseBenchmark
@@ -47,7 +48,7 @@ def _get_owned_plan(plan_id: uuid.UUID, current_user: User, db: Session) -> Year
     plan = db.get(YearlyPlan, plan_id)
     if plan is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plan not found")
-    authorize_skater_access(current_user, plan.skater_id, db)
+    require_skater_editor(current_user, plan.skater_id, db)
     return plan
 
 
@@ -55,7 +56,7 @@ def _get_owned_phase(phase_id: uuid.UUID, current_user: User, db: Session) -> Yt
     phase = db.get(YtpPhase, phase_id)
     if phase is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Phase not found")
-    authorize_skater_access(current_user, phase.plan.skater_id, db)
+    require_skater_editor(current_user, phase.plan.skater_id, db)
     return phase
 
 
@@ -99,10 +100,10 @@ def list_plans(
 def create_plan(
     skater_id: int,
     payload: YearlyPlanCreate,
-    current_user: User = Depends(require_coach),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> YearlyPlanOut:
-    authorize_skater_access(current_user, skater_id, db)
+    require_skater_editor(current_user, skater_id, db)
     plan = YearlyPlan(skater_id=skater_id, **payload.model_dump())
     db.add(plan)
     db.commit()
@@ -114,7 +115,7 @@ def create_plan(
 def update_plan(
     plan_id: uuid.UUID,
     payload: YearlyPlanUpdate,
-    current_user: User = Depends(require_coach),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> YearlyPlanOut:
     plan = _get_owned_plan(plan_id, current_user, db)
@@ -128,7 +129,7 @@ def update_plan(
 @router.delete("/plans/{plan_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_plan(
     plan_id: uuid.UUID,
-    current_user: User = Depends(require_coach),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> None:
     plan = _get_owned_plan(plan_id, current_user, db)
@@ -145,7 +146,7 @@ def delete_plan(
 def create_phase(
     plan_id: uuid.UUID,
     payload: YtpPhaseCreate,
-    current_user: User = Depends(require_coach),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> YtpPhaseOut:
     plan = _get_owned_plan(plan_id, current_user, db)
@@ -164,7 +165,7 @@ def create_phase(
 def update_phase(
     phase_id: uuid.UUID,
     payload: YtpPhaseUpdate,
-    current_user: User = Depends(require_coach),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> YtpPhaseOut:
     phase = _get_owned_phase(phase_id, current_user, db)
@@ -183,7 +184,7 @@ def update_phase(
 @router.delete("/phases/{phase_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_phase(
     phase_id: uuid.UUID,
-    current_user: User = Depends(require_coach),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> None:
     phase = _get_owned_phase(phase_id, current_user, db)

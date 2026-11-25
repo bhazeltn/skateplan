@@ -4,6 +4,7 @@ from fastapi import APIRouter
 from app.api import (
     admin,
     auth,
+    auth_invites,
     benchmark_sets,
     benchmarks,
     competition_edit,
@@ -13,6 +14,7 @@ from app.api import (
     dashboard,
     external,
     federations,
+    goals,
     injuries,
     levels,
     meetings,
@@ -20,6 +22,7 @@ from app.api import (
     run_throughs,
     schedule,
     scoring,
+    skater_access,
     skater_records,
     skaters,
     sov,
@@ -31,6 +34,7 @@ from app.api import (
 
 api_router = APIRouter()
 api_router.include_router(auth.router)
+api_router.include_router(auth_invites.router)
 api_router.include_router(dashboard.router)
 api_router.include_router(skaters.router)
 api_router.include_router(skater_records.router)
@@ -64,6 +68,8 @@ api_router.include_router(benchmarks.router)
 api_router.include_router(benchmark_sets.router)
 api_router.include_router(ytp.router)
 api_router.include_router(ytp.skater_router)
+api_router.include_router(goals.skater_router)
+api_router.include_router(skater_access.router)
 
 
 @api_router.get("/health", tags=["health"])

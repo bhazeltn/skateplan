@@ -23,6 +23,8 @@ from app.models.standard import (
 )
 from app.models.scoring import ScaleOfValues
 from app.models.session import TrainingSession
+from app.models.skater_goal import SkaterGoal
+from app.models.skater_invite import SkaterInvite
 from app.models.training import CoachAssignment, TrainingUnit, TrainingUnitRoster
 from app.models.training_log import JumpAttemptLog, TrainingSessionLog
 from app.models.user import AccountProxyLink, SkaterProfile, User
@@ -65,4 +67,6 @@ __all__ = [
     "YearlyPlan",
     "YtpPhase",
     "YtpPhaseBenchmark",
+    "SkaterInvite",
+    "SkaterGoal",
 ]

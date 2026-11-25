@@ -69,6 +69,8 @@ _CLEAN_TABLES = [
     "training_unit_roster",
     "training_units",
     "account_proxy_links",
+    "skater_invites",
+    "skater_goals",
     "skater_profiles",
     "safesport_text_history_ledgers",
     "users",
@@ -85,6 +87,16 @@ def _prepare_schema():
     with engine.begin() as conn:
         conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {TEST_SCHEMA}"))
     Base.metadata.create_all(engine)
+    # create_all only creates MISSING tables, never new columns on existing ones.
+    # Self-heal the additive permission_level column on the persistent test schema.
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                f"ALTER TABLE {TEST_SCHEMA}.coach_assignments "
+                "ADD COLUMN IF NOT EXISTS permission_level VARCHAR(30) "
+                "NOT NULL DEFAULT 'viewer'"
+            )
+        )
     # Seed persistent reference data (SOV, federations, levels) once, mirroring
     # the dev/public schema. These tables are never truncated between tests.
     from app.seeds.run_all import run_all

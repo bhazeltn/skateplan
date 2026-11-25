@@ -6,12 +6,20 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.security import hash_password
-from app.models.enums import DisciplineType, SystemRole
+from app.models.enums import DisciplineType, RoleInUnit, SystemRole
 from app.models.training import CoachAssignment, TrainingUnit, TrainingUnitRoster
 from app.models.user import SkaterProfile, User
 from app.schemas.skater import OrchestrateSkaterRequest, OrchestrateSkaterResponse
 
 router = APIRouter(prefix="/skaters", tags=["skaters"])
+
+# Map the coaching-function role to an initial access permission_level. The
+# onboarding coach is the primary; others default to collaborator.
+_PERMISSION_FOR_UNIT_ROLE = {
+    RoleInUnit.primary: "primary",
+    RoleInUnit.secondary: "collaborator",
+    RoleInUnit.choreographer: "viewer",
+}
 
 
 def _bad_request(detail: str) -> HTTPException:
@@ -89,6 +97,7 @@ def _attach_unit(
         coach_user_id=coach.id,
         training_unit_id=unit.training_unit_id,
         role_in_unit=payload.role_in_unit,
+        permission_level=_PERMISSION_FOR_UNIT_ROLE.get(payload.role_in_unit, "collaborator"),
     )
     db.add_all([roster, assignment])
     db.flush()
