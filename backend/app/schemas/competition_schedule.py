@@ -30,5 +30,7 @@ class RosterCompetitionOut(BaseModel):
     name: str
     start_date: Optional[date] = None
     end_date: Optional[date] = None
+    city: Optional[str] = None
+    country: Optional[str] = None
     location: Optional[str] = None
     entries: list[RosterEntrySummaryOut] = []

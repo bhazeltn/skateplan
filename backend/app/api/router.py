@@ -6,6 +6,7 @@ from app.api import (
     auth,
     benchmark_sets,
     benchmarks,
+    competition_edit,
     competition_results,
     competition_schedule,
     competitions,
@@ -45,6 +46,7 @@ api_router.include_router(scoring.router)
 # whose /competitions/{competition_id} would otherwise capture "roster-schedule".
 api_router.include_router(competition_schedule.router)
 api_router.include_router(competitions.router)
+api_router.include_router(competition_edit.router)
 api_router.include_router(competition_results.router)
 api_router.include_router(competitions.skater_router)
 api_router.include_router(training.session_router)

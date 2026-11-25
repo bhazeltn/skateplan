@@ -100,6 +100,8 @@ def _comp_out(comp: Competition, entries: list[RosterEntrySummaryOut]) -> Roster
         name=comp.name,
         start_date=comp.start_date,
         end_date=comp.end_date,
+        city=comp.city,
+        country=comp.country,
         location=location,
         entries=entries,
     )

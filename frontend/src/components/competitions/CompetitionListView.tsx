@@ -6,14 +6,18 @@ function todayStr(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+type EditHandler = (comp: RosterCompetitionOut) => void;
+
 function Section({
   title,
   items,
   muted = false,
+  onEdit,
 }: {
   title: string;
   items: RosterCompetitionOut[];
   muted?: boolean;
+  onEdit?: EditHandler;
 }) {
   if (items.length === 0) return null;
   return (
@@ -21,7 +25,7 @@ function Section({
       <h2 className="mb-3 text-lg font-semibold text-slate-900">{title}</h2>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {items.map((c) => (
-          <CompetitionScheduleCard key={c.id} competition={c} />
+          <CompetitionScheduleCard key={c.id} competition={c} onEdit={onEdit} />
         ))}
       </div>
     </section>
@@ -32,9 +36,11 @@ function Section({
 export function CompetitionListView({
   competitions,
   todayIso = todayStr(),
+  onEdit,
 }: {
   competitions: RosterCompetitionOut[];
   todayIso?: string;
+  onEdit?: EditHandler;
 }) {
   const { upcoming, past, undated } = partitionCompetitions(competitions, todayIso);
 
@@ -48,9 +54,9 @@ export function CompetitionListView({
 
   return (
     <div className="space-y-8">
-      <Section title="Upcoming Competitions" items={upcoming} />
-      <Section title="Past Competitions" items={past} muted />
-      <Section title="Undated" items={undated} />
+      <Section title="Upcoming Competitions" items={upcoming} onEdit={onEdit} />
+      <Section title="Past Competitions" items={past} muted onEdit={onEdit} />
+      <Section title="Undated" items={undated} onEdit={onEdit} />
     </div>
   );
 }

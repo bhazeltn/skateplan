@@ -20,8 +20,20 @@ export interface RosterCompetitionOut {
   name: string;
   start_date?: string | null;
   end_date?: string | null;
+  city?: string | null;
+  country?: string | null;
   location?: string | null;
   entries: RosterEntrySummaryOut[];
+}
+
+// Partial update payload for PATCH /api/competitions/{id}. All optional;
+// only supplied fields are changed. city/country feed the derived location.
+export interface CompetitionUpdate {
+  name?: string;
+  start_date?: string | null;
+  end_date?: string | null;
+  city?: string | null;
+  country?: string | null;
 }
 
 export interface RosterScheduleOptions {
@@ -51,4 +63,23 @@ export async function getRosterCompetitionSchedule(
     throw new ApiError(res.status, detail?.detail ?? "Request failed");
   }
   return (await res.json()) as RosterCompetitionOut[];
+}
+
+export async function updateCompetition(
+  competitionId: string,
+  payload: CompetitionUpdate,
+  token?: string | null
+): Promise<RosterCompetitionOut> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(`${BASE_URL}/api/competitions/${competitionId}`, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    throw new ApiError(res.status, detail?.detail ?? "Update failed");
+  }
+  return (await res.json()) as RosterCompetitionOut;
 }

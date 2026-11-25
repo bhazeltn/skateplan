@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import type { RosterCompetitionOut } from "@/lib/competitionScheduleApi";
 import { CompetitionListView } from "./CompetitionListView";
 import { CompetitionCalendarView } from "./CompetitionCalendarView";
+import { EditCompetitionModal } from "./EditCompetitionModal";
 import { useRosterSchedule } from "./useRosterSchedule";
 
 type ViewMode = "list" | "calendar";
@@ -62,11 +64,13 @@ function SkaterFilter({
 /** Competitions page: list/calendar toggle + skater filter over the roster schedule. */
 export function CompetitionsPage({ today }: { today?: string }) {
   const [mode, setMode] = useState<ViewMode>("list");
+  const [editing, setEditing] = useState<RosterCompetitionOut | null>(null);
   const {
     skaterOptions,
     selectedSkaterId,
     setSelectedSkaterId,
     filteredCompetitions,
+    editCompetition,
     loading,
     error,
   } = useRosterSchedule();
@@ -89,9 +93,25 @@ export function CompetitionsPage({ today }: { today?: string }) {
       {loading ? (
         <p className="text-sm text-slate-500">Loading competitions…</p>
       ) : mode === "list" ? (
-        <CompetitionListView competitions={filteredCompetitions} todayIso={today} />
+        <CompetitionListView
+          competitions={filteredCompetitions}
+          todayIso={today}
+          onEdit={setEditing}
+        />
       ) : (
-        <CompetitionCalendarView competitions={filteredCompetitions} todayIso={today} />
+        <CompetitionCalendarView
+          competitions={filteredCompetitions}
+          todayIso={today}
+          onEdit={setEditing}
+        />
+      )}
+
+      {editing && (
+        <EditCompetitionModal
+          competition={editing}
+          onSave={editCompetition}
+          onClose={() => setEditing(null)}
+        />
       )}
     </div>
   );

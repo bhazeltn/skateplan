@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { MapPin } from "lucide-react";
+import { MapPin, Pencil } from "lucide-react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatCompDateRange } from "@/lib/calendarHelpers";
 import type {
   RosterCompetitionOut,
@@ -36,26 +37,42 @@ function EntryRow({ entry }: { entry: RosterEntrySummaryOut }) {
   );
 }
 
-/** Detail card for a single competition: date range, location and its roster. */
+/** Detail card for a single competition: date range, location and its roster.
+ *  When onEdit is supplied, a compact Edit button is shown in the header. */
 export function CompetitionScheduleCard({
   competition,
+  onEdit,
 }: {
   competition: RosterCompetitionOut;
+  onEdit?: (comp: RosterCompetitionOut) => void;
 }) {
   return (
     <Card data-testid="competition-detail">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold text-slate-900">
-          {competition.name}
-        </CardTitle>
-        <p className="text-sm text-slate-500">
-          {formatCompDateRange(competition.start_date, competition.end_date)}
-        </p>
-        {competition.location && (
-          <p className="flex items-center gap-1 text-sm text-slate-500">
-            <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
-            {competition.location}
+      <CardHeader className="flex flex-row items-start justify-between gap-2">
+        <div>
+          <CardTitle className="text-lg font-semibold text-slate-900">
+            {competition.name}
+          </CardTitle>
+          <p className="text-sm text-slate-500">
+            {formatCompDateRange(competition.start_date, competition.end_date)}
           </p>
+          {competition.location && (
+            <p className="flex items-center gap-1 text-sm text-slate-500">
+              <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+              {competition.location}
+            </p>
+          )}
+        </div>
+        {onEdit && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            aria-label={`Edit ${competition.name}`}
+            onClick={() => onEdit(competition)}
+          >
+            <Pencil className="h-3.5 w-3.5" aria-hidden="true" /> Edit
+          </Button>
         )}
       </CardHeader>
       <div className="p-4 pt-0">

@@ -30,6 +30,14 @@ class CompetitionOut(BaseModel):
     season: Optional[str] = None
 
 
+class CompetitionUpdate(BaseModel):
+    name: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    city: Optional[str] = None
+    country: Optional[str] = None
+
+
 class EntryCreate(BaseModel):
     skater_id: int
     level_id: Optional[int] = None

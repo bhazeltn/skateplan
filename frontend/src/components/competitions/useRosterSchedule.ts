@@ -1,9 +1,31 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import {
   getRosterCompetitionSchedule,
+  updateCompetition,
+  type CompetitionUpdate,
   type RosterCompetitionOut,
 } from "@/lib/competitionScheduleApi";
+
+function deriveLocation(city?: string | null, country?: string | null): string | null {
+  return [city, country].filter(Boolean).join(", ") || null;
+}
+
+/** Merge persisted edit fields into an existing competition, keeping its entries. */
+function applyEdit(
+  comp: RosterCompetitionOut,
+  updated: RosterCompetitionOut
+): RosterCompetitionOut {
+  return {
+    ...comp,
+    name: updated.name,
+    start_date: updated.start_date ?? null,
+    end_date: updated.end_date ?? null,
+    city: updated.city ?? null,
+    country: updated.country ?? null,
+    location: deriveLocation(updated.city, updated.country),
+  };
+}
 
 export interface SkaterOption {
   id: number;
@@ -65,12 +87,23 @@ export function useRosterSchedule() {
     [competitions, selectedSkaterId]
   );
 
+  const editCompetition = useCallback(
+    async (competitionId: string, payload: CompetitionUpdate) => {
+      const updated = await updateCompetition(competitionId, payload, token);
+      setCompetitions((prev) =>
+        prev.map((c) => (c.id === competitionId ? applyEdit(c, updated) : c))
+      );
+    },
+    [token]
+  );
+
   return {
     competitions,
     skaterOptions,
     selectedSkaterId,
     setSelectedSkaterId,
     filteredCompetitions,
+    editCompetition,
     loading,
     error,
   };

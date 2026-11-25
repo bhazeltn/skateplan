@@ -6,6 +6,7 @@ import { resetBenchmarkSetStore } from "@/mocks/benchmarkSetHandlers";
 import { resetYtpStore } from "@/mocks/ytpHandlers";
 import { resetTrainingStore } from "@/mocks/trainingHandlers";
 import { resetRunThroughStore } from "@/mocks/runThroughHandlers";
+import { resetCompetitionScheduleStore } from "@/mocks/competitionScheduleHandlers";
 import { mockViewport } from "@/test/utils";
 
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
@@ -17,6 +18,7 @@ afterEach(() => {
   resetYtpStore();
   resetTrainingStore();
   resetRunThroughStore();
+  resetCompetitionScheduleStore();
   localStorage.clear();
 });
 afterAll(() => server.close());

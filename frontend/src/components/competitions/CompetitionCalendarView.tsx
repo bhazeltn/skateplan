@@ -88,9 +88,11 @@ function DayCellView(props: {
 export function CompetitionCalendarView({
   competitions,
   todayIso = todayStr(),
+  onEdit,
 }: {
   competitions: RosterCompetitionOut[];
   todayIso?: string;
+  onEdit?: (comp: RosterCompetitionOut) => void;
 }) {
   const [y, mi] = todayIso.split("-").map(Number);
   const [cursor, setCursor] = useState({ year: y, month: mi - 1 });
@@ -132,7 +134,7 @@ export function CompetitionCalendarView({
           />
         ))}
       </div>
-      {selected && <CompetitionScheduleCard competition={selected} />}
+      {selected && <CompetitionScheduleCard competition={selected} onEdit={onEdit} />}
     </div>
   );
 }
