@@ -21,6 +21,7 @@ class SessionOut(BaseModel):
 
     id: uuid.UUID
     skater_id: int
+    logged_by_user_id: Optional[int] = None
     session_date: Optional[date] = None
     session_type: str
     duration_minutes: int
@@ -29,10 +30,30 @@ class SessionOut(BaseModel):
     notes: Optional[str] = None
 
 
+class SessionUpdate(BaseModel):
+    """Partial update for a session; only supplied fields are applied."""
+
+    session_date: Optional[date] = None
+    session_type: Optional[str] = None
+    duration_minutes: Optional[int] = Field(default=None, ge=0)
+    rpe: Optional[int] = Field(default=None, ge=1, le=10)  # invalid rpe -> 422
+    location: Optional[str] = None
+    notes: Optional[str] = None
+
+
 class AttemptIn(BaseModel):
     element_code: str
     outcome: str
     attempts_count: int = Field(default=1, ge=1)
+    notes: Optional[str] = None
+
+
+class AttemptUpdate(BaseModel):
+    """Partial update for a logged attempt; only supplied fields are applied."""
+
+    element_code: Optional[str] = None
+    outcome: Optional[str] = None
+    attempts_count: Optional[int] = Field(default=None, ge=1)
     notes: Optional[str] = None
 
 

@@ -21,6 +21,7 @@ from app.schemas.training import (
     MetricsOut,
     SessionCreate,
     SessionOut,
+    SessionUpdate,
 )
 from app.services.training_service import (
     aggregate_attempt_success_rates,
@@ -61,11 +62,41 @@ def create_session(
     db: Session = Depends(get_db),
 ) -> SessionOut:
     authorize_skater_access(current_user, payload.skater_id, db)
-    session = TrainingSessionLog(**payload.model_dump())
+    session = TrainingSessionLog(
+        **payload.model_dump(), logged_by_user_id=current_user.id
+    )
     db.add(session)
     db.commit()
     db.refresh(session)
     return SessionOut.model_validate(session)
+
+
+@session_router.patch("/{session_id}", response_model=SessionOut)
+def update_session(
+    session_id: uuid.UUID,
+    payload: SessionUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> SessionOut:
+    session = _get_session(session_id, db)
+    authorize_skater_access(current_user, session.skater_id, db)
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(session, field, value)
+    db.commit()
+    db.refresh(session)
+    return SessionOut.model_validate(session)
+
+
+@session_router.delete("/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_session(
+    session_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> None:
+    session = _get_session(session_id, db)
+    authorize_skater_access(current_user, session.skater_id, db)
+    db.delete(session)  # cascades attempts via relationship/FK ON DELETE CASCADE
+    db.commit()
 
 
 @session_router.get("/{session_id}", response_model=SessionOut)

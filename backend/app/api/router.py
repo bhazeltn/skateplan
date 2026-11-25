@@ -22,6 +22,7 @@ from app.api import (
     sov,
     standards,
     training,
+    training_attempts,
     ytp,
 )
 
@@ -42,6 +43,7 @@ api_router.include_router(competitions.router)
 api_router.include_router(competition_results.router)
 api_router.include_router(competitions.skater_router)
 api_router.include_router(training.session_router)
+api_router.include_router(training_attempts.attempt_router)
 api_router.include_router(training.skater_router)
 api_router.include_router(injuries.router)
 api_router.include_router(injuries.skater_router)

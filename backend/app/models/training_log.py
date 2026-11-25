@@ -39,6 +39,11 @@ class TrainingSessionLog(Base):
     skater_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
+    # Who recorded the entry (coach vs. athlete once athlete login lands). Nullable
+    # so a deleted user doesn't cascade away the training history (SET NULL).
+    logged_by_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     session_date: Mapped[date | None] = mapped_column(Date, index=True)
     session_type: Mapped[str] = mapped_column(String(30), nullable=False)
     duration_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
