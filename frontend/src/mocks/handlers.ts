@@ -1,6 +1,7 @@
 import { http, HttpResponse } from "msw";
 import type { CompetitionOut, LevelListItem, Skater } from "@/lib/types";
 import { benchmarkSetHandlers } from "@/mocks/benchmarkSetHandlers";
+import { ytpHandlers } from "@/mocks/ytpHandlers";
 
 // A minimal JWT-looking token (header.payload.signature) with role claim so the
 // client can decode role locally. Not cryptographically valid — tests only.
@@ -541,4 +542,6 @@ export const handlers = [
   http.get("*/api/skaters/:id/competitions", () => HttpResponse.json([])),
   // Sprint 7: coach-owned benchmark sets (stateful in-memory store).
   ...benchmarkSetHandlers,
+  // YTP: yearly training plans + phases (stateful in-memory store).
+  ...ytpHandlers,
 ];
