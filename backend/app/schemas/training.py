@@ -45,6 +45,7 @@ class AttemptIn(BaseModel):
     element_code: str
     outcome: str
     attempts_count: int = Field(default=1, ge=1)
+    tags: list[str] = Field(default_factory=list)
     notes: Optional[str] = None
 
 
@@ -54,6 +55,7 @@ class AttemptUpdate(BaseModel):
     element_code: Optional[str] = None
     outcome: Optional[str] = None
     attempts_count: Optional[int] = Field(default=None, ge=1)
+    tags: Optional[list[str]] = None
     notes: Optional[str] = None
 
 
@@ -65,6 +67,7 @@ class AttemptOut(BaseModel):
     element_code: str
     outcome: str
     attempts_count: int
+    tags: list[str] = Field(default_factory=list)
     notes: Optional[str] = None
 
 
@@ -73,6 +76,9 @@ class ElementStatOut(BaseModel):
     total_attempts: int
     clean_count: int
     clean_percentage: float
+    with_calls_count: int = 0
+    completed_percentage: float = 0.0
+    tag_counts: dict[str, int] = Field(default_factory=dict)
 
 
 class MetricsOut(BaseModel):

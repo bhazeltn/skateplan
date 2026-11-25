@@ -8,6 +8,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import (
+    JSON,
     Boolean,
     DateTime,
     ForeignKey,
@@ -16,6 +17,7 @@ from sqlalchemy import (
     Text,
     Uuid,
     func,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -64,6 +66,9 @@ class RunThroughElementResult(Base):
     element_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     element_code: Mapped[str] = mapped_column(String(50), nullable=False)
     outcome: Mapped[str] = mapped_column(String(30), nullable=False)
+    tags: Mapped[list[str]] = mapped_column(
+        JSON, default=list, server_default=text("'[]'"), nullable=False
+    )
     notes: Mapped[str | None] = mapped_column(Text)
 
     run_through: Mapped["ProgramRunThrough"] = relationship(

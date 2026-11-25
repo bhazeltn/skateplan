@@ -27,22 +27,49 @@ def calculate_workload_metrics(sessions) -> dict:
     }
 
 
+def _blank_bucket() -> dict:
+    return {"total": 0, "clean": 0, "with_calls": 0, "tags": {}}
+
+
+def _tally_attempt(bucket: dict, attempt) -> None:
+    """Fold one (possibly batched) attempt into its element bucket."""
+    weight = attempt.attempts_count
+    tags = attempt.tags or []
+    bucket["total"] += weight
+    if attempt.outcome == "clean":
+        if tags:
+            bucket["with_calls"] += weight
+        else:
+            bucket["clean"] += weight
+    for tag in tags:
+        bucket["tags"][tag] = bucket["tags"].get(tag, 0) + weight
+
+
+def sort_tag_counts(tags: dict) -> dict:
+    """Deterministic order: count desc, then tag name asc."""
+    return dict(sorted(tags.items(), key=lambda kv: (-kv[1], kv[0])))
+
+
+def _pct(part: int, whole: int) -> float:
+    return round(part / whole * 100, 1) if whole else 0.0
+
+
 def aggregate_attempt_success_rates(attempts) -> list[dict]:
-    """Group attempts by element_code; compute totals and clean percentage."""
-    groups: dict[str, list[int]] = {}
+    """Group attempts by element_code; two-tier clean vs. completed stats."""
+    groups: dict[str, dict] = {}
     for a in attempts:
-        totals = groups.setdefault(a.element_code, [0, 0])
-        totals[0] += a.attempts_count
-        if a.outcome == "clean":
-            totals[1] += a.attempts_count
+        _tally_attempt(groups.setdefault(a.element_code, _blank_bucket()), a)
     stats = []
     for code in sorted(groups):
-        total, clean = groups[code]
-        pct = round(clean / total * 100, 1) if total else 0.0
+        b = groups[code]
+        completed = b["clean"] + b["with_calls"]
         stats.append({
             "element_code": code,
-            "total_attempts": total,
-            "clean_count": clean,
-            "clean_percentage": pct,
+            "total_attempts": b["total"],
+            "clean_count": b["clean"],
+            "with_calls_count": b["with_calls"],
+            "clean_percentage": _pct(b["clean"], b["total"]),
+            "completed_percentage": _pct(completed, b["total"]),
+            "tag_counts": sort_tag_counts(b["tags"]),
         })
     return stats

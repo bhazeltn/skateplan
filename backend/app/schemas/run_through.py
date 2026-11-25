@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from typing import Literal, Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 RunType = Literal["full", "half", "section", "walkthrough"]
 
@@ -12,6 +12,7 @@ class RunThroughElementIn(BaseModel):
     element_order: int = 0
     element_code: str
     outcome: str
+    tags: list[str] = Field(default_factory=list)
     notes: Optional[str] = None
 
 
@@ -22,6 +23,7 @@ class RunThroughElementOut(BaseModel):
     element_order: int
     element_code: str
     outcome: str
+    tags: list[str] = Field(default_factory=list)
     notes: Optional[str] = None
 
 
@@ -60,6 +62,9 @@ class ProgramElementStatOut(BaseModel):
     total_attempts: int
     clean_count: int
     clean_percentage: float
+    with_calls_count: int = 0
+    completed_percentage: float = 0.0
+    tag_counts: dict[str, int] = Field(default_factory=dict)
 
 
 class ProgramConsistencyOut(BaseModel):
@@ -70,4 +75,5 @@ class ProgramConsistencyOut(BaseModel):
     full_runs: int
     clean_runs: int
     overall_clean_percentage: float
+    overall_completed_percentage: float = 0.0
     element_stats: list[ProgramElementStatOut] = []
