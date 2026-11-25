@@ -22,6 +22,7 @@ from app.api import (
     sov,
     standards,
     training,
+    ytp,
 )
 
 api_router = APIRouter()
@@ -50,6 +51,8 @@ api_router.include_router(standards.router)
 api_router.include_router(standards.skater_router)
 api_router.include_router(benchmarks.router)
 api_router.include_router(benchmark_sets.router)
+api_router.include_router(ytp.router)
+api_router.include_router(ytp.skater_router)
 
 
 @api_router.get("/health", tags=["health"])

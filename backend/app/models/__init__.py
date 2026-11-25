@@ -25,6 +25,7 @@ from app.models.session import TrainingSession
 from app.models.training import CoachAssignment, TrainingUnit, TrainingUnitRoster
 from app.models.training_log import JumpAttemptLog, TrainingSessionLog
 from app.models.user import AccountProxyLink, SkaterProfile, User
+from app.models.ytp import YearlyPlan, YtpPhase, YtpPhaseBenchmark
 
 __all__ = [
     "Base",
@@ -58,4 +59,7 @@ __all__ = [
     "SkaterBenchmarkAssessment",
     "SkaterBenchmark",
     "GapAssessment",
+    "YearlyPlan",
+    "YtpPhase",
+    "YtpPhaseBenchmark",
 ]
