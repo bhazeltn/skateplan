@@ -11,6 +11,7 @@ import { GoalsTab } from "@/components/skaters/GoalsTab";
 import { GapAnalysisTab } from "@/components/skaters/GapAnalysisTab";
 import { CompetitionsTab } from "@/components/skaters/CompetitionsTab";
 import { YtpTab } from "@/components/ytp/YtpTab";
+import { TrainingTab } from "@/components/training/TrainingTab";
 
 function buildTabs(skater: SkaterDetail, onChanged: () => void): ProfileTab[] {
   return [
@@ -54,6 +55,10 @@ function buildTabs(skater: SkaterDetail, onChanged: () => void): ProfileTab[] {
     {
       label: "Season Plan",
       content: <YtpTab skaterId={skater.skater_id} />,
+    },
+    {
+      label: "Training",
+      content: <TrainingTab skaterId={skater.skater_id} />,
     },
   ];
 }

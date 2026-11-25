@@ -2,6 +2,7 @@ import { http, HttpResponse } from "msw";
 import type { CompetitionOut, LevelListItem, Skater } from "@/lib/types";
 import { benchmarkSetHandlers } from "@/mocks/benchmarkSetHandlers";
 import { ytpHandlers } from "@/mocks/ytpHandlers";
+import { trainingHandlers } from "@/mocks/trainingHandlers";
 
 // A minimal JWT-looking token (header.payload.signature) with role claim so the
 // client can decode role locally. Not cryptographically valid — tests only.
@@ -544,4 +545,6 @@ export const handlers = [
   ...benchmarkSetHandlers,
   // YTP: yearly training plans + phases (stateful in-memory store).
   ...ytpHandlers,
+  // Training logs + attempts + metrics (stateful in-memory store).
+  ...trainingHandlers,
 ];

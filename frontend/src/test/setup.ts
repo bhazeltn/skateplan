@@ -4,6 +4,7 @@ import { cleanup } from "@testing-library/react";
 import { server } from "@/mocks/server";
 import { resetBenchmarkSetStore } from "@/mocks/benchmarkSetHandlers";
 import { resetYtpStore } from "@/mocks/ytpHandlers";
+import { resetTrainingStore } from "@/mocks/trainingHandlers";
 import { mockViewport } from "@/test/utils";
 
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
@@ -13,6 +14,7 @@ afterEach(() => {
   server.resetHandlers();
   resetBenchmarkSetStore();
   resetYtpStore();
+  resetTrainingStore();
   localStorage.clear();
 });
 afterAll(() => server.close());
