@@ -99,7 +99,7 @@ export function YtpPhaseCard({
       <dl className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Target label="On-ice h/wk" value={phase.target_on_ice_hours_per_week} />
         <Target label="Off-ice h/wk" value={phase.target_off_ice_hours_per_week} />
-        <Target label="Target RPE" value={phase.target_rpe} />
+        <Target label="Target Effort" value={phase.target_rpe} />
         <Target
           label="Intensity"
           value={phase.intensity_level ? phase.intensity_level.replace(/^\w/, (c) => c.toUpperCase()) : null}

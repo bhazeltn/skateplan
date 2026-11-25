@@ -41,7 +41,7 @@ function LoadRow({
 }
 
 /** "This Week vs. Planned Phase" — compares this week's actual on-ice / off-ice
- *  volume and average RPE against the active YTP phase targets. Falls back to a
+ *  volume and average effort against the active YTP phase targets. Falls back to a
  *  plain actuals view when no phase is active. */
 export function WeeklyLoadBar({
   sessions,
@@ -82,12 +82,12 @@ export function WeeklyLoadBar({
           target={activePhase?.target_off_ice_hours_per_week}
         />
         <div className="flex items-baseline justify-between border-t border-slate-100 pt-2 text-sm">
-          <span className="text-slate-600">Avg RPE ({load.sessionCount} sessions)</span>
+          <span className="text-slate-600">Avg Effort ({load.sessionCount} sessions)</span>
           <span className="tabular-nums text-slate-900">
-            <span className="font-semibold">{load.avgRpe || "—"}</span>
+            <span className="font-semibold">{load.avgRpe || "—"} / 10</span>
             <span className="text-slate-400">
               {" "}
-              / {activePhase?.target_rpe != null ? `target ${activePhase.target_rpe}` : "—"}
+              {activePhase?.target_rpe != null ? `· Target ${activePhase.target_rpe}` : "· —"}
             </span>
           </span>
         </div>

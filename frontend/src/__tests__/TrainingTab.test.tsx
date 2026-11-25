@@ -52,7 +52,7 @@ async function logSession(user: ReturnType<typeof userEvent.setup>, preset: stri
   const dialog = await screen.findByRole("dialog");
   await user.click(within(dialog).getByRole("button", { name: /^on-ice$/i }));
   await user.click(within(dialog).getByRole("button", { name: new RegExp(`^${preset} min$`, "i") }));
-  await user.click(within(dialog).getByRole("button", { name: new RegExp(`^rpe ${rpe}$`, "i") }));
+  await user.click(within(dialog).getByRole("button", { name: new RegExp(`^effort ${rpe}$`, "i") }));
   await user.click(within(dialog).getByRole("button", { name: /save session/i }));
   await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
 }
@@ -77,7 +77,7 @@ describe("TrainingTab", () => {
 
     const card = await screen.findByTestId("session-card");
     expect(within(card).getByText("60 min")).toBeInTheDocument();
-    expect(within(card).getByText(/RPE 8/)).toBeInTheDocument();
+    expect(within(card).getByText(/Effort 8\/10/)).toBeInTheDocument();
     expect(within(card).getByText(/On-Ice/)).toBeInTheDocument();
 
     const bar = screen.getByTestId("weekly-load-bar");

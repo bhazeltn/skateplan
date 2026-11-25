@@ -22,7 +22,7 @@ function SessionMeta({ session }: { session: SessionOut }) {
       <span className="text-sm font-semibold text-slate-900">
         {session.duration_minutes} min
       </span>
-      <Badge variant="warning">RPE {session.rpe}</Badge>
+      <Badge variant="warning">Effort {session.rpe}/10</Badge>
       {session.location ? (
         <span className="text-xs text-slate-500">· {session.location}</span>
       ) : null}
@@ -30,7 +30,7 @@ function SessionMeta({ session }: { session: SessionOut }) {
   );
 }
 
-/** One logged training session: date, type, duration and RPE, with inline
+/** One logged training session: date, type, duration and effort, with inline
  *  actions to edit, delete (confirm-guarded) and expand its attempts tracker. */
 export function SessionCard({ session, onEdit, onDelete, onAttemptsChanged }: Props) {
   const [showAttempts, setShowAttempts] = useState(false);

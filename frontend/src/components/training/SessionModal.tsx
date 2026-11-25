@@ -60,7 +60,7 @@ function Pill({
 }
 
 /** Create / edit dialog for a training session. Opens pre-filled with sensible
- *  defaults (today, on-ice, 60 min, RPE 7) so it is valid immediately; on edit
+ *  defaults (today, on-ice, 60 min, effort 7) so it is valid immediately; on edit
  *  it prefills from the session. Delegates the save to the parent. */
 export function SessionModal({ skaterId, initial, onClose, onSubmit }: Props) {
   const [form, setForm] = useState(() => initialState(initial));
@@ -156,17 +156,20 @@ export function SessionModal({ skaterId, initial, onClose, onSubmit }: Props) {
         </div>
 
         <div>
-          <Label>RPE (1–10)</Label>
+          <Label>Effort Level (1–10)</Label>
           <div className="flex flex-wrap gap-1">
             {RPE_SCALE.map((n) => (
               <Pill
                 key={n}
                 active={form.rpe === n}
-                label={`RPE ${n}`}
+                label={`Effort ${n}`}
                 onClick={() => set("rpe", n)}
               />
             ))}
           </div>
+          <p className="mt-1 text-[11px] text-slate-400">
+            1 = Very Easy · 5 = Moderate · 10 = All-Out
+          </p>
         </div>
 
         <div>

@@ -79,7 +79,7 @@ describe("YtpTab — season plan flow", () => {
     await user.click(await screen.findByRole("button", { name: /add phase/i }));
     dialog = await screen.findByRole("dialog");
     await user.type(within(dialog).getByLabelText(/^name$/i), "General Prep");
-    await user.type(within(dialog).getByLabelText(/target rpe/i), "6");
+    await user.type(within(dialog).getByLabelText(/target effort/i), "6");
     await user.click(within(dialog).getByRole("checkbox", { name: /triple axel/i }));
     await user.click(within(dialog).getByRole("button", { name: /save phase/i }));
 

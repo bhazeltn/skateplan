@@ -151,7 +151,7 @@ export function PhaseModal({
             <Input id="ph-office" type="number" min="0" step="0.5" value={form.off_ice} onChange={(e) => set("off_ice")(e.target.value)} />
           </div>
           <div>
-            <Label htmlFor="ph-rpe">Target RPE (1–10)</Label>
+            <Label htmlFor="ph-rpe">Target Effort (1–10)</Label>
             <Input id="ph-rpe" type="number" min="1" max="10" value={form.rpe} onChange={(e) => set("rpe")(e.target.value)} />
           </div>
           <div>
