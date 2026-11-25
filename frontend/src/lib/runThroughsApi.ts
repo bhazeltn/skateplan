@@ -11,6 +11,7 @@ export interface RunThroughElementIn {
   element_code: string;
   outcome: string;
   notes?: string | null;
+  tags?: string[];
 }
 
 export interface RunThroughElementOut {
@@ -19,6 +20,7 @@ export interface RunThroughElementOut {
   element_code: string;
   outcome: string;
   notes?: string | null;
+  tags: string[];
 }
 
 export interface RunThroughCreate {
@@ -54,6 +56,9 @@ export interface ProgramElementStatOut {
   total_attempts: number;
   clean_count: number;
   clean_percentage: number;
+  with_calls_count: number;
+  completed_percentage: number;
+  tag_counts: Record<string, number>;
 }
 
 export interface ProgramConsistencyOut {
@@ -64,6 +69,7 @@ export interface ProgramConsistencyOut {
   full_runs: number;
   clean_runs: number;
   overall_clean_percentage: number;
+  overall_completed_percentage: number;
   element_stats: ProgramElementStatOut[];
 }
 

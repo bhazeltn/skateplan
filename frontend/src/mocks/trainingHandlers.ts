@@ -18,6 +18,51 @@ interface Attempt extends Body {
   element_code: string;
   outcome: string;
   attempts_count: number;
+  tags: string[];
+}
+
+// Two-tier bucket mirroring backend: clean = outcome "clean" with no tags;
+// with_calls = outcome "clean" with >=1 tag. Weighted by attempts_count.
+interface Bucket {
+  total: number;
+  clean: number;
+  withCalls: number;
+  tags: Record<string, number>;
+}
+
+const pct = (part: number, whole: number): number =>
+  whole ? Math.round((part / whole) * 1000) / 10 : 0;
+
+const tagsOf = (v: unknown): string[] => (Array.isArray(v) ? (v as string[]) : []);
+
+function addToBucket(b: Bucket, outcome: string, tags: string[], weight: number): void {
+  b.total += weight;
+  const clean = outcome === "clean";
+  if (clean && tags.length === 0) b.clean += weight;
+  if (clean && tags.length > 0) b.withCalls += weight;
+  for (const t of tags) b.tags[t] = (b.tags[t] ?? 0) + weight;
+}
+
+/** Deterministic order: count DESC, tie-break tag name ASC. */
+function orderTagCounts(tags: Record<string, number>): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const [k, v] of Object.entries(tags).sort(
+    (a, b) => b[1] - a[1] || a[0].localeCompare(b[0])
+  ))
+    out[k] = v;
+  return out;
+}
+
+function statFromBucket(code: string, b: Bucket) {
+  return {
+    element_code: code,
+    total_attempts: b.total,
+    clean_count: b.clean,
+    clean_percentage: pct(b.clean, b.total),
+    with_calls_count: b.withCalls,
+    completed_percentage: pct(b.clean + b.withCalls, b.total),
+    tag_counts: orderTagCounts(b.tags),
+  };
 }
 
 let sessions: Session[] = [];
@@ -59,6 +104,7 @@ function buildAttempt(sessionId: string, b: Body): Attempt {
     outcome: String(b.outcome ?? "clean"),
     attempts_count: Number(b.attempts_count ?? 1),
     notes: str(b.notes),
+    tags: tagsOf(b.tags),
   };
 }
 
@@ -75,23 +121,14 @@ function computeMetrics(skaterId: number, url: URL): Body {
   const totalMin = rows.reduce((t, s) => t + Number(s.duration_minutes), 0);
   const workload = rows.reduce((t, s) => t + Number(s.duration_minutes) * Number(s.rpe), 0);
   const rpeSum = rows.reduce((t, s) => t + Number(s.rpe), 0);
-  const groups: Record<string, [number, number]> = {};
+  const buckets: Record<string, Bucket> = {};
   for (const a of attempts.filter((x) => ids.has(x.session_id))) {
-    const g = (groups[a.element_code] ??= [0, 0]);
-    g[0] += a.attempts_count;
-    if (a.outcome === "clean") g[1] += a.attempts_count;
+    const b = (buckets[a.element_code] ??= { total: 0, clean: 0, withCalls: 0, tags: {} });
+    addToBucket(b, a.outcome, tagsOf(a.tags), a.attempts_count);
   }
-  const element_stats = Object.keys(groups)
+  const element_stats = Object.keys(buckets)
     .sort()
-    .map((code) => {
-      const [total, clean] = groups[code];
-      return {
-        element_code: code,
-        total_attempts: total,
-        clean_count: clean,
-        clean_percentage: total ? Math.round((clean / total) * 1000) / 10 : 0,
-      };
-    });
+    .map((code) => statFromBucket(code, buckets[code]));
   return {
     skater_id: skaterId,
     total_ice_minutes: totalMin,

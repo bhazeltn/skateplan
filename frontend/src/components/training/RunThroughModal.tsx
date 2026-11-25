@@ -34,7 +34,7 @@ function initialRows(r?: RunThroughOut): RtElement[] {
   if (!r) return [];
   return [...r.element_results]
     .sort((a, b) => a.element_order - b.element_order)
-    .map((e) => ({ element_code: e.element_code, outcome: e.outcome }));
+    .map((e) => ({ element_code: e.element_code, outcome: e.outcome, tags: e.tags ?? [] }));
 }
 
 function Pill({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
@@ -64,7 +64,7 @@ export function RunThroughModal({ sessionId: _s, programs, initial, onClose, onS
     try {
       const detail = await getProgram(id, token);
       const sorted = [...detail.program_elements].sort((a, b) => a.segment_order - b.segment_order);
-      setRows(sorted.map((e) => ({ element_code: e.element_code, outcome: "clean" })));
+      setRows(sorted.map((e) => ({ element_code: e.element_code, outcome: "clean", tags: [] })));
     } catch {
       setRows([]);
     }
@@ -80,7 +80,7 @@ export function RunThroughModal({ sessionId: _s, programs, initial, onClose, onS
         program_id: programId, run_type: runType, with_music: withMusic,
         notes: notes.trim() || null,
         element_results: rows.map((r, i) => ({
-          element_order: i, element_code: r.element_code, outcome: r.outcome,
+          element_order: i, element_code: r.element_code, outcome: r.outcome, tags: r.tags,
         })),
       });
       onClose();
@@ -166,8 +166,13 @@ export function RunThroughModal({ sessionId: _s, programs, initial, onClose, onS
             onOutcome={(i, o) =>
               setRows((rs) => rs.map((r, idx) => (idx === i ? { ...r, outcome: o } : r)))
             }
+            onTags={(i, t) =>
+              setRows((rs) => rs.map((r, idx) => (idx === i ? { ...r, tags: t } : r)))
+            }
             onRemove={(i) => setRows((rs) => rs.filter((_, idx) => idx !== i))}
-            onAdd={(code) => setRows((rs) => [...rs, { element_code: code, outcome: "clean" }])}
+            onAdd={(code) =>
+              setRows((rs) => [...rs, { element_code: code, outcome: "clean", tags: [] }])
+            }
           />
         </div>
 

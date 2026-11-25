@@ -1,8 +1,6 @@
 import { Badge } from "@/components/ui/badge";
-import type {
-  ProgramConsistencyOut,
-  ProgramElementStatOut,
-} from "@/lib/runThroughsApi";
+import type { ProgramConsistencyOut } from "@/lib/runThroughsApi";
+import { TwoTierConsistencyBar } from "./TwoTierConsistencyBar";
 
 function accent(pct: number): string {
   if (pct >= 75) return "text-emerald-700";
@@ -10,29 +8,16 @@ function accent(pct: number): string {
   return "text-rose-700";
 }
 
-function barColor(pct: number): string {
-  if (pct >= 75) return "bg-emerald-500";
-  if (pct >= 40) return "bg-amber-500";
-  return "bg-rose-500";
-}
-
-function ElementStatRow({ stat }: { stat: ProgramElementStatOut }) {
-  const pct = stat.clean_percentage;
+function Legend() {
   return (
-    <li className="flex items-center gap-3 py-1.5">
-      <span className="w-16 shrink-0 font-mono text-xs font-semibold text-slate-900">
-        {stat.element_code}
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
+      <span className="flex items-center gap-1">
+        <span className="h-2 w-2 rounded-full bg-emerald-500" /> Clean
       </span>
-      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-        <div className={`h-full ${barColor(pct)}`} style={{ width: `${pct}%` }} />
-      </div>
-      <span className={`w-12 shrink-0 text-right text-xs font-semibold ${accent(pct)}`}>
-        {pct}%
+      <span className="flex items-center gap-1">
+        <span className="h-2 w-2 rounded-full bg-amber-400" /> Completed w/ calls
       </span>
-      <span className="w-16 shrink-0 text-right text-[11px] text-slate-500 tabular-nums">
-        {stat.clean_count}/{stat.total_attempts}
-      </span>
-    </li>
+    </div>
   );
 }
 
@@ -40,23 +25,35 @@ function ProgramBlock({ entry }: { entry: ProgramConsistencyOut }) {
   return (
     <div className="rounded-md border border-slate-200 p-3">
       <div className="mb-1 flex flex-wrap items-center gap-2">
-        <span className="text-sm font-semibold text-slate-900">
-          {entry.program_name}
-        </span>
+        <span className="text-sm font-semibold text-slate-900">{entry.program_name}</span>
         <Badge variant="primary">{entry.segment}</Badge>
       </div>
-      <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
+      <div className="mb-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
         <span>
           {entry.total_runs} runs · {entry.full_runs} full · {entry.clean_runs} clean
         </span>
-        <span className={`font-semibold ${accent(entry.overall_clean_percentage)}`}>
-          {entry.overall_clean_percentage}% elements clean
+        <span className="font-semibold text-slate-800">
+          {entry.overall_completed_percentage}% completed
         </span>
+        <span className={`font-semibold ${accent(entry.overall_clean_percentage)}`}>
+          {entry.overall_clean_percentage}% clean
+        </span>
+      </div>
+      <div className="mb-2">
+        <Legend />
       </div>
       {entry.element_stats.length > 0 ? (
         <ul className="divide-y divide-slate-100">
           {entry.element_stats.map((s) => (
-            <ElementStatRow key={s.element_code} stat={s} />
+            <TwoTierConsistencyBar
+              key={s.element_code}
+              elementCode={s.element_code}
+              totalAttempts={s.total_attempts}
+              withCallsCount={s.with_calls_count}
+              cleanPercentage={s.clean_percentage}
+              completedPercentage={s.completed_percentage}
+              tagCounts={s.tag_counts}
+            />
           ))}
         </ul>
       ) : null}
@@ -64,8 +61,8 @@ function ProgramBlock({ entry }: { entry: ProgramConsistencyOut }) {
   );
 }
 
-/** Program run-through consistency: per program, run counts and per-element clean
- *  rates derived from logged run-throughs. Empty hint until the first run-through. */
+/** Program run-through consistency: per program, run counts and per-element
+ *  two-tier (clean vs completed-with-calls) rates. Empty hint until the first run. */
 export function ProgramConsistencyCard({
   stats,
 }: {

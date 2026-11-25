@@ -12,7 +12,8 @@ import {
   type RunThroughOut,
   type RunThroughUpdate,
 } from "@/lib/runThroughsApi";
-import { outcomeLabel } from "@/lib/trainingHelpers";
+import { formatOutcomeLabel } from "@/lib/elementTaxonomy";
+import type { RunThroughElementOut } from "@/lib/runThroughsApi";
 import { RunThroughModal } from "./RunThroughModal";
 
 interface Props {
@@ -25,10 +26,22 @@ const RUN_TYPE_LABELS: Record<string, string> = {
   full: "Full", half: "Half", section: "Section", walkthrough: "Walkthrough",
 };
 
-function chipCls(outcome: string): string {
-  if (outcome === "clean") return "bg-emerald-100 text-emerald-700";
-  if (outcome === "fall") return "bg-rose-100 text-rose-700";
+function chipCls(e: RunThroughElementOut): string {
+  const tags = e.tags ?? [];
+  if (e.outcome === "clean") {
+    // Clean with technical calls renders amber (completed-with-calls); true clean green.
+    return tags.length > 0
+      ? "bg-amber-100 text-amber-700"
+      : "bg-emerald-100 text-emerald-700";
+  }
+  if (e.outcome === "fall") return "bg-rose-100 text-rose-700";
   return "bg-amber-100 text-amber-700";
+}
+
+function chipLabel(e: RunThroughElementOut): string {
+  const tags = e.tags ?? [];
+  const base = `${e.element_code} · ${formatOutcomeLabel(e.outcome)}`;
+  return tags.length > 0 ? `${base} (${tags.join(", ")})` : base;
 }
 
 function cleanFraction(run: RunThroughOut): string {
@@ -63,9 +76,9 @@ function RunThroughItem({
         {run.element_results.map((e) => (
           <span
             key={e.id}
-            className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${chipCls(e.outcome)}`}
+            className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${chipCls(e)}`}
           >
-            {e.element_code} · {outcomeLabel(e.outcome)}
+            {chipLabel(e)}
           </span>
         ))}
       </div>

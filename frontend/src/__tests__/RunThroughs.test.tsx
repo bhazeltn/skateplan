@@ -117,7 +117,7 @@ describe("Program run-throughs", () => {
     expect(await within(card).findByText("Short Program")).toBeInTheDocument();
     expect(within(card).getByText(/1 run/)).toBeInTheDocument();
     expect(within(card).getByText(/1 full/)).toBeInTheDocument();
-    expect(within(card).getByText(/66\.7/)).toBeInTheDocument();
+    expect(within(card).getByText(/66\.7% clean/)).toBeInTheDocument();
   });
 
   it("edits a run-through's type and deletes it, updating panel and card", async () => {

@@ -134,7 +134,7 @@ describe("TrainingTab", () => {
     expect(await within(panel).findByText("3Lo")).toBeInTheDocument();
     const ec = screen.getByTestId("element-consistency");
     expect(await within(ec).findByText("3Lo")).toBeInTheDocument();
-    expect(within(ec).getByText(/100/)).toBeInTheDocument();
+    expect(within(ec).getByText(/100% clean/)).toBeInTheDocument();
 
     await user.click(within(panel).getByRole("button", { name: /delete attempt/i }));
     await waitFor(() => expect(within(panel).queryByText("3Lo")).not.toBeInTheDocument());

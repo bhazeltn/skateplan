@@ -35,6 +35,7 @@ export interface AttemptIn {
   outcome: string;
   attempts_count?: number;
   notes?: string | null;
+  tags?: string[];
 }
 
 export type AttemptUpdate = Partial<AttemptIn>;
@@ -46,6 +47,7 @@ export interface AttemptOut {
   outcome: string;
   attempts_count: number;
   notes?: string | null;
+  tags: string[];
 }
 
 export interface ElementStatOut {
@@ -53,6 +55,9 @@ export interface ElementStatOut {
   total_attempts: number;
   clean_count: number;
   clean_percentage: number;
+  with_calls_count: number;
+  completed_percentage: number;
+  tag_counts: Record<string, number>;
 }
 
 export interface MetricsOut {

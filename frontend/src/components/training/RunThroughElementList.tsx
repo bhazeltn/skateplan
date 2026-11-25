@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ATTEMPT_OUTCOMES, outcomeLabel } from "@/lib/trainingHelpers";
+import { executionOptionsFor } from "@/lib/elementTaxonomy";
+import { ElementTagPicker } from "./ElementTagPicker";
 
 export interface RtElement {
   element_code: string;
   outcome: string;
+  tags: string[];
 }
 
 interface Props {
   rows: RtElement[];
   onOutcome: (index: number, outcome: string) => void;
+  onTags: (index: number, tags: string[]) => void;
   onRemove: (index: number) => void;
   onAdd: (code: string) => void;
 }
@@ -18,10 +21,12 @@ interface Props {
 function ElementRow({
   row,
   onOutcome,
+  onTags,
   onRemove,
 }: {
   row: RtElement;
   onOutcome: (outcome: string) => void;
+  onTags: (tags: string[]) => void;
   onRemove: () => void;
 }) {
   return (
@@ -33,15 +38,15 @@ function ElementRow({
         {row.element_code}
       </span>
       <div className="flex flex-wrap gap-1">
-        {ATTEMPT_OUTCOMES.map((o) => (
+        {executionOptionsFor(row.element_code).map((o) => (
           <Button
-            key={o}
+            key={o.value}
             type="button"
             size="sm"
-            variant={row.outcome === o ? "default" : "outline"}
-            onClick={() => onOutcome(o)}
+            variant={row.outcome === o.value ? "default" : "outline"}
+            onClick={() => onOutcome(o.value)}
           >
-            {outcomeLabel(o)}
+            {o.label}
           </Button>
         ))}
       </div>
@@ -55,13 +60,21 @@ function ElementRow({
       >
         ✕
       </Button>
+      <div className="w-full">
+        <ElementTagPicker
+          elementCode={row.element_code}
+          selectedTags={row.tags}
+          onChange={onTags}
+        />
+      </div>
     </li>
   );
 }
 
 /** Editable list of run-through elements: each row is an element code with
- *  tap-only outcome pills (default clean) plus an ad-hoc "+ Add Element" row. */
-export function RunThroughElementList({ rows, onOutcome, onRemove, onAdd }: Props) {
+ *  category-aware tap-only outcome pills (default clean), technical call tags,
+ *  plus an ad-hoc "+ Add Element" row. */
+export function RunThroughElementList({ rows, onOutcome, onTags, onRemove, onAdd }: Props) {
   const [code, setCode] = useState("");
   const add = () => {
     if (!code.trim()) return;
@@ -81,6 +94,7 @@ export function RunThroughElementList({ rows, onOutcome, onRemove, onAdd }: Prop
               key={`${r.element_code}-${i}`}
               row={r}
               onOutcome={(o) => onOutcome(i, o)}
+              onTags={(t) => onTags(i, t)}
               onRemove={() => onRemove(i)}
             />
           ))}

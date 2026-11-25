@@ -1,39 +1,22 @@
 import type { ElementStatOut } from "@/lib/trainingApi";
+import { TwoTierConsistencyBar } from "./TwoTierConsistencyBar";
 
-function accent(pct: number): string {
-  if (pct >= 75) return "text-emerald-700";
-  if (pct >= 40) return "text-amber-700";
-  return "text-rose-700";
-}
-
-function barColor(pct: number): string {
-  if (pct >= 75) return "bg-emerald-500";
-  if (pct >= 40) return "bg-amber-500";
-  return "bg-rose-500";
-}
-
-function StatRow({ stat }: { stat: ElementStatOut }) {
-  const pct = stat.clean_percentage;
+function Legend() {
   return (
-    <li className="flex items-center gap-3 py-2">
-      <span className="w-16 shrink-0 font-mono text-sm font-semibold text-slate-900">
-        {stat.element_code}
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
+      <span className="flex items-center gap-1">
+        <span className="h-2 w-2 rounded-full bg-emerald-500" /> Clean
       </span>
-      <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
-        <div className={`h-full ${barColor(pct)}`} style={{ width: `${pct}%` }} />
-      </div>
-      <span className={`w-12 shrink-0 text-right text-sm font-semibold ${accent(pct)}`}>
-        {pct}%
+      <span className="flex items-center gap-1">
+        <span className="h-2 w-2 rounded-full bg-amber-400" /> Completed w/ calls
       </span>
-      <span className="w-20 shrink-0 text-right text-xs text-slate-500 tabular-nums">
-        {stat.clean_count}/{stat.total_attempts}
-      </span>
-    </li>
+    </div>
   );
 }
 
-/** Per-element clean-landing consistency from training metrics. Clean empty
- *  state until at least one attempt has been logged. */
+/** Per-element two-tier consistency from training metrics: a stacked clean /
+ *  completed-with-calls bar plus the top technical calls. Clean empty state until
+ *  at least one attempt has been logged. */
 export function ElementConsistencyCard({ stats }: { stats: ElementStatOut[] }) {
   return (
     <section
@@ -42,7 +25,10 @@ export function ElementConsistencyCard({ stats }: { stats: ElementStatOut[] }) {
     >
       <div className="mb-2 flex items-baseline justify-between">
         <h4 className="text-sm font-semibold text-slate-900">Element Consistency</h4>
-        <span className="text-xs text-slate-500">Clean landings</span>
+        <span className="text-xs text-slate-500">Clean vs completed</span>
+      </div>
+      <div className="mb-2">
+        <Legend />
       </div>
       {stats.length === 0 ? (
         <p className="rounded-md border border-dashed border-slate-200 p-6 text-center text-sm text-slate-400">
@@ -51,7 +37,15 @@ export function ElementConsistencyCard({ stats }: { stats: ElementStatOut[] }) {
       ) : (
         <ul className="divide-y divide-slate-100">
           {stats.map((s) => (
-            <StatRow key={s.element_code} stat={s} />
+            <TwoTierConsistencyBar
+              key={s.element_code}
+              elementCode={s.element_code}
+              totalAttempts={s.total_attempts}
+              withCallsCount={s.with_calls_count}
+              cleanPercentage={s.clean_percentage}
+              completedPercentage={s.completed_percentage}
+              tagCounts={s.tag_counts}
+            />
           ))}
         </ul>
       )}
