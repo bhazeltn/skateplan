@@ -4,6 +4,7 @@ import type { BenchmarkStatus, SkaterBenchmark } from "@/lib/types";
 interface Props {
   benchmark: SkaterBenchmark;
   onStatus: (id: string, status: BenchmarkStatus) => void;
+  onEdit: (benchmark: SkaterBenchmark) => void;
   onDelete: (id: string) => void;
 }
 
@@ -13,7 +14,12 @@ const IDLE = "border-slate-300 bg-white text-slate-600 hover:bg-slate-50";
 /** One benchmark target: name, optional target date, one-click status chips that
  *  PATCH the status, and a delete action. Status chips are the interactive
  *  toggles that drive the gap-delta summary. */
-export function BenchmarkItemRow({ benchmark, onStatus, onDelete }: Props) {
+export function BenchmarkItemRow({
+  benchmark,
+  onStatus,
+  onEdit,
+  onDelete,
+}: Props) {
   return (
     <div
       className="flex flex-wrap items-center justify-between gap-3 rounded-md
@@ -21,6 +27,11 @@ export function BenchmarkItemRow({ benchmark, onStatus, onDelete }: Props) {
     >
       <div className="min-w-[8rem]">
         <p className="text-sm font-medium text-slate-900">{benchmark.name}</p>
+        {benchmark.notes ? (
+          <p className="mt-0.5 text-xs text-slate-500 whitespace-pre-line">
+            {benchmark.notes}
+          </p>
+        ) : null}
         {benchmark.target_date ? (
           <p className="text-xs tabular-nums text-slate-500">
             Target {benchmark.target_date}
@@ -44,9 +55,18 @@ export function BenchmarkItemRow({ benchmark, onStatus, onDelete }: Props) {
         ))}
         <button
           type="button"
+          aria-label={`Edit ${benchmark.name}`}
+          onClick={() => onEdit(benchmark)}
+          className="ml-1 rounded-md border border-slate-300 bg-white px-2 py-1
+            text-xs font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Edit
+        </button>
+        <button
+          type="button"
           aria-label={`Delete ${benchmark.name}`}
           onClick={() => onDelete(benchmark.id)}
-          className="ml-1 rounded-md border border-slate-300 bg-white px-2 py-1
+          className="rounded-md border border-slate-300 bg-white px-2 py-1
             text-xs font-medium text-rose-600 hover:bg-rose-50"
         >
           Delete

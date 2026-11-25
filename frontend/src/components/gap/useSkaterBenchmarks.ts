@@ -48,6 +48,14 @@ export function useSkaterBenchmarks(skaterId: number | string) {
     [skaterId, token]
   );
 
+  const update = useCallback(
+    async (id: string, payload: Partial<SkaterBenchmarkPayload>) => {
+      const rec = await updateSkaterBenchmark(skaterId, id, payload, token);
+      setItems((prev) => prev.map((i) => (i.id === id ? rec : i)));
+    },
+    [skaterId, token]
+  );
+
   const remove = useCallback(
     async (id: string) => {
       await deleteSkaterBenchmark(skaterId, id, token);
@@ -56,5 +64,5 @@ export function useSkaterBenchmarks(skaterId: number | string) {
     [skaterId, token]
   );
 
-  return { items, loading, refresh, create, setStatus, remove };
+  return { items, loading, refresh, create, setStatus, update, remove };
 }

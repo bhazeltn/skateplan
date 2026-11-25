@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AddBenchmarkModal } from "@/components/gap/AddBenchmarkModal";
 import { BenchmarkItemRow } from "@/components/gap/BenchmarkItemRow";
 import { BenchmarkSetActions } from "@/components/gap/BenchmarkSetActions";
+import { EditBenchmarkModal } from "@/components/gap/EditBenchmarkModal";
 import {
   groupByCategory,
   summarizeBenchmarks,
@@ -10,6 +11,7 @@ import {
 import { useSkaterBenchmarks } from "@/components/gap/useSkaterBenchmarks";
 import { Alert } from "@/components/ui/alert";
 import type { ApplySetResult } from "@/lib/benchmarkSetsApi";
+import type { SkaterBenchmark } from "@/lib/types";
 
 function Stat({ testid, label, value }: { testid: string; label: string; value: number }) {
   return (
@@ -47,9 +49,10 @@ function GapDeltaSummary({ summary }: { summary: BenchmarkSummary }) {
  *  targets across flexible categories, toggle status inline and delete items; a
  *  gap-delta summary rolls up Total / Met / Developing / Gaps deterministically. */
 export function CustomBenchmarksPanel({ skaterId }: { skaterId: number | string }) {
-  const { items, refresh, create, setStatus, remove } =
+  const { items, refresh, create, setStatus, update, remove } =
     useSkaterBenchmarks(skaterId);
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<SkaterBenchmark | null>(null);
   const [applied, setApplied] = useState<ApplySetResult | null>(null);
   const summary = summarizeBenchmarks(items);
 
@@ -126,6 +129,7 @@ export function CustomBenchmarksPanel({ skaterId }: { skaterId: number | string 
                   key={b.id}
                   benchmark={b}
                   onStatus={setStatus}
+                  onEdit={setEditing}
                   onDelete={remove}
                 />
               ))}
@@ -133,6 +137,14 @@ export function CustomBenchmarksPanel({ skaterId }: { skaterId: number | string 
           ))}
         </div>
       )}
+
+      {editing ? (
+        <EditBenchmarkModal
+          benchmark={editing}
+          onSave={update}
+          onClose={() => setEditing(null)}
+        />
+      ) : null}
     </section>
   );
 }

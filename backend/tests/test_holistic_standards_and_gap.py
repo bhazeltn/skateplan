@@ -248,6 +248,40 @@ def test_update_custom_benchmark_persists_status_change(client, make_user):
     assert match["notes"] == "Landed clean"
 
 
+def test_update_custom_benchmark_edits_name_category_and_clears_notes(
+    client, make_user
+):
+    """PATCH updates name, category, status AND notes (including clearing notes
+    to null). Proves the existing update schema/handler already supports a full
+    edit — no schema change needed."""
+    skater, token = _coach_and_skater(client, make_user, "3b")
+    created = client.post(
+        f"/api/skaters/{skater.id}/benchmarks", headers=_hdr(token),
+        json=_benchmark_payload(category="Jumps", name="2A",
+                                status="NOT_STARTED", notes="start")).json()
+    bid = created["id"]
+    upd = client.patch(
+        f"/api/skaters/{skater.id}/benchmarks/{bid}",
+        headers=_hdr(token),
+        json={"name": "Triple Axel", "category": "Spins",
+              "status": "MET", "notes": None})
+    assert upd.status_code in (200, 201), upd.text
+    body = upd.json()
+    assert body["name"] == "Triple Axel"
+    assert body["category"] == "Spins"
+    assert body["status"] == "MET"
+    assert body["notes"] is None
+    # A partial (status-only) update must leave name/category unchanged.
+    partial = client.patch(
+        f"/api/skaters/{skater.id}/benchmarks/{bid}",
+        headers=_hdr(token), json={"status": "DEVELOPING"})
+    assert partial.status_code in (200, 201), partial.text
+    pbody = partial.json()
+    assert pbody["status"] == "DEVELOPING"
+    assert pbody["name"] == "Triple Axel"
+    assert pbody["category"] == "Spins"
+
+
 def test_delete_custom_benchmark_removes_item(client, make_user):
     skater, token = _coach_and_skater(client, make_user, "4")
     created = client.post(
