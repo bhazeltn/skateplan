@@ -15,6 +15,7 @@ from app.api import (
     levels,
     meetings,
     programs,
+    run_throughs,
     schedule,
     scoring,
     skater_records,
@@ -45,6 +46,8 @@ api_router.include_router(competitions.skater_router)
 api_router.include_router(training.session_router)
 api_router.include_router(training_attempts.attempt_router)
 api_router.include_router(training.skater_router)
+api_router.include_router(run_throughs.session_router)
+api_router.include_router(run_throughs.skater_router)
 api_router.include_router(injuries.router)
 api_router.include_router(injuries.skater_router)
 api_router.include_router(meetings.router)

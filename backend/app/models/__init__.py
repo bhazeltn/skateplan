@@ -13,6 +13,7 @@ from app.models.grant import ExternalAccessGrant
 from app.models.injury import InjuryRecord
 from app.models.meeting import CoachMeeting
 from app.models.program import Program, ProgramElement
+from app.models.run_through import ProgramRunThrough, RunThroughElementResult
 from app.models.standard import (
     DevelopmentStandard,
     GapAssessment,
@@ -48,6 +49,8 @@ __all__ = [
     "JumpAttemptLog",
     "Program",
     "ProgramElement",
+    "ProgramRunThrough",
+    "RunThroughElementResult",
     "Competition",
     "CompetitionEntry",
     "CompetitionSegmentResult",

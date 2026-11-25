@@ -41,6 +41,8 @@ engine.dispose()
 
 # Tables cleaned between tests (children first for FK order).
 _CLEAN_TABLES = [
+    "run_through_element_results",
+    "program_run_throughs",
     "ytp_phase_benchmarks",
     "ytp_phases",
     "yearly_plans",
