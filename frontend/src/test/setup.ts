@@ -5,6 +5,7 @@ import { server } from "@/mocks/server";
 import { resetBenchmarkSetStore } from "@/mocks/benchmarkSetHandlers";
 import { resetYtpStore } from "@/mocks/ytpHandlers";
 import { resetTrainingStore } from "@/mocks/trainingHandlers";
+import { resetRunThroughStore } from "@/mocks/runThroughHandlers";
 import { mockViewport } from "@/test/utils";
 
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
@@ -15,6 +16,7 @@ afterEach(() => {
   resetBenchmarkSetStore();
   resetYtpStore();
   resetTrainingStore();
+  resetRunThroughStore();
   localStorage.clear();
 });
 afterAll(() => server.close());

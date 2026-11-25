@@ -2,14 +2,18 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { SessionOut } from "@/lib/trainingApi";
+import type { SkaterProgram } from "@/lib/types";
 import { sessionTypeLabel } from "@/lib/trainingHelpers";
 import { SessionAttemptsPanel } from "./SessionAttemptsPanel";
+import { SessionRunThroughsPanel } from "./SessionRunThroughsPanel";
 
 interface Props {
   session: SessionOut;
+  programs: SkaterProgram[];
   onEdit: () => void;
   onDelete: () => void;
   onAttemptsChanged: () => void;
+  onRunThroughsChanged: () => void;
 }
 
 function SessionMeta({ session }: { session: SessionOut }) {
@@ -32,8 +36,16 @@ function SessionMeta({ session }: { session: SessionOut }) {
 
 /** One logged training session: date, type, duration and effort, with inline
  *  actions to edit, delete (confirm-guarded) and expand its attempts tracker. */
-export function SessionCard({ session, onEdit, onDelete, onAttemptsChanged }: Props) {
+export function SessionCard({
+  session,
+  programs,
+  onEdit,
+  onDelete,
+  onAttemptsChanged,
+  onRunThroughsChanged,
+}: Props) {
   const [showAttempts, setShowAttempts] = useState(false);
+  const [showRunThroughs, setShowRunThroughs] = useState(false);
 
   const confirmDelete = () => {
     if (window.confirm("Delete this session and its attempts?")) onDelete();
@@ -60,6 +72,14 @@ export function SessionCard({ session, onEdit, onDelete, onAttemptsChanged }: Pr
           >
             Attempts
           </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={showRunThroughs ? "default" : "outline"}
+            onClick={() => setShowRunThroughs((v) => !v)}
+          >
+            Run-Throughs
+          </Button>
           <Button type="button" size="sm" variant="ghost" onClick={onEdit}>
             Edit
           </Button>
@@ -85,6 +105,14 @@ export function SessionCard({ session, onEdit, onDelete, onAttemptsChanged }: Pr
         <SessionAttemptsPanel
           sessionId={session.id}
           onAttemptsChanged={onAttemptsChanged}
+        />
+      ) : null}
+
+      {showRunThroughs ? (
+        <SessionRunThroughsPanel
+          sessionId={session.id}
+          programs={programs}
+          onRunThroughsChanged={onRunThroughsChanged}
         />
       ) : null}
     </article>

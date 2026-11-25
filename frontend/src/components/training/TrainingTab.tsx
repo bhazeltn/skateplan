@@ -9,8 +9,10 @@ import type {
 } from "@/lib/trainingApi";
 import { findActivePhase, sortSessionsNewestFirst } from "@/lib/trainingHelpers";
 import { ElementConsistencyCard } from "./ElementConsistencyCard";
+import { ProgramConsistencyCard } from "./ProgramConsistencyCard";
 import { SessionCard } from "./SessionCard";
 import { SessionModal } from "./SessionModal";
+import { useProgramStats } from "./useProgramStats";
 import { useTrainingLogs } from "./useTrainingLogs";
 import { WeeklyLoadBar } from "./WeeklyLoadBar";
 
@@ -33,6 +35,7 @@ function todayIso(): string {
 export function TrainingTab({ skaterId }: { skaterId: number | string }) {
   const logs = useTrainingLogs(skaterId);
   const { plans } = useYtp(skaterId);
+  const { programStats, programs, refreshProgramStats } = useProgramStats(skaterId);
   const [filter, setFilter] = useState<Filter>("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<SessionOut | null>(null);
@@ -88,7 +91,10 @@ export function TrainingTab({ skaterId }: { skaterId: number | string }) {
       {logs.error ? <Alert variant="danger">{logs.error}</Alert> : null}
 
       <WeeklyLoadBar sessions={logs.sessions} activePhase={activePhase} />
-      <ElementConsistencyCard stats={logs.metrics.element_stats} />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <ElementConsistencyCard stats={logs.metrics.element_stats} />
+        <ProgramConsistencyCard stats={programStats} />
+      </div>
 
       {logs.sessions.length === 0 ? (
         <p className="rounded-lg border border-dashed border-slate-200 p-10 text-center text-sm text-slate-400">
@@ -100,9 +106,11 @@ export function TrainingTab({ skaterId }: { skaterId: number | string }) {
             <SessionCard
               key={s.id}
               session={s}
+              programs={programs}
               onEdit={() => openEdit(s)}
               onDelete={() => void logs.removeSession(s.id)}
               onAttemptsChanged={logs.refresh}
+              onRunThroughsChanged={refreshProgramStats}
             />
           ))}
         </div>

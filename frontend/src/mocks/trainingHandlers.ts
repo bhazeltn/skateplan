@@ -30,6 +30,11 @@ export function resetTrainingStore(): void {
   seq = 0;
 }
 
+/** Session lookup for cross-module mocks (run-throughs resolve skater/date). */
+export function findMockSession(id: string): Session | undefined {
+  return sessions.find((s) => s.id === id);
+}
+
 const str = (v: unknown): string | null => (v == null ? null : String(v));
 
 function buildSession(skaterId: number, b: Body): Session {
