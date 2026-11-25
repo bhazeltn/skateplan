@@ -7,6 +7,7 @@ from app.api import (
     benchmark_sets,
     benchmarks,
     competition_results,
+    competition_schedule,
     competitions,
     dashboard,
     external,
@@ -40,6 +41,9 @@ api_router.include_router(levels.router)
 api_router.include_router(external.router)
 api_router.include_router(programs.router)
 api_router.include_router(scoring.router)
+# Static /competitions/roster-schedule must be registered BEFORE competitions.router,
+# whose /competitions/{competition_id} would otherwise capture "roster-schedule".
+api_router.include_router(competition_schedule.router)
 api_router.include_router(competitions.router)
 api_router.include_router(competition_results.router)
 api_router.include_router(competitions.skater_router)
