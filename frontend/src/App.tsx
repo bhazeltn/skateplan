@@ -5,13 +5,8 @@ import { DashboardPage } from "@/pages/DashboardPage";
 import { SkaterProfilePage } from "@/pages/SkaterProfilePage";
 import { SkatersPage } from "@/pages/SkatersPage";
 import { GapAnalysisPage } from "@/pages/GapAnalysisPage";
-import { PlaceholderPage } from "@/pages/PlaceholderPage";
+import { CompetitionsPage } from "@/components/competitions/CompetitionsPage";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
-
-const PROTECTED: { path: string; title: string }[] = [
-  { path: "/sessions", title: "Sessions" },
-  { path: "/competitions", title: "Competitions" },
-];
 
 export default function App() {
   return (
@@ -58,17 +53,14 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-      {PROTECTED.map(({ path, title }) => (
-        <Route
-          key={path}
-          path={path}
-          element={
-            <ProtectedRoute>
-              <PlaceholderPage title={title} />
-            </ProtectedRoute>
-          }
-        />
-      ))}
+      <Route
+        path="/competitions"
+        element={
+          <ProtectedRoute>
+            <CompetitionsPage />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

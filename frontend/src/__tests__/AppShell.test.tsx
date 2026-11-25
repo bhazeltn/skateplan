@@ -12,10 +12,11 @@ function seedSession() {
 const LINKS = [
   "Dashboard",
   "Skaters",
-  "Sessions",
   "Competitions",
   "Gap Analysis",
 ];
+
+const REMOVED_LINKS = ["Sessions"];
 
 describe("AppShell navigation", () => {
   it("renders a desktop sidebar with all primary links on wide viewports", () => {
@@ -29,6 +30,9 @@ describe("AppShell navigation", () => {
     const sidebar = screen.getByTestId("desktop-sidebar");
     for (const label of LINKS) {
       expect(within(sidebar).getByText(label)).toBeInTheDocument();
+    }
+    for (const label of REMOVED_LINKS) {
+      expect(within(sidebar).queryByText(label)).not.toBeInTheDocument();
     }
   });
 

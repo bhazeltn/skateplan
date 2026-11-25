@@ -1,6 +1,5 @@
 import {
   BarChart3,
-  CalendarDays,
   LayoutDashboard,
   Trophy,
   Users,
@@ -16,7 +15,6 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", to: "/", icon: LayoutDashboard },
   { label: "Skaters", to: "/skaters", icon: Users },
-  { label: "Sessions", to: "/sessions", icon: CalendarDays },
   { label: "Competitions", to: "/competitions", icon: Trophy },
   { label: "Gap Analysis", to: "/gap-analysis", icon: BarChart3 },
 ];

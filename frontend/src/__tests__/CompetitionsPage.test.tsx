@@ -1,0 +1,93 @@
+import { describe, expect, it } from "vitest";
+import { screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { AppShell } from "@/components/layout/AppShell";
+import { CompetitionsPage } from "@/components/competitions/CompetitionsPage";
+import { TOKEN_KEY } from "@/context/AuthContext";
+import { renderWithProviders } from "@/test/utils";
+
+// "today" is pinned during Winter Nationals (2026-12-11..13) so the calendar
+// opens on a month containing a seeded competition, deterministically.
+const TODAY = "2026-12-12";
+
+function seedSession() {
+  const payload = btoa(JSON.stringify({ user_id: 10, system_role: "coach" }));
+  localStorage.setItem(TOKEN_KEY, `h.${payload}.s`);
+}
+
+describe("CompetitionsPage — list view", () => {
+  it("renders upcoming and past competitions with skater badges, levels, scores and profile links", async () => {
+    seedSession();
+    renderWithProviders(<CompetitionsPage today={TODAY} />);
+
+    expect(await screen.findByText("Winter Nationals")).toBeInTheDocument();
+    expect(screen.getByText("Autumn Classic")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /upcoming competitions/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /past competitions/i })).toBeInTheDocument();
+
+    // Skater name links to the profile route.
+    const avaLinks = screen.getAllByRole("link", { name: /Ava Nguyen/ });
+    expect(avaLinks[0]).toHaveAttribute("href", "/skaters/1");
+
+    // Levels and a 2-decimal score from the past competition.
+    expect(screen.getAllByText("Senior").length).toBeGreaterThan(0);
+    expect(screen.getByText("198.45")).toBeInTheDocument();
+    expect(screen.getByText("172.30")).toBeInTheDocument();
+  });
+
+  it("narrows competitions and entries when a skater is selected", async () => {
+    seedSession();
+    renderWithProviders(<CompetitionsPage today={TODAY} />);
+    await screen.findByText("Winter Nationals");
+
+    await userEvent.selectOptions(
+      screen.getByLabelText(/skater filter/i),
+      "Ava Nguyen"
+    );
+
+    // Spring Invitational (Mia only) disappears; Liam's badge is gone.
+    await waitFor(() =>
+      expect(screen.queryByText("Spring Invitational")).not.toBeInTheDocument()
+    );
+    expect(screen.queryByRole("link", { name: /Liam Torres/ })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /Ava Nguyen/ }).length).toBeGreaterThan(0);
+  });
+});
+
+describe("CompetitionsPage — calendar view", () => {
+  it("shows the month grid, competition chips and an openable detail card", async () => {
+    seedSession();
+    renderWithProviders(<CompetitionsPage today={TODAY} />);
+    await screen.findByText("Winter Nationals");
+
+    await userEvent.click(screen.getByRole("button", { name: /calendar/i }));
+    expect(screen.getByText("December 2026")).toBeInTheDocument();
+
+    // Chip carries the competition name and a skater-count pill.
+    const chips = screen.getAllByRole("button", { name: /Winter Nationals/ });
+    expect(chips.length).toBeGreaterThan(0);
+    expect(within(chips[0]).getByText(/2 skaters/i)).toBeInTheDocument();
+
+    await userEvent.click(chips[0]);
+    const detail = await screen.findByTestId("competition-detail");
+    expect(within(detail).getByText("Winter Nationals")).toBeInTheDocument();
+    expect(within(detail).getByRole("link", { name: /Ava Nguyen/ })).toHaveAttribute(
+      "href",
+      "/skaters/1"
+    );
+  });
+});
+
+describe("CompetitionsPage — navigation", () => {
+  it("renders a Competitions sidebar link but no Sessions link", () => {
+    seedSession();
+    renderWithProviders(
+      <AppShell>
+        <CompetitionsPage today={TODAY} />
+      </AppShell>
+    );
+    const sidebar = screen.getByTestId("desktop-sidebar");
+    expect(within(sidebar).getByText("Competitions")).toBeInTheDocument();
+    expect(within(sidebar).queryByText("Sessions")).not.toBeInTheDocument();
+  });
+});
