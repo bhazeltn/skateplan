@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import authorize_skater_access, get_current_user
 from app.core.database import get_db
-from app.core.skater_permissions import require_skater_editor
+from app.core.skater_permissions import require_goal_editor, require_skater_editor
 from app.models.standard import SkaterBenchmark
 from app.models.user import User
 from app.schemas.standard import (
@@ -45,7 +45,7 @@ def create_benchmark(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> SkaterBenchmarkOut:
-    require_skater_editor(current_user, skater_id, db)
+    require_goal_editor(current_user, skater_id, db)
     row = SkaterBenchmark(skater_id=skater_id, **payload.model_dump())
     db.add(row)
     db.commit()
@@ -77,7 +77,7 @@ def update_benchmark(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> SkaterBenchmarkOut:
-    require_skater_editor(current_user, skater_id, db)
+    require_goal_editor(current_user, skater_id, db)
     row = _get_benchmark(bid, skater_id, db)
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(row, field, value)

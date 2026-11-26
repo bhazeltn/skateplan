@@ -124,7 +124,7 @@ def test_skater_invite_accept_and_capabilities(client, make_user, db):
     assert client.post(f"/api/skaters/{sid}/ytp", headers=_hdr(st), json=_plan_payload()).status_code == 403
     assert client.post(
         f"/api/skaters/{sid}/benchmarks", headers=_hdr(st), json={"category": "Jumps", "name": "3Lz"}
-    ).status_code == 403
+    ).status_code == 201
     assert client.post("/api/programs", headers=_hdr(st), json=_program_payload(sid)).status_code == 403
     assert client.get(f"/api/skaters/{sid}/access", headers=_hdr(st)).status_code == 403
 
