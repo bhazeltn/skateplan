@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import {
   createSkaterBenchmark,
+  deleteSkaterBenchmark,
   listSkaterBenchmarks,
   updateSkaterBenchmark,
 } from "@/lib/api";
@@ -45,5 +46,15 @@ export function useGoals(skaterId: number | string) {
     }
   }
 
-  return { goals, loading, saving, create, update };
+  async function remove(id: string) {
+    setSaving(true);
+    try {
+      await deleteSkaterBenchmark(skaterId, id, token);
+      load();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return { goals, loading, saving, create, update, remove };
 }

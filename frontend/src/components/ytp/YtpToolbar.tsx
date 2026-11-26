@@ -8,6 +8,7 @@ interface Props {
   onNew: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  canEdit?: boolean;
 }
 
 const selectCls =
@@ -21,6 +22,7 @@ export function YtpToolbar({
   onNew,
   onEdit,
   onDelete,
+  canEdit = true,
 }: Props) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -41,17 +43,19 @@ export function YtpToolbar({
           ))}
         </select>
       </div>
-      <div className="flex gap-2">
-        <Button type="button" size="sm" variant="outline" onClick={onEdit}>
-          Edit Plan
-        </Button>
-        <Button type="button" size="sm" variant="danger" onClick={onDelete}>
-          Delete Plan
-        </Button>
-        <Button type="button" size="sm" onClick={onNew}>
-          + New Plan
-        </Button>
-      </div>
+      {canEdit && (
+        <div className="flex gap-2">
+          <Button type="button" size="sm" variant="outline" onClick={onEdit}>
+            Edit Plan
+          </Button>
+          <Button type="button" size="sm" variant="danger" onClick={onDelete}>
+            Delete Plan
+          </Button>
+          <Button type="button" size="sm" onClick={onNew}>
+            + New Plan
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

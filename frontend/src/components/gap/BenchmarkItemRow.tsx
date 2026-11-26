@@ -6,6 +6,7 @@ interface Props {
   onStatus: (id: string, status: BenchmarkStatus) => void;
   onEdit: (benchmark: SkaterBenchmark) => void;
   onDelete: (id: string) => void;
+  canEdit?: boolean;
 }
 
 const ACTIVE = "border-slate-900 bg-slate-900 text-white";
@@ -19,6 +20,7 @@ export function BenchmarkItemRow({
   onStatus,
   onEdit,
   onDelete,
+  canEdit = true,
 }: Props) {
   return (
     <div
@@ -43,16 +45,18 @@ export function BenchmarkItemRow({
           <button
             key={s.value}
             type="button"
+            disabled={!canEdit}
             aria-pressed={benchmark.status === s.value}
-            onClick={() => onStatus(benchmark.id, s.value)}
+            onClick={() => canEdit && onStatus(benchmark.id, s.value)}
             className={`rounded-full border px-2.5 py-1 text-xs font-medium
               transition-colors ${
                 benchmark.status === s.value ? ACTIVE : IDLE
-              }`}
+              } ${canEdit ? "" : "cursor-default opacity-70"}`}
           >
             {s.label}
           </button>
         ))}
+        {canEdit && (
         <button
           type="button"
           aria-label={`Edit ${benchmark.name}`}
@@ -62,6 +66,8 @@ export function BenchmarkItemRow({
         >
           Edit
         </button>
+        )}
+        {canEdit && (
         <button
           type="button"
           aria-label={`Delete ${benchmark.name}`}
@@ -71,6 +77,7 @@ export function BenchmarkItemRow({
         >
           Delete
         </button>
+        )}
       </div>
     </div>
   );

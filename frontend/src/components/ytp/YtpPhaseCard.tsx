@@ -22,6 +22,7 @@ interface Props {
   competitions?: TimelineCompetition[];
   onEdit: (phase: YtpPhaseOut) => void;
   onDelete: (phase: YtpPhaseOut) => void;
+  canEdit?: boolean;
 }
 
 /** One labelled metric when a value is present. */
@@ -56,6 +57,7 @@ export function YtpPhaseCard({
   competitions = [],
   onEdit,
   onDelete,
+  canEdit = true,
 }: Props) {
   const meta = PHASE_META[phase.phase_type];
   const weeks = weeksBetween(phase.start_date, phase.end_date);
@@ -86,14 +88,16 @@ export function YtpPhaseCard({
             {phase.start_date} → {phase.end_date} · {weeks} week{weeks === 1 ? "" : "s"}
           </p>
         </div>
-        <div className="flex shrink-0 gap-1">
-          <Button type="button" size="sm" variant="outline" onClick={() => onEdit(phase)}>
-            Edit
-          </Button>
-          <Button type="button" size="sm" variant="danger" onClick={handleDelete}>
-            Delete
-          </Button>
-        </div>
+        {canEdit && (
+          <div className="flex shrink-0 gap-1">
+            <Button type="button" size="sm" variant="outline" onClick={() => onEdit(phase)}>
+              Edit
+            </Button>
+            <Button type="button" size="sm" variant="danger" onClick={handleDelete}>
+              Delete
+            </Button>
+          </div>
+        )}
       </div>
 
       <dl className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">

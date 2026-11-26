@@ -1,16 +1,19 @@
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { NAV_ITEMS } from "./navItems";
+import { useAuth } from "@/context/AuthContext";
+import { navItemsForRole } from "./navItems";
 
 /** Fixed bottom navigation for mobile viewports (< 768px), height h-16. */
 export function MobileNav() {
+  const { role, userId } = useAuth();
+  const items = navItemsForRole(role, userId);
   return (
     <nav
       data-testid="mobile-nav"
       aria-label="Mobile"
       className="fixed inset-x-0 bottom-0 z-20 flex h-16 items-stretch border-t border-slate-200 bg-white"
     >
-      {NAV_ITEMS.map(({ label, to, icon: Icon }) => (
+      {items.map(({ label, to, icon: Icon }) => (
         <NavLink
           key={to}
           to={to}

@@ -14,10 +14,12 @@ export function ProgramsTab({
   skaterId,
   programs,
   onProgramSaved,
+  canEdit = true,
 }: {
   skaterId: number;
   programs: SkaterProgram[];
   onProgramSaved: () => void;
+  canEdit?: boolean;
 }) {
   const { token } = useAuth();
   const [building, setBuilding] = useState(false);
@@ -92,6 +94,7 @@ export function ProgramsTab({
         onEdit={() => handleEdit(p)}
         onDelete={() => handleDelete(p.id)}
         onArchiveToggle={() => handleArchiveToggle(p)}
+        canEdit={canEdit}
       />
     );
   }
@@ -104,7 +107,7 @@ export function ProgramsTab({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-slate-700">Program layouts</h2>
-        {showList && (
+        {showList && canEdit && (
           <button
             type="button"
             onClick={() => {

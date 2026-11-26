@@ -17,6 +17,7 @@ export function ProgramCard({
   onEdit,
   onDelete,
   onArchiveToggle,
+  canEdit = true,
 }: {
   program: SkaterProgram;
   isExpanded: boolean;
@@ -26,6 +27,7 @@ export function ProgramCard({
   onEdit: () => void;
   onDelete: () => void;
   onArchiveToggle: () => void;
+  canEdit?: boolean;
 }) {
   const p = program;
   return (
@@ -49,6 +51,7 @@ export function ProgramCard({
             >
               {isExpanded ? "Hide Layout" : "View Layout"}
             </button>
+            {canEdit && (
             <button
               type="button"
               onClick={onEdit}
@@ -57,7 +60,8 @@ export function ProgramCard({
             >
               Edit
             </button>
-            {p.is_archived ? (
+            )}
+            {canEdit && (p.is_archived ? (
               <button
                 type="button"
                 onClick={onArchiveToggle}
@@ -73,7 +77,8 @@ export function ProgramCard({
               >
                 Archive
               </button>
-            )}
+            ))}
+            {canEdit && (
             <button
               type="button"
               onClick={onDelete}
@@ -81,6 +86,7 @@ export function ProgramCard({
             >
               Delete
             </button>
+            )}
           </div>
         </div>
 

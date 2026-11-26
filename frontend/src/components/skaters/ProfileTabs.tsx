@@ -6,9 +6,20 @@ export interface ProfileTab {
   content: ReactNode;
 }
 
-/** Lightweight accessible tab strip for the profile hub. */
-export function ProfileTabs({ tabs }: { tabs: ProfileTab[] }) {
-  const [active, setActive] = useState(0);
+/** Lightweight accessible tab strip for the profile hub. An optional
+ *  `initialLabel` selects which tab is active on first render. */
+export function ProfileTabs({
+  tabs,
+  initialLabel,
+}: {
+  tabs: ProfileTab[];
+  initialLabel?: string;
+}) {
+  const initialIndex = Math.max(
+    0,
+    tabs.findIndex((t) => t.label === initialLabel)
+  );
+  const [active, setActive] = useState(initialIndex);
   return (
     <div className="space-y-4">
       <div role="tablist" className="flex flex-wrap gap-1 border-b border-slate-200">

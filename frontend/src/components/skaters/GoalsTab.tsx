@@ -4,15 +4,30 @@ import { GoalList } from "@/components/skaters/GoalCard";
 import { useGoals } from "@/components/skaters/useGoals";
 import type { SkaterBenchmarkPayload } from "@/lib/types";
 
-/** Standalone goals manager: create, edit, and track discrete goals independently
- *  from the heavier Gap Analysis benchmark-standard workflow. */
-export function GoalsTab({ skaterId }: { skaterId: number | string }) {
-  const { goals, loading, saving, create, update } = useGoals(skaterId);
+interface GoalsCapabilities {
+  can_edit_goals: boolean;
+  can_edit_plan: boolean;
+}
+
+const FULL: GoalsCapabilities = { can_edit_goals: true, can_edit_plan: true };
+
+/** Standalone goals manager: create, edit, delete and track discrete goals.
+ *  Add/Edit are gated on can_edit_goals; Delete only on can_edit_plan. */
+export function GoalsTab({
+  skaterId,
+  capabilities = FULL,
+}: {
+  skaterId: number | string;
+  capabilities?: GoalsCapabilities;
+}) {
+  const { goals, loading, saving, create, update, remove } = useGoals(skaterId);
   const [adding, setAdding] = useState(false);
   const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
 
   const active = goals.filter((g) => g.status !== "MET");
   const completed = goals.filter((g) => g.status === "MET");
+  const canEditGoals = capabilities.can_edit_goals;
+  const canDelete = capabilities.can_edit_plan;
 
   async function handleCreate(payload: SkaterBenchmarkPayload) {
     await create(payload);
@@ -41,6 +56,9 @@ export function GoalsTab({ skaterId }: { skaterId: number | string }) {
     onStatusChange: handleStatus,
     onSave: handleUpdate,
     onCancel: () => setEditingGoalId(null),
+    onDelete: remove,
+    canEditGoals,
+    canDelete,
   };
 
   return (
@@ -52,7 +70,7 @@ export function GoalsTab({ skaterId }: { skaterId: number | string }) {
             Track discrete standalone goals for this athlete.
           </p>
         </div>
-        {!adding && (
+        {canEditGoals && !adding && (
           <button
             type="button"
             onClick={startAdding}
@@ -64,7 +82,7 @@ export function GoalsTab({ skaterId }: { skaterId: number | string }) {
         )}
       </div>
 
-      {adding && (
+      {canEditGoals && adding && (
         <GoalForm
           onSave={handleCreate}
           onCancel={() => setAdding(false)}

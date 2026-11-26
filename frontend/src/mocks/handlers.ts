@@ -5,6 +5,7 @@ import { ytpHandlers } from "@/mocks/ytpHandlers";
 import { trainingHandlers } from "@/mocks/trainingHandlers";
 import { runThroughHandlers } from "@/mocks/runThroughHandlers";
 import { competitionScheduleHandlers } from "@/mocks/competitionScheduleHandlers";
+import { accessHandlers } from "@/mocks/accessHandlers";
 
 // A minimal JWT-looking token (header.payload.signature) with role claim so the
 // client can decode role locally. Not cryptographically valid — tests only.
@@ -552,4 +553,6 @@ export const handlers = [
   // Program run-throughs + consistency analytics (stateful in-memory store).
   ...runThroughHandlers,
   ...competitionScheduleHandlers,
+  // Multi-role access, invites, change-password, thin skater goals.
+  ...accessHandlers,
 ];

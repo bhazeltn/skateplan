@@ -12,16 +12,27 @@ import { GapAnalysisTab } from "@/components/skaters/GapAnalysisTab";
 import { CompetitionsTab } from "@/components/skaters/CompetitionsTab";
 import { YtpTab } from "@/components/ytp/YtpTab";
 import { TrainingTab } from "@/components/training/TrainingTab";
+import { SkaterAccessTab } from "@/components/skaters/SkaterAccessTab";
+import { useSkaterCapabilities } from "@/components/skaters/useSkaterCapabilities";
+import { isSkaterRole } from "@/components/layout/navItems";
+import type { SkaterCapabilities } from "@/lib/accessApi";
 
-function buildTabs(skater: SkaterDetail, onChanged: () => void): ProfileTab[] {
-  return [
+function buildTabs(
+  skater: SkaterDetail,
+  onChanged: () => void,
+  caps: SkaterCapabilities
+): ProfileTab[] {
+  const id = skater.skater_id;
+  const canEdit = caps.can_edit_plan;
+  const tabs: ProfileTab[] = [
     {
       label: "Programs",
       content: (
         <ProgramsTab
-          skaterId={skater.skater_id}
+          skaterId={id}
           programs={skater.programs}
           onProgramSaved={onChanged}
+          canEdit={canEdit}
         />
       ),
     },
@@ -29,7 +40,7 @@ function buildTabs(skater: SkaterDetail, onChanged: () => void): ProfileTab[] {
       label: "Health & Load",
       content: (
         <RestrictionsTab
-          skaterId={skater.skater_id}
+          skaterId={id}
           restrictions={skater.restrictions}
           onChanged={onChanged}
         />
@@ -37,37 +48,48 @@ function buildTabs(skater: SkaterDetail, onChanged: () => void): ProfileTab[] {
     },
     {
       label: "Goals",
-      content: <GoalsTab skaterId={skater.skater_id} />,
-    },
-    {
-      label: "Gap Analysis",
-      content: <GapAnalysisTab skaterId={skater.skater_id} />,
-    },
-    {
-      label: "Competitions",
       content: (
-        <CompetitionsTab
-          skaterId={skater.skater_id}
-          programs={skater.programs}
+        <GoalsTab
+          skaterId={id}
+          capabilities={{
+            can_edit_goals: caps.can_edit_goals,
+            can_edit_plan: caps.can_edit_plan,
+          }}
         />
       ),
     },
     {
+      label: "Gap Analysis",
+      content: <GapAnalysisTab skaterId={id} canEdit={canEdit} />,
+    },
+    {
+      label: "Competitions",
+      content: (
+        <CompetitionsTab skaterId={id} programs={skater.programs} canEdit={canEdit} />
+      ),
+    },
+    {
       label: "Season Plan",
-      content: <YtpTab skaterId={skater.skater_id} />,
+      content: <YtpTab skaterId={id} canEdit={canEdit} />,
     },
     {
       label: "Training",
-      content: <TrainingTab skaterId={skater.skater_id} />,
+      content: <TrainingTab skaterId={id} />,
     },
   ];
+  if (caps.can_manage_access) {
+    tabs.push({ label: "Access", content: <SkaterAccessTab skaterId={id} /> });
+  }
+  return tabs;
 }
 
 export function SkaterProfilePage() {
   const { id } = useParams();
-  const { token } = useAuth();
+  const { token, role } = useAuth();
   const [skater, setSkater] = useState<SkaterDetail | null>(null);
   const [error, setError] = useState(false);
+  const { capabilities } = useSkaterCapabilities(id);
+  const initialTab = isSkaterRole(role) ? "Training" : undefined;
 
   const load = useCallback(() => {
     if (!id) return;
@@ -90,7 +112,10 @@ export function SkaterProfilePage() {
   return (
     <main className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
       <ProfileHeader skater={skater} />
-      <ProfileTabs tabs={buildTabs(skater, load)} />
+      <ProfileTabs
+        tabs={buildTabs(skater, load, capabilities)}
+        initialLabel={initialTab}
+      />
     </main>
   );
 }

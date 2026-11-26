@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { NAV_ITEMS, type NavItem } from "./navItems";
+import { useAuth } from "@/context/AuthContext";
+import { navItemsForRole, type NavItem } from "./navItems";
 
 function SidebarLink({ label, to, icon: Icon }: NavItem) {
   return (
@@ -26,6 +27,8 @@ function SidebarLink({ label, to, icon: Icon }: NavItem) {
  * on md (tablet). Labels are hidden when collapsed but stay in the DOM for a11y.
  */
 export function Sidebar() {
+  const { role, userId } = useAuth();
+  const items = navItemsForRole(role, userId);
   return (
     <aside
       data-testid="desktop-sidebar"
@@ -36,7 +39,7 @@ export function Sidebar() {
         <span className="hidden text-lg font-semibold text-slate-900 lg:inline">SkatePlan</span>
       </div>
       <nav aria-label="Primary" className="flex flex-col gap-1 p-2">
-        {NAV_ITEMS.map((item) => (
+        {items.map((item) => (
           <SidebarLink key={item.to} {...item} />
         ))}
       </nav>

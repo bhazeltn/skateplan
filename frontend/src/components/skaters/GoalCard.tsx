@@ -23,10 +23,16 @@ export function GoalCard({
   goal,
   onEdit,
   onStatusChange,
+  onDelete,
+  canEditGoals = true,
+  canDelete = true,
 }: {
   goal: SkaterBenchmark;
   onEdit: (id: string) => void;
   onStatusChange: (id: string, status: StatusValue) => void;
+  onDelete?: (id: string) => void;
+  canEditGoals?: boolean;
+  canDelete?: boolean;
 }) {
   const cls = STATUS_CLS[goal.status] ?? STATUS_CLS.NOT_STARTED;
   return (
@@ -42,26 +48,44 @@ export function GoalCard({
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <select
-            aria-label={`Status for ${goal.name}`}
-            value={goal.status}
-            onChange={(e) => onStatusChange(goal.id, e.target.value as StatusValue)}
-            className={`rounded-md border px-2 py-1 text-xs font-medium ${cls}`}
-          >
-            {STATUS_OPTIONS.map(([v, label]) => (
-              <option key={v} value={v}>
-                {label}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            onClick={() => onEdit(goal.id)}
-            className="rounded-md border border-slate-300 bg-white px-2.5 py-1
-              text-xs font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Edit
-          </button>
+          {canEditGoals ? (
+            <select
+              aria-label={`Status for ${goal.name}`}
+              value={goal.status}
+              onChange={(e) => onStatusChange(goal.id, e.target.value as StatusValue)}
+              className={`rounded-md border px-2 py-1 text-xs font-medium ${cls}`}
+            >
+              {STATUS_OPTIONS.map(([v, label]) => (
+                <option key={v} value={v}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className={`rounded-md border px-2 py-1 text-xs font-medium ${cls}`}>
+              {STATUS_OPTIONS.find(([v]) => v === goal.status)?.[1] ?? goal.status}
+            </span>
+          )}
+          {canEditGoals ? (
+            <button
+              type="button"
+              onClick={() => onEdit(goal.id)}
+              className="rounded-md border border-slate-300 bg-white px-2.5 py-1
+                text-xs font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Edit
+            </button>
+          ) : null}
+          {canDelete && onDelete ? (
+            <button
+              type="button"
+              onClick={() => onDelete(goal.id)}
+              className="rounded-md border border-slate-300 bg-white px-2.5 py-1
+                text-xs font-medium text-rose-600 hover:bg-rose-50"
+            >
+              Delete
+            </button>
+          ) : null}
         </div>
       </div>
       {goal.action_plan && (
@@ -101,6 +125,9 @@ export function GoalList({
   onStatusChange,
   onSave,
   onCancel,
+  onDelete,
+  canEditGoals = true,
+  canDelete = true,
 }: {
   testId: string;
   heading: string;
@@ -111,6 +138,9 @@ export function GoalList({
   onStatusChange: (id: string, status: StatusValue) => void;
   onSave: (payload: SkaterBenchmarkPayload) => void;
   onCancel: () => void;
+  onDelete?: (id: string) => void;
+  canEditGoals?: boolean;
+  canDelete?: boolean;
 }) {
   return (
     <div className="space-y-2" data-testid={testId}>
@@ -122,7 +152,7 @@ export function GoalList({
       ) : (
         <ul className="space-y-2">
           {goals.map((g) =>
-            editingGoalId === g.id ? (
+            canEditGoals && editingGoalId === g.id ? (
               <li key={g.id}>
                 <GoalForm
                   initialGoal={g}
@@ -137,6 +167,9 @@ export function GoalList({
                 goal={g}
                 onEdit={onEdit}
                 onStatusChange={onStatusChange}
+                onDelete={onDelete}
+                canEditGoals={canEditGoals}
+                canDelete={canDelete}
               />
             )
           )}

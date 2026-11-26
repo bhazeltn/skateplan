@@ -18,11 +18,12 @@ import type { SkaterProgram } from "@/lib/types";
 interface Props {
   skaterId: number;
   programs: SkaterProgram[];
+  canEdit?: boolean;
 }
 
 /** Skater profile → Competitions tab: lists entries, registers new ones, and
  *  records deterministic segment results (TSS = TES + PCS + Bonus − Deductions). */
-export function CompetitionsTab({ skaterId, programs }: Props) {
+export function CompetitionsTab({ skaterId, programs, canEdit = true }: Props) {
   const {
     items,
     loading,
@@ -48,11 +49,13 @@ export function CompetitionsTab({ skaterId, programs }: Props) {
             Entries, assigned programs, and recorded segment scores.
           </p>
         </div>
-        <button type="button" onClick={() => setAdding(true)}
-          className="shrink-0 rounded-md bg-slate-900 px-3 py-2 text-sm
-            font-semibold text-white hover:bg-slate-800">
-          + Add Entry
-        </button>
+        {canEdit && (
+          <button type="button" onClick={() => setAdding(true)}
+            className="shrink-0 rounded-md bg-slate-900 px-3 py-2 text-sm
+              font-semibold text-white hover:bg-slate-800">
+            + Add Entry
+          </button>
+        )}
       </div>
 
       {loading ? (
@@ -69,7 +72,7 @@ export function CompetitionsTab({ skaterId, programs }: Props) {
             {sortedItems.map((item) => (
               <CompetitionEntryRow key={item.entry.id} item={item}
                 programs={programs} bests={bests} onResult={setResultModal}
-                onEdit={setEditFor} onDelete={removeEntry} />
+                onEdit={setEditFor} onDelete={removeEntry} canEdit={canEdit} />
             ))}
           </ul>
         </>

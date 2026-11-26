@@ -22,6 +22,7 @@ interface Props {
   onResult: (req: ResultModalRequest) => void;
   onEdit: (item: JoinedEntry) => void;
   onDelete: (entryId: string) => void;
+  canEdit?: boolean;
 }
 
 function Chip({ children }: { children: React.ReactNode }) {
@@ -108,11 +109,13 @@ function ResultColumn({
   bests,
   upcoming,
   onResult,
+  canEdit = true,
 }: {
   item: JoinedEntry;
   bests: SkaterBests;
   upcoming: boolean;
   onResult: (req: ResultModalRequest) => void;
+  canEdit?: boolean;
 }) {
   const { entry, results } = item;
   const bySegment = (seg: "SP" | "FS") => results.find((r) => r.segment === seg);
@@ -130,7 +133,7 @@ function ResultColumn({
       <div className="space-y-2">
         {segments.map((seg) => (
           <SegmentResultDisplay key={seg} segment={seg} result={bySegment(seg)}
-            canLog={!upcoming} badgeKind={segBadge(seg)}
+            canLog={!upcoming && canEdit} badgeKind={segBadge(seg)}
             onLog={() => onResult({ entryId: entry.id, segment: seg })}
             onEdit={() =>
               onResult({ entryId: entry.id, initialResult: bySegment(seg) })
@@ -156,7 +159,7 @@ function ResultColumn({
     );
   }
 
-  if (upcoming) return null;
+  if (upcoming || !canEdit) return null;
   return (
     <Button type="button" variant="outline"
       onClick={() => onResult({ entryId: entry.id })}>
@@ -172,6 +175,7 @@ export function CompetitionEntryRow({
   onResult,
   onEdit,
   onDelete,
+  canEdit = true,
 }: Props) {
   const { entry, competition, results } = item;
   const name = competition?.name ?? "Unknown competition";
@@ -199,8 +203,10 @@ export function CompetitionEntryRow({
         chips={[titleOf(entry.sp_program_id), titleOf(entry.fs_program_id)]} />
       <div className="flex shrink-0 flex-col items-end gap-2 text-right">
         <ResultColumn item={item} bests={bests} upcoming={upcoming}
-          onResult={onResult} />
-        <RowActions onEdit={() => onEdit(item)} onDelete={handleDelete} />
+          onResult={onResult} canEdit={canEdit} />
+        {canEdit && (
+          <RowActions onEdit={() => onEdit(item)} onDelete={handleDelete} />
+        )}
       </div>
     </li>
   );

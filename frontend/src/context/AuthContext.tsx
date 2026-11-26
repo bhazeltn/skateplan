@@ -17,6 +17,7 @@ interface AuthState {
   userId: number | null;
   isAuthenticated: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  applyToken: (accessToken: string) => void;
   signOut: () => void;
 }
 
@@ -47,6 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(res.access_token);
   }, []);
 
+  const applyToken = useCallback((accessToken: string) => {
+    localStorage.setItem(TOKEN_KEY, accessToken);
+    setToken(accessToken);
+  }, []);
+
   const signOut = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
@@ -60,9 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       userId,
       isAuthenticated: Boolean(token),
       signIn,
+      applyToken,
       signOut,
     };
-  }, [token, signIn, signOut]);
+  }, [token, signIn, applyToken, signOut]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

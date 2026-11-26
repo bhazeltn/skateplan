@@ -25,7 +25,13 @@ type ModalState =
 
 /** The Season Plan tab: periodised yearly plan with a visual timeline, phase
  *  cards and a gap-coverage sidebar for one skater. */
-export function YtpTab({ skaterId }: { skaterId: number }) {
+export function YtpTab({
+  skaterId,
+  canEdit = true,
+}: {
+  skaterId: number;
+  canEdit?: boolean;
+}) {
   const {
     plans,
     activePlanId,
@@ -99,9 +105,11 @@ export function YtpTab({ skaterId }: { skaterId: number }) {
       {plans.length === 0 ? (
         <div className="rounded-lg border border-dashed border-slate-300 p-10 text-center">
           <p className="text-sm text-slate-500">No season plan yet.</p>
-          <Button type="button" className="mt-4" onClick={() => setModal({ kind: "plan" })}>
-            + Create Season Plan
-          </Button>
+          {canEdit && (
+            <Button type="button" className="mt-4" onClick={() => setModal({ kind: "plan" })}>
+              + Create Season Plan
+            </Button>
+          )}
         </div>
       ) : (
         <>
@@ -112,6 +120,7 @@ export function YtpTab({ skaterId }: { skaterId: number }) {
             onNew={() => setModal({ kind: "plan" })}
             onEdit={() => activePlan && setModal({ kind: "plan", plan: activePlan })}
             onDelete={handleDeletePlan}
+            canEdit={canEdit}
           />
 
           {activePlan ? (
@@ -128,13 +137,15 @@ export function YtpTab({ skaterId }: { skaterId: number }) {
                     <h3 className="text-sm font-semibold text-slate-900">
                       Phases ({sortedPhases.length})
                     </h3>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => setModal({ kind: "phase" })}
-                    >
-                      + Add Phase
-                    </Button>
+                    {canEdit && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => setModal({ kind: "phase" })}
+                      >
+                        + Add Phase
+                      </Button>
+                    )}
                   </div>
                   {sortedPhases.length === 0 ? (
                     <p className="rounded-md border border-dashed border-slate-300 p-6 text-center text-sm text-slate-400">
@@ -149,6 +160,7 @@ export function YtpTab({ skaterId }: { skaterId: number }) {
                         competitions={competitions}
                         onEdit={(p) => setModal({ kind: "phase", phase: p })}
                         onDelete={(p) => void removePhase(p.id)}
+                        canEdit={canEdit}
                       />
                     ))
                   )}

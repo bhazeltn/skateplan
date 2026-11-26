@@ -48,7 +48,13 @@ function GapDeltaSummary({ summary }: { summary: BenchmarkSummary }) {
 /** Fully coach-driven custom benchmark matrix (Sprint 6). Coaches add discrete
  *  targets across flexible categories, toggle status inline and delete items; a
  *  gap-delta summary rolls up Total / Met / Developing / Gaps deterministically. */
-export function CustomBenchmarksPanel({ skaterId }: { skaterId: number | string }) {
+export function CustomBenchmarksPanel({
+  skaterId,
+  canEdit = true,
+}: {
+  skaterId: number | string;
+  canEdit?: boolean;
+}) {
   const { items, refresh, create, setStatus, update, remove } =
     useSkaterBenchmarks(skaterId);
   const [adding, setAdding] = useState(false);
@@ -72,21 +78,23 @@ export function CustomBenchmarksPanel({ skaterId }: { skaterId: number | string 
         <h2 className="text-sm font-semibold text-slate-900">
           Custom Benchmark Targets
         </h2>
-        <div className="flex flex-wrap items-center gap-2">
-          <BenchmarkSetActions
-            skaterId={skaterId}
-            benchmarks={items}
-            onApplied={handleApplied}
-          />
-          <button
-            type="button"
-            onClick={() => setAdding((v) => !v)}
-            className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium
-              text-white hover:bg-slate-700"
-          >
-            + Add Benchmark
-          </button>
-        </div>
+        {canEdit && (
+          <div className="flex flex-wrap items-center gap-2">
+            <BenchmarkSetActions
+              skaterId={skaterId}
+              benchmarks={items}
+              onApplied={handleApplied}
+            />
+            <button
+              type="button"
+              onClick={() => setAdding((v) => !v)}
+              className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium
+                text-white hover:bg-slate-700"
+            >
+              + Add Benchmark
+            </button>
+          </div>
+        )}
       </div>
 
       {applied ? (
@@ -131,6 +139,7 @@ export function CustomBenchmarksPanel({ skaterId }: { skaterId: number | string 
                   onStatus={setStatus}
                   onEdit={setEditing}
                   onDelete={remove}
+                  canEdit={canEdit}
                 />
               ))}
             </div>
