@@ -26,6 +26,7 @@ import type {
   SkaterBenchmark,
   SkaterBenchmarkPayload,
   SkaterDetail,
+  SkaterUpdatePayload,
   SovElement,
 } from "@/lib/types";
 
@@ -97,6 +98,19 @@ export function getSkater(
   token?: string | null
 ): Promise<SkaterDetail> {
   return request<SkaterDetail>(`/api/skaters/${id}`, {}, token);
+}
+
+// Partial profile edit: PATCH /api/skaters/{id}. Returns the updated detail.
+export function updateSkater(
+  id: number | string,
+  payload: SkaterUpdatePayload,
+  token?: string | null
+): Promise<SkaterDetail> {
+  return request<SkaterDetail>(
+    `/api/skaters/${id}`,
+    { method: "PATCH", body: JSON.stringify(payload) },
+    token
+  );
 }
 
 // Singles Scale of Values reference for the program builder: GET /api/sov/elements.

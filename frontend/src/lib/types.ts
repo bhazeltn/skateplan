@@ -32,6 +32,15 @@ export interface OrchestrateSkaterPayload {
   role_in_unit?: "primary" | "secondary" | "choreographer";
 }
 
+export interface SkaterUpdatePayload {
+  full_name?: string;
+  contact_email?: string;
+  federation_id?: number;
+  competitive_level?: string;
+  date_of_birth?: string;
+  home_club?: string;
+}
+
 export interface Federation {
   id: number;
   name: string;

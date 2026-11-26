@@ -233,6 +233,12 @@ export const mockSkaterDetail = {
   ],
 };
 
+// Pristine baseline so the stateful PATCH handler can be reset between tests.
+const SKATER_DETAIL_SEED = structuredClone(mockSkaterDetail);
+export function resetSkaterDetail(): void {
+  Object.assign(mockSkaterDetail, structuredClone(SKATER_DETAIL_SEED));
+}
+
 // Aggregated Action & Risk Hub payload served by GET /api/dashboard.
 // Competitions are intentionally out of date order so the UI's ascending sort
 // is exercised by the test suite.
@@ -444,6 +450,26 @@ export const handlers = [
   http.delete("*/api/skaters/:id/benchmarks/:bid", () =>
     new HttpResponse(null, { status: 204 })
   ),
+  // Stateful partial edit: PATCH /api/skaters/:id mutates the shared detail so
+  // a subsequent GET reflects the change. resetSkaterDetail() restores seed.
+  http.patch("*/api/skaters/:id", async ({ request }) => {
+    const body = (await request.json()) as Record<string, unknown>;
+    const name = typeof body.full_name === "string" ? body.full_name.trim() : "";
+    if (name) {
+      const [first, ...rest] = name.split(" ");
+      mockSkaterDetail.first_name = first;
+      mockSkaterDetail.last_name = rest.join(" ");
+    }
+    if (body.competitive_level !== undefined)
+      mockSkaterDetail.competitive_level = body.competitive_level as string;
+    if (body.home_club !== undefined)
+      mockSkaterDetail.home_club = body.home_club as string;
+    if (body.federation_id !== undefined) {
+      const fed = mockFederations.find((f) => f.id === body.federation_id);
+      if (fed) mockSkaterDetail.federation_name = fed.name;
+    }
+    return HttpResponse.json(mockSkaterDetail);
+  }),
   http.get("*/api/skaters/:id", () => HttpResponse.json(mockSkaterDetail)),
   http.get("*/api/skaters", () => HttpResponse.json(mockSkaters)),
   http.post("*/api/programs", async ({ request }) => {

@@ -3,7 +3,9 @@ import { useParams } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { getSkater } from "@/lib/api";
 import type { SkaterDetail } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 import { ProfileHeader } from "@/components/skaters/ProfileHeader";
+import { EditSkaterModal } from "@/components/skaters/EditSkaterModal";
 import { ProfileTabs, type ProfileTab } from "@/components/skaters/ProfileTabs";
 import { ProgramsTab } from "@/components/skaters/ProgramsTab";
 import { RestrictionsTab } from "@/components/skaters/RestrictionsTab";
@@ -88,6 +90,7 @@ export function SkaterProfilePage() {
   const { token, role } = useAuth();
   const [skater, setSkater] = useState<SkaterDetail | null>(null);
   const [error, setError] = useState(false);
+  const [editing, setEditing] = useState(false);
   const { capabilities } = useSkaterCapabilities(id);
   const initialTab = isSkaterRole(role) ? "Training" : undefined;
 
@@ -109,13 +112,27 @@ export function SkaterProfilePage() {
     return <p className="p-6 text-sm text-slate-400">Loading profile…</p>;
   }
 
+  const editAction = capabilities.can_edit_plan ? (
+    <Button type="button" variant="outline" onClick={() => setEditing(true)}>
+      Edit Profile
+    </Button>
+  ) : undefined;
+
   return (
     <main className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
-      <ProfileHeader skater={skater} />
+      <ProfileHeader skater={skater} action={editAction} />
       <ProfileTabs
         tabs={buildTabs(skater, load, capabilities)}
         initialLabel={initialTab}
       />
+      {editing && (
+        <EditSkaterModal
+          open={editing}
+          skater={skater}
+          onClose={() => setEditing(false)}
+          onSaved={setSkater}
+        />
+      )}
     </main>
   );
 }

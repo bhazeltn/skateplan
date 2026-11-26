@@ -8,6 +8,7 @@ import { resetTrainingStore } from "@/mocks/trainingHandlers";
 import { resetRunThroughStore } from "@/mocks/runThroughHandlers";
 import { resetCompetitionScheduleStore } from "@/mocks/competitionScheduleHandlers";
 import { resetAccessStore } from "@/mocks/accessHandlers";
+import { resetSkaterDetail } from "@/mocks/handlers";
 import { mockViewport } from "@/test/utils";
 
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
@@ -21,6 +22,7 @@ afterEach(() => {
   resetRunThroughStore();
   resetCompetitionScheduleStore();
   resetAccessStore();
+  resetSkaterDetail();
   localStorage.clear();
 });
 afterAll(() => server.close());

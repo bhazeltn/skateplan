@@ -33,6 +33,18 @@ class OrchestrateSkaterRequest(BaseModel):
     role_in_unit: RoleInUnit = RoleInUnit.primary
 
 
+class SkaterUpdate(BaseModel):
+    """Partial update for an existing skater. Every field optional; only
+    fields explicitly supplied (model_dump(exclude_unset=True)) are applied."""
+
+    full_name: Optional[str] = None
+    contact_email: Optional[EmailStr] = None
+    federation_id: Optional[int] = None
+    competitive_level: Optional[str] = None
+    date_of_birth: Optional[date] = None
+    home_club: Optional[str] = None
+
+
 class OrchestrateSkaterResponse(BaseModel):
     skater_id: int
     training_unit_id: int

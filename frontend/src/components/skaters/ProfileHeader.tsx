@@ -1,9 +1,16 @@
+import type { ReactNode } from "react";
 import type { SkaterDetail } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { flagEmoji } from "@/lib/flags";
 
 /** Identity header for the skater profile hub. */
-export function ProfileHeader({ skater }: { skater: SkaterDetail }) {
+export function ProfileHeader({
+  skater,
+  action,
+}: {
+  skater: SkaterDetail;
+  action?: ReactNode;
+}) {
   const flag = flagEmoji(skater.country_code);
   const affiliation = [skater.federation_name, skater.home_club]
     .filter(Boolean)
@@ -25,9 +32,12 @@ export function ProfileHeader({ skater }: { skater: SkaterDetail }) {
           </p>
         )}
       </div>
-      <Badge variant={skater.has_active_restriction ? "danger" : "success"}>
-        {skater.has_active_restriction ? "Restricted Load" : "Standard Load"}
-      </Badge>
+      <div className="flex items-center gap-2">
+        <Badge variant={skater.has_active_restriction ? "danger" : "success"}>
+          {skater.has_active_restriction ? "Restricted Load" : "Standard Load"}
+        </Badge>
+        {action}
+      </div>
     </header>
   );
 }

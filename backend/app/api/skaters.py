@@ -4,12 +4,21 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.core.security import hash_password
+from app.core.skater_permissions import require_skater_editor
 from app.models.enums import DisciplineType, RoleInUnit, SystemRole
+from app.models.federation import Federation
 from app.models.training import CoachAssignment, TrainingUnit, TrainingUnitRoster
 from app.models.user import SkaterProfile, User
-from app.schemas.skater import OrchestrateSkaterRequest, OrchestrateSkaterResponse
+from app.schemas.skater import (
+    OrchestrateSkaterRequest,
+    OrchestrateSkaterResponse,
+    SkaterUpdate,
+)
+from app.schemas.skater_detail import SkaterDetailOut
+from app.services.skater_service import get_skater_detail
 
 router = APIRouter(prefix="/skaters", tags=["skaters"])
 
@@ -144,3 +153,49 @@ def orchestrate_skater(
     except Exception as exc:  # noqa: BLE001
         db.rollback()
         raise _bad_request(f"Onboarding failed and was rolled back: {exc}")
+
+
+_PROFILE_FIELDS = ("contact_email", "federation_id", "competitive_level",
+                   "date_of_birth", "home_club")
+
+
+def _apply_full_name(user: User, full_name: str | None) -> None:
+    name = (full_name or "").strip()
+    if not name:
+        return
+    first, _, last = name.partition(" ")
+    user.first_name = first
+    user.last_name = last or None
+
+
+def _apply_update(user: User, profile: SkaterProfile, data: dict, db: Session) -> None:
+    if "full_name" in data:
+        _apply_full_name(user, data["full_name"])
+    fed_id = data.get("federation_id")
+    if "federation_id" in data and fed_id is not None and db.get(Federation, fed_id) is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Federation not found"
+        )
+    for field in _PROFILE_FIELDS:
+        if field in data:
+            setattr(profile, field, data[field])
+
+
+@router.patch("/{skater_id}", response_model=SkaterDetailOut)
+def update_skater(
+    skater_id: int,
+    payload: SkaterUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> SkaterDetailOut:
+    """Partially update a skater's identity + profile. Plan-editors only."""
+    require_skater_editor(current_user, skater_id, db)  # 403 for viewers/skaters
+    user = db.get(User, skater_id)
+    profile = db.get(SkaterProfile, skater_id)
+    if user is None or profile is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Skater not found"
+        )
+    _apply_update(user, profile, payload.model_dump(exclude_unset=True), db)
+    db.commit()
+    return get_skater_detail(skater_id, db)
