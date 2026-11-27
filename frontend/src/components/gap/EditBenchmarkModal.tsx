@@ -26,6 +26,7 @@ export function EditBenchmarkModal({ benchmark, onSave, onClose }: Props) {
   const [category, setCategory] = useState(benchmark.category);
   const [name, setName] = useState(benchmark.name);
   const [status, setStatus] = useState<BenchmarkStatus>(benchmark.status);
+  const [targetDate, setTargetDate] = useState(benchmark.target_date ?? "");
   const [notes, setNotes] = useState(benchmark.notes ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +40,7 @@ export function EditBenchmarkModal({ benchmark, onSave, onClose }: Props) {
         category,
         name: name.trim(),
         status,
+        target_date: targetDate || null,
         notes: notes.trim() || null,
       });
       onClose();
@@ -115,6 +117,15 @@ export function EditBenchmarkModal({ benchmark, onSave, onClose }: Props) {
                 </option>
               ))}
             </select>
+          </label>
+          <label className="text-sm font-medium text-slate-700">
+            Target Date
+            <input
+              type="date"
+              className={FIELD}
+              value={targetDate}
+              onChange={(e) => setTargetDate(e.target.value)}
+            />
           </label>
           <label className="text-sm font-medium text-slate-700 sm:col-span-2">
             Notes

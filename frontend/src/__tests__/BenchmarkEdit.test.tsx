@@ -13,6 +13,7 @@ interface Bench {
   name: string;
   status: string;
   notes?: string | null;
+  target_date?: string | null;
 }
 
 function seedSession() {
@@ -139,5 +140,75 @@ describe("Custom benchmark notes + inline editing", () => {
     expect(await screen.findByText(/Quad Toe/)).toBeInTheDocument();
     expect(screen.getByText(/new coaching notes/)).toBeInTheDocument();
     expect(screen.queryByText(/old notes/)).not.toBeInTheDocument();
+  });
+
+  it("edits the target date, PATCHes and shows the new date", async () => {
+    seedSession();
+    installBenchmarkApi([
+      {
+        id: "b1",
+        category: "Jumps",
+        name: "Triple Axel",
+        status: "DEVELOPING",
+        target_date: "2026-01-01",
+      },
+    ]);
+    const user = userEvent.setup();
+    renderTab();
+    await screen.findByText(/Triple Axel/);
+    await user.click(screen.getByRole("button", { name: /edit triple axel/i }));
+
+    const dialog = await screen.findByRole("dialog");
+    const dateField = within(dialog).getByLabelText(/target date/i);
+    expect(dateField).toHaveValue("2026-01-01");
+    await user.clear(dateField);
+    await user.type(dateField, "2026-06-30");
+    await user.click(within(dialog).getByRole("button", { name: /save/i }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(await screen.findByText(/Target 2026-06-30/)).toBeInTheDocument();
+    expect(screen.queryByText(/Target 2026-01-01/)).not.toBeInTheDocument();
+  });
+
+  it("clears the target date (sends null) and removes the displayed date", async () => {
+    seedSession();
+    let lastBody: Record<string, unknown> | null = null;
+    installBenchmarkApi([
+      {
+        id: "b1",
+        category: "Jumps",
+        name: "Triple Axel",
+        status: "DEVELOPING",
+        target_date: "2026-01-01",
+      },
+    ]);
+    server.use(
+      http.patch("*/api/skaters/:id/benchmarks/:bid", async ({ request, params }) => {
+        lastBody = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json({
+          id: params.bid,
+          category: "Jumps",
+          name: "Triple Axel",
+          status: "DEVELOPING",
+          ...lastBody,
+        });
+      })
+    );
+    const user = userEvent.setup();
+    renderTab();
+    await screen.findByText(/Target 2026-01-01/);
+    await user.click(screen.getByRole("button", { name: /edit triple axel/i }));
+
+    const dialog = await screen.findByRole("dialog");
+    await user.clear(within(dialog).getByLabelText(/target date/i));
+    await user.click(within(dialog).getByRole("button", { name: /save/i }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(lastBody).toMatchObject({ target_date: null });
+    expect(screen.queryByText(/Target 2026-01-01/)).not.toBeInTheDocument();
   });
 });

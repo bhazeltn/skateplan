@@ -123,3 +123,63 @@ def test_viewer_blocked_from_goal_write(client, make_user, db):
         f"/api/skaters/{sid}/benchmarks", headers=_hdr(vt),
         json={"category": "Jumps", "name": "3Lz"},
     ).status_code == 403
+
+
+
+
+def test_coach_updates_target_date_and_outcome(client, make_user, db):
+    """Coach edits an existing benchmark's target date + outcome; the change is
+    returned by PATCH and persisted on a subsequent GET."""
+    coach, skater = _primary_coach(db, make_user, "s4")
+    ct = _login(client, "pcgs4@ex.com")
+    sid = skater.id
+
+    created = client.post(
+        f"/api/skaters/{sid}/benchmarks", headers=_hdr(ct),
+        json={"category": "Jumps", "name": "Land 3A",
+              "target_date": "2026-01-01", "success_criteria": "3 of 5 clean"},
+    )
+    assert created.status_code == 201, created.text
+    bid = created.json()["id"]
+
+    updated = client.patch(
+        f"/api/skaters/{sid}/benchmarks/{bid}", headers=_hdr(ct),
+        json={"name": "Land 3A clean", "target_date": "2026-06-30",
+              "success_criteria": "5 of 5 clean"},
+    )
+    assert updated.status_code == 200, updated.text
+    body = updated.json()
+    assert body["name"] == "Land 3A clean"
+    assert body["target_date"] == "2026-06-30"
+    assert body["success_criteria"] == "5 of 5 clean"
+
+    listed = client.get(f"/api/skaters/{sid}/benchmarks", headers=_hdr(ct))
+    assert listed.status_code == 200, listed.text
+    row = next(b for b in listed.json() if b["id"] == bid)
+    assert row["target_date"] == "2026-06-30"
+    assert row["name"] == "Land 3A clean"
+
+
+def test_coach_clears_target_date_to_null(client, make_user, db):
+    """Coach clears a benchmark's target date; null round-trips with a 200."""
+    coach, skater = _primary_coach(db, make_user, "s5")
+    ct = _login(client, "pcgs5@ex.com")
+    sid = skater.id
+
+    created = client.post(
+        f"/api/skaters/{sid}/benchmarks", headers=_hdr(ct),
+        json={"category": "Jumps", "name": "Land 3A", "target_date": "2026-01-01"},
+    )
+    assert created.status_code == 201, created.text
+    bid = created.json()["id"]
+
+    cleared = client.patch(
+        f"/api/skaters/{sid}/benchmarks/{bid}", headers=_hdr(ct),
+        json={"target_date": None},
+    )
+    assert cleared.status_code == 200, cleared.text
+    assert cleared.json()["target_date"] is None
+
+    listed = client.get(f"/api/skaters/{sid}/benchmarks", headers=_hdr(ct))
+    row = next(b for b in listed.json() if b["id"] == bid)
+    assert row["target_date"] is None
